@@ -417,6 +417,34 @@ void cFinger::setJoint() {
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(f2_joint, &force);
 }
+void cFinger::setJoint2() {
+	auto sim = EntityManager::get();
+	// 固定ジョイント
+	f_joint = dJointCreateFixed(sim->getWorld(), 0);
+	dJointAttach(f_joint, finger[0]->getBody(), 0);
+	dJointSetFixed(f_joint);
+	// ヒンジジョイント1
+	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
+	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
+	dJointSetHingeAnchor(r_joint[ARM_M1], x1, y1, 0.4 / 2);
+	dJointSetHingeAxis(r_joint[ARM_M1], 0, 0, 1);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
+	// ヒンジジョイント2
+	r_joint[ARM_M2] = dJointCreateHinge(sim->getWorld(), 0);
+	dJointAttach(r_joint[ARM_M2], finger[2]->getBody(), finger[1]->getBody());
+	dJointSetHingeAnchor(r_joint[ARM_M2], x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]), 0.4 / 2);
+	dJointSetHingeAxis(r_joint[ARM_M2], 0, 0, 1);
+	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
+	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
+	// 固定ジョイント
+	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
+	dJointSetFixed(f2_joint);
+	// センサ設定（力とトルクの取得に必要）
+	dJointSetFeedback(f2_joint, &force);
+}
+
 
 ////////////////////////////////////////////////////////
 // シミュレーションループ
@@ -424,6 +452,8 @@ void cFinger::setJoint() {
 void DrawStuff::simLoop(int pause)
 {
 	auto _this = EntityManager::get();
+	auto _this2 = EntityManager::get();
+
 	auto finger = EntityManager::get()->getFinger();
 	auto finger2 = EntityManager::get()->getFinger2();	//kawahara二本目の指
 
@@ -435,12 +465,13 @@ void DrawStuff::simLoop(int pause)
 		auto sensor = _this->getFinger()->getParts()[3];
 
 		//二本目の指用　kawahara
-		auto base2 = _this->getFinger2()->getParts()[0];
-		auto link21 = _this->getFinger2()->getParts()[1];
-		auto link22 = _this->getFinger2()->getParts()[2];
-		auto sensor2 = _this->getFinger2()->getParts()[3];
+		auto base2 = _this2->getFinger2()->getParts()[0];
+		auto link21 = _this2->getFinger2()->getParts()[1];
+		auto link22 = _this2->getFinger2()->getParts()[2];
+		auto sensor2 = _this2->getFinger2()->getParts()[3];
 
 		auto obj = _this->getObj();
+		auto obj2 = _this2->getObj();
 		// 初期設定
 #if SIM_OBJ_IMPACT
 		if (_this->step == 0)	dBodySetLinearVel(obj.body, _this->init_obj_att[AXIS_X][CRD_X] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Y] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Z] * SIM_OBJ_INIT_ABS_VEL);		// 対象速度
@@ -456,12 +487,21 @@ void DrawStuff::simLoop(int pause)
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(finger->r_joint[jnt]);	// 関節速度
 			
 			//追加 kawahara
-			_this->jnt_pos[jnt] = dJointGetHingeAngle(finger2->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
-			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(finger2->r_joint[jnt]);	// 関節速度
+			_this2->jnt_pos[jnt] = dJointGetHingeAngle(finger2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
+			_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(finger2->r_joint[jnt]);	// 関節速度
 		}
 		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
 		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
+
+		dBodyGetRelPointPos(sensor2->getBody(), 5.0, 5.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
+		dBodyGetRelPointVel(sensor2->getBody(), 5.0, 5.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
+
+		//関節のフィードバックを反映
 		finger->p_force = dJointGetFeedback(finger->f2_joint);
+
+		//追加
+		finger2->p_force = dJointGetFeedback(finger2->f2_joint);
+
 
 		finger->p_force = dJointGetFeedback(finger->f2_joint);
 
@@ -469,40 +509,55 @@ void DrawStuff::simLoop(int pause)
 
 		for (int crd = 0; crd<DIM3; crd++) {
 			_this->eff_force[crd] = -finger->p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
-			//_this->eff_force[crd] = -finger2->p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+			_this2->eff_force[crd] = -finger2->p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 
 			_this->obj_pos[crd] = (dBodyGetPosition(obj->getBody()))[crd];		// 対象位置
 			_this->obj_vel[crd] = (dBodyGetLinearVel(obj->getBody()))[crd];		// 対象速度
+
+			//kawahara
+			_this2->obj_pos[crd] = (dBodyGetPosition(obj2->getBody()))[crd];		// 対象位置
+			_this2->obj_vel[crd] = (dBodyGetLinearVel(obj2->getBody()))[crd];		// 対象速度
 		}
 		// 距離計算
 		calcDist(_this);
+		calcDist(_this2);
 		// 外力設定
 #if SIM_ADD_EXT_FORCE
 		finger->addExtForce();
 		//finger2->addExtForce();
-
+		
 #endif
 		// ODE摩擦手動設定(粘性摩擦)
 		finger->setJntFric();
+		finger2->setJntFric();
+
 		// 力計算
 		finger->control();
+		finger2->control();
 
-		//// ODE摩擦手動設定(粘性摩擦)
-		//finger2->setJntFric();
-		//// 力計算
-		//finger2->control();
+	
 
 		// 過去データとして代入
 		for (int jnt = 0; jnt<ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];
 		matCopy(&_this->var_prev2.r, &_this->var_prev.r); matCopy(&_this->var_prev2.dr, &_this->var_prev.dr);
 		matCopy(&_this->var_prev.r, &_this->var.r); matCopy(&_this->var_prev.dr, &_this->var.dr);
+
+		// kawahara
+		for (int jnt = 0; jnt < ARM_JNT; jnt++)	_this2->past_jnt_pos[jnt] = _this2->jnt_pos[jnt];
+		matCopy(&_this2->var_prev2.r, &_this2->var_prev.r); matCopy(&_this2->var_prev2.dr, &_this2->var_prev.dr);
+		matCopy(&_this2->var_prev.r, &_this2->var.r); matCopy(&_this2->var_prev.dr, &_this2->var.dr);
 		
 		// 現在値を保存領域へコピー
 		copyData(_this);
 		_this->state_contact = 0;
+
+		copyData(_this2);
+		_this2->state_contact = 0;
 		// シミュレーションを１ステップ進行
 		_this->update();
 		_this->step++;
+		_this2->update();
+		_this2->step++;
 
 #if FLAG_DRAW_SIM
 	// 終了設定

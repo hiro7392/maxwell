@@ -34,7 +34,7 @@
 // バイナリフラグ
 // ON(1)とOFF(0)のみ設定可能
 ////////////////////////////////////////////////////////
-#define	GLAPHIC_OPENGL		1		// OpenGLで描画
+#define	GLAPHIC_OPENGL		0		// OpenGLで描画
 #define	FLAG_DRAW_SIM		1		// ODEの標準描画
 #define	FLAG_SAVE_IMAGE		0		// 画像保存
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
@@ -276,7 +276,7 @@ class cFinger {
 	std::vector<cParts*> finger;
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;	
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;		//	書き換えた後　kawahara
-	//dReal x1 = 0.5, y0 = -2.0, z0 = 1.5;		//	書き換えた後　kawahara
+	dReal x1 = 0.5, y1 = -0.5, z1 = 1.5;		//	書き換えた後　kawahara
 
 	//	constexpr double Z_OFFSET = 0.08;
 	double Z_OFFSET = 0.08;
@@ -312,10 +312,10 @@ public:
 		//inger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
 		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
 
-		finger[0]->setPosition(5, 5, 0.2);	// z:base->sides[CRD_Z]/2
-		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
-		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
-		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		finger[0]->setPosition(x1,y1, 0.2);	// z:base->sides[CRD_Z]/2
+		finger[1]->setPosition(x1 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
+		finger[2]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		finger[3]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
@@ -326,6 +326,7 @@ public:
 		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) 	(*j)->setColor((*i).x, (*i).y, (*i).z);
 	}
 	void setJoint();	// 関節設定
+	void setJoint2();	// 関節設定 2本目の指
 	void setJntFric();	// 摩擦設定
 	void addExtForce();		// 外力
 	void control();		// 制御
@@ -344,8 +345,8 @@ class DrawStuff {
 public:
 	DrawStuff()	{	// 描画関数の設定
 		fn.version = DS_VERSION;    // ドロースタッフのバージョン
-		fn.start = &start;        // 前処理 start関数のポインタ
-		fn.step = &simLoop;      // simLoop関数のポインタ
+		fn.start = &start;			// 前処理 start関数のポインタ
+		fn.step = &simLoop;			// simLoop関数のポインタ
 		fn.command = &command;      // キー入力関数へのポインタ
 		fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH; // テクスチャ
 	}
@@ -411,6 +412,10 @@ public:
 
 		this->pObj = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
 		std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5, 0.5), Vec3(0, 0.5, 0.5) };
+
+		
+
+		
 		this->pFinger->setColor(color);
 		this->pFinger2->setColor(color);	//二本目の指　kawaharaが追加
 

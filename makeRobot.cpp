@@ -387,7 +387,7 @@ void EntityODE::createRobot() {
 
 	this->pFinger2->setPosition2();
 
-	this->pFinger2->setJoint();
+	this->pFinger2->setJoint2();
 
 }
 

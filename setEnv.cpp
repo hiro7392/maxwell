@@ -116,7 +116,9 @@ void cFinger::addExtForce(){
 //	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
 	auto sensor = sim->getFinger()->getParts()[3];
+
 	dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
+
 }
 
 ////////////////////////////////////////////////////////
