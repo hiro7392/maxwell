@@ -417,6 +417,7 @@ void cFinger::setJoint() {
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(f2_joint, &force);
 }
+//二本目の指の初期位置設定
 void cFinger::setJoint2() {
 	auto sim = EntityManager::get();
 	// 固定ジョイント
@@ -459,15 +460,15 @@ void DrawStuff::simLoop(int pause)
 
 
 	if (!pause) {
-		auto base = _this->getFinger()->getParts()[0];
-		auto link1 = _this->getFinger()->getParts()[1];
-		auto link2 = _this->getFinger()->getParts()[2];
+		//auto base = _this->getFinger()->getParts()[0];
+		//auto link1 = _this->getFinger()->getParts()[1];
+		//auto link2 = _this->getFinger()->getParts()[2];
 		auto sensor = _this->getFinger()->getParts()[3];
 
-		//二本目の指用　kawahara
-		auto base2 = _this2->getFinger2()->getParts()[0];
-		auto link21 = _this2->getFinger2()->getParts()[1];
-		auto link22 = _this2->getFinger2()->getParts()[2];
+		////二本目の指用　kawahara
+		//auto base2 = _this2->getFinger2()->getParts()[0];
+		//auto link21 = _this2->getFinger2()->getParts()[1];
+		//auto link22 = _this2->getFinger2()->getParts()[2];
 		auto sensor2 = _this2->getFinger2()->getParts()[3];
 
 		auto obj = _this->getObj();
@@ -493,8 +494,8 @@ void DrawStuff::simLoop(int pause)
 		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
 		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
 
-		dBodyGetRelPointPos(sensor2->getBody(), 5.0, 5.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
-		dBodyGetRelPointVel(sensor2->getBody(), 5.0, 5.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
+		dBodyGetRelPointPos(sensor2->getBody(), 0.0,-0.5, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
+		dBodyGetRelPointVel(sensor2->getBody(), 0.0,-0.5, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
 
 		//関節のフィードバックを反映
 		finger->p_force = dJointGetFeedback(finger->f2_joint);
@@ -509,7 +510,7 @@ void DrawStuff::simLoop(int pause)
 
 		for (int crd = 0; crd<DIM3; crd++) {
 			_this->eff_force[crd] = -finger->p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
-			_this2->eff_force[crd] = -finger2->p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+			_this2->eff_force[crd] = -finger2->p_force->f1[crd];	
 
 			_this->obj_pos[crd] = (dBodyGetPosition(obj->getBody()))[crd];		// 対象位置
 			_this->obj_vel[crd] = (dBodyGetLinearVel(obj->getBody()))[crd];		// 対象速度
@@ -524,7 +525,7 @@ void DrawStuff::simLoop(int pause)
 		// 外力設定
 #if SIM_ADD_EXT_FORCE
 		finger->addExtForce();
-		//finger2->addExtForce();
+		finger2->addExtForce2();
 		
 #endif
 		// ODE摩擦手動設定(粘性摩擦)
@@ -542,7 +543,7 @@ void DrawStuff::simLoop(int pause)
 		matCopy(&_this->var_prev2.r, &_this->var_prev.r); matCopy(&_this->var_prev2.dr, &_this->var_prev.dr);
 		matCopy(&_this->var_prev.r, &_this->var.r); matCopy(&_this->var_prev.dr, &_this->var.dr);
 
-		// kawahara
+		// 二本目の指　kawahara
 		for (int jnt = 0; jnt < ARM_JNT; jnt++)	_this2->past_jnt_pos[jnt] = _this2->jnt_pos[jnt];
 		matCopy(&_this2->var_prev2.r, &_this2->var_prev.r); matCopy(&_this2->var_prev2.dr, &_this2->var_prev.dr);
 		matCopy(&_this2->var_prev.r, &_this2->var.r); matCopy(&_this2->var_prev.dr, &_this2->var.dr);

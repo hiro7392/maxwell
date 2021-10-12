@@ -329,6 +329,8 @@ public:
 	void setJoint2();	// 関節設定 2本目の指
 	void setJntFric();	// 摩擦設定
 	void addExtForce();		// 外力
+	void addExtForce2();		// 外力
+
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { for (auto &x : finger) { x->draw(); } }
@@ -404,11 +406,13 @@ public:
 		constexpr auto OBJ_RADIUS = 0.10;
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = { 4 * PI / 4.0, PI / 4.0 };
+		double init_jnt_pos[2] = { 4 * PI / 4.0, PI / 3.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 4.0 };
+
 
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		this->pFinger = std::make_shared<cFinger>(init_jnt_pos);
-		this->pFinger2 = std::make_shared<cFinger>(init_jnt_pos);	//二本目の指
+		this->pFinger2 = std::make_shared<cFinger>(init_jnt_posF2);	//二本目の指
 
 		this->pObj = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
 		std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5, 0.5), Vec3(0, 0.5, 0.5) };
