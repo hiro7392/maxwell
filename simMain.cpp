@@ -54,31 +54,31 @@ void cFinger::control(){
 	auto _this = EntityManager::get();
 	static Matrix	tau;
 	// 初期化
-	if(_this->step == 0){
+	if(_this->Fparams.step == 0){
 		matInit(&tau,2,1);
 		// 初期化
-		_this->ctrlInitErr();		// パラメータ誤差を追加
+		_this->Fparams.ctrlInitErr();		// パラメータ誤差を追加
 		// 初期値保存
 		for(int crd=0;crd<DIM2;crd++){
 //			_this->var_init.q.el[crd][0] = _this->jnt_pos[crd]; _this->var_init.dq.el[crd][0] = _this->jnt_vel[crd];
 //			_this->var_init.r.el[crd][0] = _this->eff_pos[crd]; _this->var_init.dr.el[crd][0] = _this->eff_vel[crd];
 //			_this->var_init.F.el[crd][0] = _this->eff_force[crd];
-			_this->var_init.q.el[crd][0] = _this->jnt_pos[crd]; _this->var_init.dq.el[crd][0] = _this->jnt_vel[crd] = 0.0;
-			_this->var_init.r.el[crd][0] = _this->eff_pos[crd]; _this->var_init.dr.el[crd][0] = _this->eff_vel[crd] = 0.0;
-			_this->var_init.F.el[crd][0] = _this->eff_force[crd] = 0.0;
+			_this->Fparams.var_init.q.el[crd][0] = _this->Fparams.jnt_pos[crd]; _this->Fparams.var_init.dq.el[crd][0] = _this->Fparams.jnt_vel[crd] = 0.0;
+			_this->Fparams.var_init.r.el[crd][0] = _this->Fparams.eff_pos[crd]; _this->Fparams.var_init.dr.el[crd][0] = _this->Fparams.eff_vel[crd] = 0.0;
+			_this->Fparams.var_init.F.el[crd][0] = _this->Fparams.eff_force[crd] = 0.0;
 		}
 	}
 	// 手先変数代入
 	for(int crd=0;crd<DIM2;crd++){
-		_this->var.r.el[crd][0] = _this->eff_pos[crd]; _this->var.dr.el[crd][0] = _this->eff_vel[crd];
-		_this->var.F.el[crd][0] = _this->eff_force[crd];
+		_this->Fparams.var.r.el[crd][0] = _this->Fparams.eff_pos[crd]; _this->Fparams.var.dr.el[crd][0] = _this->Fparams.eff_vel[crd];
+		_this->Fparams.var.F.el[crd][0] = _this->Fparams.eff_force[crd];
 	}
 	// 関節変数代入
 	for(int jnt=0;jnt<ARM_JNT;jnt++){
-		_this->var.q.el[jnt][0] = _this->jnt_pos[jnt];	_this->var.dq.el[jnt][0] = _this->jnt_vel[jnt];
+		_this->Fparams.var.q.el[jnt][0] = _this->Fparams.jnt_pos[jnt];	_this->Fparams.var.dq.el[jnt][0] = _this->Fparams.jnt_vel[jnt];
 	}
 	// パラメータセット
-	_this->armDynPara();
+	_this->Fparams.armD4ynPara();
 
 	// インピーダンス設定
 	// 制御指令計算
@@ -87,8 +87,8 @@ void cFinger::control(){
 	//		double	impM[] = {2.0, 2.0}, impC[] = {4.0, 4.0}, impK[] = {1000.0, 1000.0}, impK0[] = {10.0, 10.0};
 	//		double	impM[] = {2.0, 2.0}, impC[] = {4.0, 4.0}, impK[] = {100.0, 100.0}, impK0[] = {10.0, 10.0};
 	//		double	impM[] = {1.0, 1.0}, impC[] = {10.0, 10.0}, impK[] = {10.0, 10.0}, impK0[] = {10.0, 10.0};
-	matSetValDiag(&_this->imp.M, impM); matSetValDiag(&_this->imp.C, impC); matSetValDiag(&_this->imp.K, impK); matSetValDiag(&_this->imp.K0, impK0);	// ゲイン設定
-	_this->ctrlPreProcessing();		// インピーダンス補足処理（逆行列等）
+	matSetValDiag(&_this->Fparams.imp.M, impM); matSetValDiag(&_this->Fparams.imp.C, impC); matSetValDiag(&_this->Fparams.imp.K, impK); matSetValDiag(&_this->Fparams.imp.K0, impK0);	// ゲイン設定
+	_this->Fparams.ctrlPreProcessing();		// インピーダンス補足処理（逆行列等）
 #if 1
 	ctrlMaxwell(_this, &tau);
 //	ctrlMaxwellWithoutInertiaShaping(_this, &tau);
@@ -146,13 +146,13 @@ void cFinger::control(){
 #endif
 
 	// 返り値に代入
-	_this->jnt_force[ARM_M1] = tau.el[ARM_M1][0];
-	_this->jnt_force[ARM_M2] = tau.el[ARM_M2][0];
+	_this->Fparams.jnt_force[ARM_M1] = tau.el[ARM_M1][0];
+	_this->Fparams.jnt_force[ARM_M2] = tau.el[ARM_M2][0];
 //	if(_this->step == IMP_SWITCH_STEP){	_this->jnt_force[ARM_M1] = 0.0;	_this->jnt_force[ARM_M2] = 0.0;}
 	// 駆動力制限
 //	for(jnt=0;jnt<ARM_JNT;jnt++)	if(_this->jnt_force[jnt] > 100 || _this->jnt_force[jnt] < -100)	_this->jnt_force[jnt] = 0.0;
 	// 駆動力入力をODEに設定
-	for(int jnt=0;jnt<ARM_JNT;jnt++)	dJointAddHingeTorque(_this->getFinger()->r_joint[jnt], _this->jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+	for(int jnt=0;jnt<ARM_JNT;jnt++)	dJointAddHingeTorque(_this->getFinger()->r_joint[jnt], _this->Fparams.jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 }
 
 ////////////////////////////////////////////////////////

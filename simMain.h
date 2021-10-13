@@ -329,7 +329,7 @@ public:
 	void setJoint2();	// 関節設定 2本目の指
 	void setJntFric();	// 摩擦設定
 	void addExtForce();		// 外力
-	void addExtForce2();		// 外力
+	void addExtForce2();		// 外力 2本目の指
 
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
@@ -398,7 +398,6 @@ class EntityODE : public ODE {
 	std::shared_ptr<cFinger> pFinger2;	//二本目の指　kawahara
 
 	std::shared_ptr<cPartsCylinder> pObj;
-	//std::shared_ptr<cFinger> pFinger2;
 	//std::shared_ptr<cPartsCylinder> pObj2;
 
 public:
@@ -407,7 +406,7 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 		//各関節の初期姿勢(角度)
 		double init_jnt_pos[2] = { 4 * PI / 4.0, PI / 3.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 4.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 4.0 };//二本目の指の初期位置
 
 
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
@@ -437,7 +436,7 @@ public:
 	void destroyRobot() {	// ロボット破壊（ジョイント・ボディ・ジオメトリ）
 		pFinger.reset();  // インスタンスの破壊
 		pFinger2.reset();
-//		this->pFinger->destroy();
+		//this->pFinger->destroy();
 	}
 	void destroyObject() {	pObj.reset(); } // インスタンスの破壊	// 対象破壊（ボディ・ジオメトリ）
 	void update() {		// シミュレーションを１ステップ進行
@@ -458,6 +457,101 @@ public:
 // シミュレーション構造体
 ////////////////////////////////////////////////////////
 class SIM: public EntityODE {
+public:
+	FingerParams Fparams;
+//	// 制御用変数
+//	int	step;	//経過ステップ数
+//	int state_contact;		// 接触状態(0:OFF, 1:ON)
+//	double	dist;		// アームと対象の距離
+//	double	jnt_pos[ARM_JNT];
+//	double	jnt_vel[ARM_JNT];
+//	double	jnt_force[ARM_JNT];
+//	double	past_jnt_pos[ARM_JNT];
+//	double	eff_pos[DIM3];
+//	double	eff_vel[DIM3];
+//	double	eff_force[DIM3];
+//	double	obj_pos[DIM3];
+//	double	obj_vel[DIM3];
+//	// 目標変数
+//	double	ref_jnt_pos[ARM_JNT];
+//	double	ref_jnt_vel[ARM_JNT];
+//	double	ref_eff_pos[DIM3];
+//	double	ref_eff_vel[DIM3];
+//	// 初期変数
+//	double	init_jnt_pos[ARM_JNT];
+//	double	init_obj_pos[DIM3];
+//	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
+//	// 変数構造体
+//	Variable	var;		// 現在値
+//	Variable	var_prev;		// 過去値（1サイクル前）
+//	Variable	var_prev2;		// 過去値（2サイクル前）
+//	Variable	var_init;		// 初期値
+//	// 運動学変数
+//	Kinematics	kine;
+//	// 動力学変数
+//	Dynamics	dyn;
+//	// インピーダンス変数
+//	Impedance	imp;
+//	// 保存用データ変数
+//	int save_state_contact[DATA_CNT_NUM];
+//	double	save_dist[DATA_CNT_NUM];
+//	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
+//	double	save_ref_jnt_vel[DATA_CNT_NUM][ARM_JNT];
+//	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT];
+//	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT];
+//	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT];
+//	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3];
+//	double	save_ref_eff_vel[DATA_CNT_NUM][DIM3];
+//	double	save_eff_pos[DATA_CNT_NUM][DIM3];
+//	double	save_eff_vel[DATA_CNT_NUM][DIM3];
+//	double	save_eff_force[DATA_CNT_NUM][DIM3];
+//	double	save_obj_pos[DATA_CNT_NUM][DIM3];
+//	double	save_obj_vel[DATA_CNT_NUM][DIM3];
+//	// 保存用ファイル名変数
+//	char	data_file_name[DATA_FILE_NAME_MAXLEN];
+//	char	filename_info[DATA_FILE_NAME_MAXLEN];
+//	char	filename_graph[DATA_FILE_NAME_MAXLEN];
+//	// メンバ関数
+//	void initJntPos(double *init_jnt_pos) {}
+//	int armWithoutInertiaShaping();
+//	int ctrlPreProcessing();
+//	int armDynPara();
+//	int armInvKine(Kinematics *kine, Variable *var);
+//	int armJacob(Kinematics *kine, Variable *var);
+//	int armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp);
+////	int armInitMatVar(Variable *var);
+////	int armInitMatKine(Kinematics *kine);
+//	int ctrlInitErr();
+//	int armCalcImpPeriod();
+//	void saveData();
+//	void saveInfo();
+//	void saveGraph();
+};
+
+// 単一インスタンス管理
+template<typename WorldT>
+struct Manager{
+	static std::unique_ptr<WorldT> pWorldInstance;
+public:
+	static WorldT* init()
+	{
+		if (pWorldInstance == nullptr) pWorldInstance = std::make_unique<WorldT>();
+		return pWorldInstance.get();
+	}
+	static WorldT* get() { return pWorldInstance.get(); }
+};
+template<typename WorldT> std::unique_ptr<WorldT> Manager<WorldT>::pWorldInstance; 
+using EntityManager = Manager<SIM>;
+
+////////////////////////////////////////////////////////
+// プロトタイプ
+////////////////////////////////////////////////////////
+static void restart();
+int exeCmd(int argc, char *argv[]);
+
+
+//kawaharaが追加
+class FingerParams{
 public:
 	// 制御用変数
 	int	step;	//経過ステップ数
@@ -512,41 +606,19 @@ public:
 	char	filename_info[DATA_FILE_NAME_MAXLEN];
 	char	filename_graph[DATA_FILE_NAME_MAXLEN];
 	// メンバ関数
-	void initJntPos(double *init_jnt_pos) {}
+	void initJntPos(double* init_jnt_pos) {}
 	int armWithoutInertiaShaping();
 	int ctrlPreProcessing();
-	int armDynPara();
-	int armInvKine(Kinematics *kine, Variable *var);
-	int armJacob(Kinematics *kine, Variable *var);
-	int armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp);
-//	int armInitMatVar(Variable *var);
-//	int armInitMatKine(Kinematics *kine);
+	int armD4ynPara();
+	int armInvKine(Kinematics* kine, Variable* var);
+	int armJacob(Kinematics* kine, Variable* var);
+	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
+	//	int armInitMatVar(Variable *var);
+	//	int armInitMatKine(Kinematics *kine);
 	int ctrlInitErr();
 	int armCalcImpPeriod();
 	void saveData();
 	void saveInfo();
 	void saveGraph();
 };
-
-// 単一インスタンス管理
-template<typename WorldT>
-struct Manager{
-	static std::unique_ptr<WorldT> pWorldInstance;
-public:
-	static WorldT* init()
-	{
-		if (pWorldInstance == nullptr) pWorldInstance = std::make_unique<WorldT>();
-		return pWorldInstance.get();
-	}
-	static WorldT* get() { return pWorldInstance.get(); }
-};
-template<typename WorldT> std::unique_ptr<WorldT> Manager<WorldT>::pWorldInstance; 
-using EntityManager = Manager<SIM>;
-
-////////////////////////////////////////////////////////
-// プロトタイプ
-////////////////////////////////////////////////////////
-static void restart();
-int exeCmd(int argc, char *argv[]);
-
 #endif

@@ -116,7 +116,7 @@ void SIM::saveData(){
 // ファイル保存
 // シミュレーション情報
 ////////////////////////////////////////////////////////
-void SIM::saveInfo()
+void variables::saveInfo()
 {
 #define print(VarName) outdata<<#VarName"="<<VarName<<endl		// 出力先をofstream名とそろえること
 	ofstream outdata(filename_info);

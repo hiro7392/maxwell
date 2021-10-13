@@ -67,7 +67,7 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
 				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
 			}
-			if (n != 0)	_this->state_contact = 1;
+			if (n != 0)	_this->Fparams.state_contact = 1;
 		}
 	}
 }
@@ -77,7 +77,7 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 ////////////////////////////////////////////////////////
 // パラメータ誤差を追加
 // 物理シミュレーションとは異なるパラメータを代入してロバスト性を検証
-int SIM::ctrlInitErr()
+int FingerParams::ctrlInitErr()
 {
 #if 0
 	this->dyn.m[ARM_M1] += 0.3;	this->dyn.m[ARM_M2] += 0.2;		// 質量誤差は数百g程度
@@ -92,7 +92,7 @@ int SIM::ctrlInitErr()
 // 入力：sim.imp.M, sim.imp.C, sim.imp.K
 // 出力：sim.imp.Minv, sim.imp.Cinv, sim.imp.Kinv
 ////////////////////////////////////////////////////////
-int SIM::ctrlPreProcessing()
+int FingerParams::ctrlPreProcessing()
 {
 	// 前処理
 //	matTrans(&this->kine.Jt, &this->kine.J);		// Jt
@@ -110,7 +110,7 @@ int SIM::ctrlPreProcessing()
 // 慣性インピーダンスに固有慣性を設定(Inertia Shaping なし)
 // 出力：this->imp.M, this->imp.dM
 ////////////////////////////////////////////////////////
-int SIM::armWithoutInertiaShaping()
+int FingerParams::armWithoutInertiaShaping()
 {
 	static Matrix	Jinvt(DIM2,ARM_JNT), d_Jinv(ARM_JNT,DIM2), d_Jinvt(DIM2,ARM_JNT);		// J^{-T}, d[J^{-1}], d[J^{-1}]^{T}
 	static Matrix	Tmp22(DIM2,DIM2), Tmp22_2(DIM2,DIM2), Tmp22_3(DIM2,DIM2);
