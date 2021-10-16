@@ -103,13 +103,17 @@ void cFinger::addExtForce(){
 	//2000ステップまでは外力を加える
 	if(sim->step <= 2000){
 //	if(sim->step <= 1100){
-		ext_force[CRD_X] = 2.0;
-		ext_force[CRD_Y] = 2.0;
+		//ext_force[CRD_X] = 2.0;
+		//ext_force[CRD_Y] = 2.0;
+		//ext_force[CRD_Z] = 0.0;
+		ext_force[CRD_X] = 0.0;
+		ext_force[CRD_Y] = 0.0;
 		ext_force[CRD_Z] = 0.0;
 	}else{
 		ext_force[CRD_X] = 0.0;
 		ext_force[CRD_Y] = 0.0;
 		ext_force[CRD_Z] = 0.0;
+
 	}
 #endif
 

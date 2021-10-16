@@ -6,6 +6,8 @@
 
 #include "texturepath.h"
 #include "simMain.h"
+#include "simMainF2.h"
+
 #include "simMode.h"
 #include "setEnv.h"
 #include "makeRobot.h"
@@ -51,13 +53,16 @@ double	init_obj_att[DIM3][DIM3] = { {sqrt(2.0)/2, sqrt(2.0)/2, 0.0}, {0.0, 0.0, 
 // 戻り値：関節一般化力（直動関節では力，回転関節ではトルク）
 ////////////////////////////////////////////////////////
 void cFinger::control(){
-	auto _this = EntityManager::get();
+	//auto _this = EntityManager::get();
+	auto _this = EntityManager::get()->getFinger();
+	auto entity = EntityManager::get();
+	
 	static Matrix	tau;
 	// 初期化
 	if(_this->step == 0){
 		matInit(&tau,2,1);
 		// 初期化
-		_this->ctrlInitErr();		// パラメータ誤差を追加
+		entity->ctrlInitErr();		// パラメータ誤差を追加
 		// 初期値保存
 		for(int crd=0;crd<DIM2;crd++){
 //			_this->var_init.q.el[crd][0] = _this->jnt_pos[crd]; _this->var_init.dq.el[crd][0] = _this->jnt_vel[crd];
@@ -68,6 +73,7 @@ void cFinger::control(){
 			_this->var_init.F.el[crd][0] = _this->eff_force[crd] = 0.0;
 		}
 	}
+
 	// 手先変数代入
 	for(int crd=0;crd<DIM2;crd++){
 		_this->var.r.el[crd][0] = _this->eff_pos[crd]; _this->var.dr.el[crd][0] = _this->eff_vel[crd];
@@ -77,8 +83,10 @@ void cFinger::control(){
 	for(int jnt=0;jnt<ARM_JNT;jnt++){
 		_this->var.q.el[jnt][0] = _this->jnt_pos[jnt];	_this->var.dq.el[jnt][0] = _this->jnt_vel[jnt];
 	}
+
 	// パラメータセット
-	_this->armDynPara();
+	//_this->armDynPara();
+	entity->armDynPara();
 
 	// インピーダンス設定
 	// 制御指令計算
@@ -88,9 +96,10 @@ void cFinger::control(){
 	//		double	impM[] = {2.0, 2.0}, impC[] = {4.0, 4.0}, impK[] = {100.0, 100.0}, impK0[] = {10.0, 10.0};
 	//		double	impM[] = {1.0, 1.0}, impC[] = {10.0, 10.0}, impK[] = {10.0, 10.0}, impK0[] = {10.0, 10.0};
 	matSetValDiag(&_this->imp.M, impM); matSetValDiag(&_this->imp.C, impC); matSetValDiag(&_this->imp.K, impK); matSetValDiag(&_this->imp.K0, impK0);	// ゲイン設定
-	_this->ctrlPreProcessing();		// インピーダンス補足処理（逆行列等）
+	//_this->ctrlPreProcessing();		// インピーダンス補足処理（逆行列等）
+	entity->ctrlPreProcessing();
 #if 1
-	ctrlMaxwell(_this, &tau);
+	ctrlMaxwell(EntityManager::get(), &tau);
 //	ctrlMaxwellWithoutInertiaShaping(_this, &tau);
 #elif 0
 //	ctrlMaxwellConv(_this, &tau);
@@ -152,7 +161,7 @@ void cFinger::control(){
 	// 駆動力制限
 //	for(jnt=0;jnt<ARM_JNT;jnt++)	if(_this->jnt_force[jnt] > 100 || _this->jnt_force[jnt] < -100)	_this->jnt_force[jnt] = 0.0;
 	// 駆動力入力をODEに設定
-	for(int jnt=0;jnt<ARM_JNT;jnt++)	dJointAddHingeTorque(_this->getFinger()->r_joint[jnt], _this->jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+	for(int jnt=0;jnt<ARM_JNT;jnt++)	dJointAddHingeTorque(_this->r_joint[jnt], _this->jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 }
 
 ////////////////////////////////////////////////////////
@@ -310,6 +319,19 @@ int main(int argc, char** argv)
 }
 
 #else
+
+//kawahara 物体生成用
+
+
+const int N=100;
+typedef struct {//球の構造体
+	dBodyID body; //動力学計算用のボディ
+	dGeomID geom; //衝突計算用のジオメトリ
+} MyObject;
+
+MyObject ball[];//球を描画するための配列
+
+
 ////////////////////////////////////////////////////////
 // main関数
 ////////////////////////////////////////////////////////
@@ -328,6 +350,7 @@ int main(int argc, char *argv[])
 		sim->init_obj_pos[crd] = init_obj_pos[crd];
 		for(int axis=0;axis<DIM3;axis++)	sim->init_obj_att[axis][crd] = init_obj_att[axis][crd];
 	}
+	
 	// 物体生成
 	sim->ground = dCreatePlane(sim->getSpace(), 0, 0, 1, 0);		// 地面の設定
 	sim->setup();
@@ -364,6 +387,7 @@ int main(int argc, char *argv[])
 ////////////////////////////////////////////////////////
 cParts::cParts(dReal m): m(m) { this->body = dBodyCreate(EntityManager::get()->getWorld()); dMassSetZero(&mass); }
 
+
 cParts::cParts(dReal m, Vec3 init_pos) : cParts(m) {
 	dBodySetPosition(this->body, init_pos.x, init_pos.y, init_pos.z);
 }
@@ -391,6 +415,7 @@ cPartsCylinder::cPartsCylinder(dReal m, Vec3 init_pos, dReal l, dReal r) : cPart
 }
 
 void cFinger::setJoint() {
+
 	auto sim = EntityManager::get();
 	// 固定ジョイント
 	f_joint = dJointCreateFixed(sim->getWorld(), 0);
@@ -414,12 +439,19 @@ void cFinger::setJoint() {
 	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
 	dJointSetFixed(f2_joint);
-	// センサ設定（力とトルクの取得に必要）
+	// センサ設定（力とトルクの取hに必要）
 	dJointSetFeedback(f2_joint, &force);
 }
 //二本目の指の初期位置設定
 void cFinger::setJoint2() {
 	auto sim = EntityManager::get();
+
+	//把持する板を固定
+	graspObj = dJointCreateFixed(sim->getWorld(), 0);
+	dJointAttach(graspObj, plate.getBody(), 0);
+	dJointSetFixed(graspObj);
+
+
 	// 固定ジョイント
 	f_joint = dJointCreateFixed(sim->getWorld(), 0);
 	dJointAttach(f_joint, finger[0]->getBody(), 0);
@@ -438,6 +470,7 @@ void cFinger::setJoint2() {
 	dJointSetHingeAxis(r_joint[ARM_M2], 0, 0, 1);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
+	
 	// 固定ジョイント
 	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
@@ -452,8 +485,10 @@ void cFinger::setJoint2() {
 ////////////////////////////////////////////////////////
 void DrawStuff::simLoop(int pause)
 {
-	auto _this = EntityManager::get();
-	auto _this2 = EntityManager::get();
+	//auto _this = EntityManager::get();
+	//auto _this2 = EntityManager::get();
+	auto _this = EntityManager::get()->getFinger();
+	auto _this2 = EntityManager::get()->getFinger();
 
 	auto finger = EntityManager::get()->getFinger();
 	auto finger2 = EntityManager::get()->getFinger2();	//kawahara二本目の指
@@ -463,26 +498,27 @@ void DrawStuff::simLoop(int pause)
 		//auto base = _this->getFinger()->getParts()[0];
 		//auto link1 = _this->getFinger()->getParts()[1];
 		//auto link2 = _this->getFinger()->getParts()[2];
-		auto sensor = _this->getFinger()->getParts()[3];
+		auto sensor = EntityManager::get()->getFinger()->getParts()[3];
 
 		////二本目の指用　kawahara
 		//auto base2 = _this2->getFinger2()->getParts()[0];
 		//auto link21 = _this2->getFinger2()->getParts()[1];
 		//auto link22 = _this2->getFinger2()->getParts()[2];
-		auto sensor2 = _this2->getFinger2()->getParts()[3];
+		auto sensor2 = EntityManager::get()->getFinger2()->getParts()[3];
 
-		auto obj = _this->getObj();
-		auto obj2 = _this2->getObj();
+		auto obj = EntityManager::get()->getObj();
+		auto obj2 = EntityManager::get()->getObj();
+
+		//auto obj = _this->getObj();
+		//auto obj2 = _this2->getObj();
 		// 初期設定
 #if SIM_OBJ_IMPACT
 		if (_this->step == 0)	dBodySetLinearVel(obj.body, _this->init_obj_att[AXIS_X][CRD_X] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Y] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Z] * SIM_OBJ_INIT_ABS_VEL);		// 対象速度
 		if (_this->step == 0)	dBodySetAngularVel(obj.body, _this->init_obj_att[AXIS_Z][CRD_X] * SIM_OBJ_INIT_ABS_VEL / OBJ_RADIUS, _this->init_obj_att[AXIS_Z][CRD_Y] * SIM_OBJ_INIT_ABS_VEL / OBJ_RADIUS, _this->init_obj_att[AXIS_Z][CRD_Z] * SIM_OBJ_INIT_ABS_VEL / OBJ_RADIUS);		// 対象角速度
-																																																																							//		if(_this->step == 0)	dBodySetLinearVel(obj.body, 1, 0, 0);		// 対象速度
-																																																																							//		if(_this->step == 0)	dBodySetAngularVel(obj.body, -1, 0, 0);		// 対象速度
 #elif SIM_ADD_EXT_FORCE
 		if (_this->step == 0)	dBodyDisable(obj->getBody());		// 対象無効化
 #endif
-																	// 状態取得
+		// 状態取得
 		for (int jnt = 0; jnt<ARM_JNT; jnt++) {
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(finger->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(finger->r_joint[jnt]);	// 関節速度
@@ -504,12 +540,8 @@ void DrawStuff::simLoop(int pause)
 		finger2->p_force = dJointGetFeedback(finger2->f2_joint);
 
 
-		finger->p_force = dJointGetFeedback(finger->f2_joint);
-
-		//finger2->p_force = dJointGetFeedback(finger2->f2_joint);
-
 		for (int crd = 0; crd<DIM3; crd++) {
-			_this->eff_force[crd] = -finger->p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+			_this->eff_force[crd] = -finger->p_force->f1[crd];				// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 			_this2->eff_force[crd] = -finger2->p_force->f1[crd];	
 
 			_this->obj_pos[crd] = (dBodyGetPosition(obj->getBody()))[crd];		// 対象位置
@@ -519,13 +551,19 @@ void DrawStuff::simLoop(int pause)
 			_this2->obj_pos[crd] = (dBodyGetPosition(obj2->getBody()))[crd];		// 対象位置
 			_this2->obj_vel[crd] = (dBodyGetLinearVel(obj2->getBody()))[crd];		// 対象速度
 		}
+		
+		auto entity = EntityManager::get();
 		// 距離計算
-		calcDist(_this);
-		calcDist(_this2);
+		calcDist(entity);
+		calcDist(entity);
+
+		//calcDist(_this);
+		//calcDist(_this2);
+
 		// 外力設定
 #if SIM_ADD_EXT_FORCE
 		finger->addExtForce();
-		finger2->addExtForce2();
+		//finger2->addExtForce2();
 		
 #endif
 		// ODE摩擦手動設定(粘性摩擦)
@@ -535,8 +573,6 @@ void DrawStuff::simLoop(int pause)
 		// 力計算
 		finger->control();
 		finger2->control();
-
-	
 
 		// 過去データとして代入
 		for (int jnt = 0; jnt<ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];
@@ -549,16 +585,16 @@ void DrawStuff::simLoop(int pause)
 		matCopy(&_this2->var_prev.r, &_this2->var.r); matCopy(&_this2->var_prev.dr, &_this2->var.dr);
 		
 		// 現在値を保存領域へコピー
-		copyData(_this);
+		copyData(entity);
 		_this->state_contact = 0;
 
-		copyData(_this2);
-		_this2->state_contact = 0;
+		/*copyData(_this2);
+		_this2->state_contact = 0;*/
 		// シミュレーションを１ステップ進行
-		_this->update();
+		entity->update();
 		_this->step++;
-		_this2->update();
-		_this2->step++;
+		//_this2->update();
+		//_this2->step++;
 
 #if FLAG_DRAW_SIM
 	// 終了設定
@@ -569,6 +605,7 @@ void DrawStuff::simLoop(int pause)
 	//	drawRobot(); // ロボットの描画
 	finger->draw();
 	finger2->draw();
+	finger2->plate.draw();
 
 
 	std::cout << "step:" << _this->step << std::endl;
@@ -577,7 +614,7 @@ void DrawStuff::simLoop(int pause)
 	//	drawObject(); // 衝突対象の描画
 	_this->getObj()->draw();
 #elif SIM_ADD_EXT_FORCE
-	drawExtForce(); // 外力の描画
+	//drawExtForce(); // 外力の描画
 #endif
 #endif
 #if FLAG_DRAW_SIM & FLAG_SAVE_IMAGE
@@ -603,10 +640,10 @@ void DrawStuff::start() {
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
 	xyz[0] = -0.5;	xyz[1] = 0.0;	xyz[2] = 2.5;
-	hpr[0] = 0.0;	hpr[1] = -90.0;	hpr[2] = 90.0;	// +zからの視点(右が+x,上が+y)
+	hpr[0] = 0.0;	hpr[1] = -90.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
-	dsSetSphereQuality(3);                 // 球の品質設定
+	dsSetSphereQuality(3);					// 球の品質設定
 #if	FLAG_SAVE_VIDEO
 	init_video();
 #endif

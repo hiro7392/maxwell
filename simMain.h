@@ -268,23 +268,105 @@ public:
 
 // 指
 class cFinger {
-	cPartsBox	base{ 14.0, Vec3(0.3, 0.3, 0.4) };
+
+	cPartsBox	base{ 14.0, Vec3(0.3, 0.5, 0.4)};
+
 	cPartsCylinder	link1{ ARM_LINK1_MASS, ARM_LINK1_LEN, ARM_LINK1_RAD };
 	cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 //	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	std::vector<cParts*> finger;
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;	
-	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;		//	書き換えた後　kawahara
-	dReal x1 = 0.5, y1 = -0.5, z1 = 1.5;		//	書き換えた後　kawahara
+	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;		//	書き換えた後1本目の指の土台の位置　kawahara
+	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	書き換えた後1本目の指の土台の位置　kawahara
 
 	//	constexpr double Z_OFFSET = 0.08;
 	double Z_OFFSET = 0.08;
-	double jnt_pos[ARM_JNT];
+	//double jnt_pos[ARM_JNT];
 public:
+	//{質量,初期位置(x,y,z),大きさ(x,y,z)}
+	cPartsBox	plate{ 100.0, Vec3(-1.2,-0.5, 0.0),Vec3(1.5,0.2,0.5) };
+
+
 	dJointFeedback force, *p_force;
+
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
+	dJointID graspObj;								//把持対象のプレート
+
+	// 指の制御用変数
+	int	step;					//経過ステップ数
+	int state_contact;			// 接触状態(0:OFF, 1:ON)
+	double	dist;				// アームと対象の距離
+	double	jnt_pos[ARM_JNT];
+	double	jnt_vel[ARM_JNT];
+	double	jnt_force[ARM_JNT];
+	double	past_jnt_pos[ARM_JNT];
+	double	eff_pos[DIM3];
+	double	eff_vel[DIM3];
+	double	eff_force[DIM3];
+	double	obj_pos[DIM3];
+	double	obj_vel[DIM3];
+	// 目標変数
+	double	ref_jnt_pos[ARM_JNT];
+	double	ref_jnt_vel[ARM_JNT];
+	double	ref_eff_pos[DIM3];
+	double	ref_eff_vel[DIM3];
+	// 初期変数
+	double	init_jnt_pos[ARM_JNT];
+	double	init_obj_pos[DIM3];
+	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
+	// 変数構造体
+	Variable	var;			// 現在値
+	Variable	var_prev;		// 過去値（1サイクル前）
+	Variable	var_prev2;		// 過去値（2サイクル前）
+	Variable	var_init;		// 初期値
+	// 運動学変数
+	Kinematics	kine;
+	// 動力学変数
+	Dynamics	dyn;
+	// インピーダンス変数
+	Impedance	imp;
+	// 保存用データ変数
+	int save_state_contact[DATA_CNT_NUM];
+	double	save_dist[DATA_CNT_NUM];
+	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
+	double	save_ref_jnt_vel[DATA_CNT_NUM][ARM_JNT];
+	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT];
+	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT];
+	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT];
+	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3];
+	double	save_ref_eff_vel[DATA_CNT_NUM][DIM3];
+	double	save_eff_pos[DATA_CNT_NUM][DIM3];
+	double	save_eff_vel[DATA_CNT_NUM][DIM3];
+	double	save_eff_force[DATA_CNT_NUM][DIM3];
+	double	save_obj_pos[DATA_CNT_NUM][DIM3];
+	double	save_obj_vel[DATA_CNT_NUM][DIM3];
+	// 保存用ファイル名変数
+	char	data_file_name[DATA_FILE_NAME_MAXLEN];
+	char	filename_info[DATA_FILE_NAME_MAXLEN];
+	char	filename_graph[DATA_FILE_NAME_MAXLEN];
+	// メンバ関数
+	void initJntPos(double* init_jnt_pos) {}
+	int armWithoutInertiaShaping();
+	int ctrlPreProcessing();
+	int armDynPara();
+	int armInvKine(Kinematics* kine, Variable* var);
+	int armJacob(Kinematics* kine, Variable* var);
+	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
+	
+	//kawaharaの変更以前からコメントアウト
+	////	int armInitMatVar(Variable *var);
+	////	int armInitMatKine(Kinematics *kine);
+
+	//int ctrlInitErr();
+	int armCalcImpPeriod();
+	void saveData();
+	void saveInfo();
+	void saveGraph();
+
+
 	//	cFinger(double* init_jnt_pos) : jnt_pos{init_jnt_pos[0], init_jnt_pos[1]} { finger[0] = &base; finger[1] = &link1; finger[2] = &link2; finger[3] = &sensor; }
+	//コンストラクタ
 	cFinger(double* init_jnt_pos) : jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, finger{&base, &link1, &link2, &sensor} {}
 	~cFinger() {		// ジョイント破壊
 		dJointDestroy(f_joint);   // 土台固定
@@ -406,8 +488,8 @@ public:
 		constexpr auto OBJ_RADIUS = 0.10;
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = { 4 * PI / 4.0, PI / 3.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 4.0 };
+		double init_jnt_pos[2] = { 4 * PI / 4.0, PI / 8.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 6.0 };//二本目の指
 
 
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
@@ -428,9 +510,9 @@ public:
 		obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0)+5, -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		this->pFinger2 = std::make_shared<cFinger>(init_jnt_pos);
 		this->pObj2 = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
-		//std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5, 0.5), Vec3(0, 0.5, 0.5) };
+		//std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5,.5), Vec3(0, 0.5, 0.5) };
 		this->pFinger->setColor(color);
-#endif
+#endif 0
 	}
 	void createRobot();	// ロボット生成（ボディ・ジオメトリ・ジョイント）
 	void createObject();	// 対象生成（ボディ・ジオメトリ）
@@ -459,10 +541,12 @@ public:
 ////////////////////////////////////////////////////////
 class SIM: public EntityODE {
 public:
+
+	// 1本目の指用
 	// 制御用変数
-	int	step;	//経過ステップ数
-	int state_contact;		// 接触状態(0:OFF, 1:ON)
-	double	dist;		// アームと対象の距離
+	int	step;					//経過ステップ数
+	int state_contact;			// 接触状態(0:OFF, 1:ON)
+	double	dist;				// アームと対象の距離
 	double	jnt_pos[ARM_JNT];
 	double	jnt_vel[ARM_JNT];
 	double	jnt_force[ARM_JNT];
@@ -482,7 +566,7 @@ public:
 	double	init_obj_pos[DIM3];
 	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
 	// 変数構造体
-	Variable	var;		// 現在値
+	Variable	var;			// 現在値
 	Variable	var_prev;		// 過去値（1サイクル前）
 	Variable	var_prev2;		// 過去値（2サイクル前）
 	Variable	var_init;		// 初期値
@@ -519,14 +603,23 @@ public:
 	int armInvKine(Kinematics *kine, Variable *var);
 	int armJacob(Kinematics *kine, Variable *var);
 	int armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp);
-//	int armInitMatVar(Variable *var);
-//	int armInitMatKine(Kinematics *kine);
-	int ctrlInitErr();
+////	int armInitMatVar(Variable *var);
+////	int armInitMatKine(Kinematics *kine);
+	int ctrlInitErr();	
 	int armCalcImpPeriod();
 	void saveData();
 	void saveInfo();
 	void saveGraph();
+
+
+
 };
+
+
+struct Fparams {
+	
+};
+
 
 // 単一インスタンス管理
 template<typename WorldT>
