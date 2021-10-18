@@ -46,7 +46,7 @@ void rolling_function(SIM *sim, dGeomID o, dReal coef, dContact *c )//床摩擦�
 // 距離関数
 // 対象(円柱)と手先の最近傍点の距離を計算
 ////////////////////////////////////////////////////////
-int calcDist(SIM *sim)
+int calcDist(cFinger *sim)
 {
 	double	tmp[DIM2];
 	double	C12, S12;
@@ -80,7 +80,7 @@ int calcDist(SIM *sim)
 // 外力設定
 ////////////////////////////////////////////////////////
 void cFinger::addExtForce(){
-	auto sim = EntityManager::get();
+	auto sim = EntityManager::get()->getFinger();
 	double ext_force[DIM3];
 	double	time;
 	time = sim->step*SIM_CYCLE_TIME;
@@ -120,17 +120,17 @@ void cFinger::addExtForce(){
 	// 手先リンク表面の中心に外力入力
 //	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
-	auto sensor = sim->getFinger()->getParts()[3];
+	auto sensor = sim->getParts()[3];
 
 	dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
 
 }
 
 void cFinger::addExtForce2() {
-	auto sim = EntityManager::get();
+	auto Finger = EntityManager::get()->getFinger();
 	double ext_force[DIM3];
 	double	time;
-	time = sim->step * SIM_CYCLE_TIME;
+	time = Finger->step * SIM_CYCLE_TIME;
 	// 外力を設定
 #if 0
 	ext_force[CRD_X] = 2.0;//0.2;
@@ -149,7 +149,7 @@ void cFinger::addExtForce2() {
 	}
 #else
 	//2000ステップまでは外力を加える
-	if (sim->step <= 2000) {
+	if (Finger->step <= 2000) {
 		//	if(sim->step <= 1100){
 		ext_force[CRD_X] = 2.0;
 		ext_force[CRD_Y] = 2.0;
@@ -165,9 +165,9 @@ void cFinger::addExtForce2() {
 	// 手先リンク表面の中心に外力入力
 //	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
-	auto sensor = sim->getFinger2()->getParts()[3];
+	auto sensor = Finger->getParts()[3];
 
-	dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
+	dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], Finger->eff_pos[CRD_X], Finger->eff_pos[CRD_Y], Finger->eff_pos[CRD_Z]);
 
 }
 
@@ -177,13 +177,13 @@ void cFinger::addExtForce2() {
 // dJointAddHingeTorque()は上書きではなくインクリメントされることに注意
 ////////////////////////////////////////////////////////
 void cFinger::setJntFric(){
-	auto sim = EntityManager::get();
+	auto finger = EntityManager::get()->getFinger();
 	dReal	jnt_fric[ARM_JNT] = { ARM_JNT1_VISCOUS, ARM_JNT2_VISCOUS };
 //	jnt_fric[ARM_M1] = ARM_JNT1_VISCOUS; jnt_fric[ARM_M1] = ARM_JNT2_VISCOUS;
 	// 粘性摩擦
 	for(int jnt=0;jnt<ARM_JNT;jnt++){
 //		dBodyAddForce(arm[jnt].body, -sim.dyn.V[jnt] * sim.jnt_vel[jnt], 0, 0);	// 直動関節
 //		dJointAddHingeTorque(r_joint[jnt], -sim->dyn.V[jnt] * sim->jnt_vel[jnt]);	// 回転関節
-		dJointAddHingeTorque(r_joint[jnt], -jnt_fric[jnt] * sim->jnt_vel[jnt]);	// 回転関節
+		dJointAddHingeTorque(r_joint[jnt], -jnt_fric[jnt] * finger->jnt_vel[jnt]);	// 回転関節
 	}
 }

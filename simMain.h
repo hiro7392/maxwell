@@ -276,8 +276,8 @@ class cFinger {
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 //	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	std::vector<cParts*> finger;
-	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;	
-	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;		//	書き換えた後1本目の指の土台の位置　kawahara
+	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
+	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
 	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	書き換えた後1本目の指の土台の位置　kawahara
 
 	//	constexpr double Z_OFFSET = 0.08;
@@ -291,7 +291,7 @@ public:
 	dJointFeedback force, *p_force;
 
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
-	dJointID graspObj;								//把持対象のプレート
+	dJointID graspObj; 							  //把持対象のプレート
 
 	// 指の制御用変数
 	int	step;					//経過ステップ数
@@ -363,7 +363,8 @@ public:
 	void saveData();
 	void saveInfo();
 	void saveGraph();
-
+	////Finger classの中に移動
+	//int ctrlMaxwell(Matrix* tau);
 
 	//	cFinger(double* init_jnt_pos) : jnt_pos{init_jnt_pos[0], init_jnt_pos[1]} { finger[0] = &base; finger[1] = &link1; finger[2] = &link2; finger[3] = &sensor; }
 	//コンストラクタ
@@ -477,6 +478,8 @@ class EntityODE : public ODE {
 //	std::unique_ptr<cFinger> pFinger;
 //	std::unique_ptr<cPartsCylinder> pObj;
 	std::shared_ptr<cFinger> pFinger;
+	//std::shared_ptr<cFinger> pFinger;
+
 	std::shared_ptr<cFinger> pFinger2;	//二本目の指　kawahara
 
 	std::shared_ptr<cPartsCylinder> pObj;
@@ -541,75 +544,75 @@ public:
 ////////////////////////////////////////////////////////
 class SIM: public EntityODE {
 public:
-
-	// 1本目の指用
-	// 制御用変数
-	int	step;					//経過ステップ数
-	int state_contact;			// 接触状態(0:OFF, 1:ON)
-	double	dist;				// アームと対象の距離
-	double	jnt_pos[ARM_JNT];
-	double	jnt_vel[ARM_JNT];
-	double	jnt_force[ARM_JNT];
-	double	past_jnt_pos[ARM_JNT];
-	double	eff_pos[DIM3];
-	double	eff_vel[DIM3];
-	double	eff_force[DIM3];
-	double	obj_pos[DIM3];
-	double	obj_vel[DIM3];
-	// 目標変数
-	double	ref_jnt_pos[ARM_JNT];
-	double	ref_jnt_vel[ARM_JNT];
-	double	ref_eff_pos[DIM3];
-	double	ref_eff_vel[DIM3];
-	// 初期変数
-	double	init_jnt_pos[ARM_JNT];
-	double	init_obj_pos[DIM3];
-	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
-	// 変数構造体
-	Variable	var;			// 現在値
-	Variable	var_prev;		// 過去値（1サイクル前）
-	Variable	var_prev2;		// 過去値（2サイクル前）
-	Variable	var_init;		// 初期値
-	// 運動学変数
-	Kinematics	kine;
-	// 動力学変数
-	Dynamics	dyn;
-	// インピーダンス変数
-	Impedance	imp;
-	// 保存用データ変数
-	int save_state_contact[DATA_CNT_NUM];
-	double	save_dist[DATA_CNT_NUM];
-	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
-	double	save_ref_jnt_vel[DATA_CNT_NUM][ARM_JNT];
-	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT];
-	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT];
-	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT];
-	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3];
-	double	save_ref_eff_vel[DATA_CNT_NUM][DIM3];
-	double	save_eff_pos[DATA_CNT_NUM][DIM3];
-	double	save_eff_vel[DATA_CNT_NUM][DIM3];
-	double	save_eff_force[DATA_CNT_NUM][DIM3];
-	double	save_obj_pos[DATA_CNT_NUM][DIM3];
-	double	save_obj_vel[DATA_CNT_NUM][DIM3];
-	// 保存用ファイル名変数
-	char	data_file_name[DATA_FILE_NAME_MAXLEN];
-	char	filename_info[DATA_FILE_NAME_MAXLEN];
-	char	filename_graph[DATA_FILE_NAME_MAXLEN];
-	// メンバ関数
-	void initJntPos(double *init_jnt_pos) {}
-	int armWithoutInertiaShaping();
-	int ctrlPreProcessing();
+//
+//	// 1本目の指用
+//	// 制御用変数
+//	int	step;					//経過ステップ数
+//	int state_contact;			// 接触状態(0:OFF, 1:ON)
+//	double	dist;				// アームと対象の距離
+//	double	jnt_pos[ARM_JNT];
+//	double	jnt_vel[ARM_JNT];
+//	double	jnt_force[ARM_JNT];
+//	double	past_jnt_pos[ARM_JNT];
+//	double	eff_pos[DIM3];
+//	double	eff_vel[DIM3];
+//	double	eff_force[DIM3];
+//	double	obj_pos[DIM3];
+//	double	obj_vel[DIM3];
+//	// 目標変数
+//	double	ref_jnt_pos[ARM_JNT];
+//	double	ref_jnt_vel[ARM_JNT];
+//	double	ref_eff_pos[DIM3];
+//	double	ref_eff_vel[DIM3];
+//	// 初期変数
+//	double	init_jnt_pos[ARM_JNT];
+//	double	init_obj_pos[DIM3];
+//	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
+//	// 変数構造体
+//	Variable	var;			// 現在値
+//	Variable	var_prev;		// 過去値（1サイクル前）
+//	Variable	var_prev2;		// 過去値（2サイクル前）
+//	Variable	var_init;		// 初期値
+//	// 運動学変数
+//	Kinematics	kine;
+//	// 動力学変数
+//	Dynamics	dyn;
+//	// インピーダンス変数
+//	Impedance	imp;
+//	// 保存用データ変数
+//	int save_state_contact[DATA_CNT_NUM];
+//	double	save_dist[DATA_CNT_NUM];
+//	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
+//	double	save_ref_jnt_vel[DATA_CNT_NUM][ARM_JNT];
+//	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT];
+//	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT];
+//	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT];
+//	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3];
+//	double	save_ref_eff_vel[DATA_CNT_NUM][DIM3];
+//	double	save_eff_pos[DATA_CNT_NUM][DIM3];
+//	double	save_eff_vel[DATA_CNT_NUM][DIM3];
+//	double	save_eff_force[DATA_CNT_NUM][DIM3];
+//	double	save_obj_pos[DATA_CNT_NUM][DIM3];
+//	double	save_obj_vel[DATA_CNT_NUM][DIM3];
+//	// 保存用ファイル名変数
+//	char	data_file_name[DATA_FILE_NAME_MAXLEN];
+//	char	filename_info[DATA_FILE_NAME_MAXLEN];
+//	char	filename_graph[DATA_FILE_NAME_MAXLEN];
+//	// メンバ関数
+//	void initJntPos(double *init_jnt_pos) {}
+//	int armWithoutInertiaShaping();
+//	int ctrlPreProcessing();
 	int armDynPara();
-	int armInvKine(Kinematics *kine, Variable *var);
-	int armJacob(Kinematics *kine, Variable *var);
-	int armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp);
-////	int armInitMatVar(Variable *var);
-////	int armInitMatKine(Kinematics *kine);
-	int ctrlInitErr();	
-	int armCalcImpPeriod();
-	void saveData();
-	void saveInfo();
-	void saveGraph();
+//	int armInvKine(Kinematics *kine, Variable *var);
+//	int armJacob(Kinematics *kine, Variable *var);
+//	int armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp);
+//////	int armInitMatVar(Variable *var);
+//////	int armInitMatKine(Kinematics *kine);
+int ctrlInitErr();	
+//	int armCalcImpPeriod();
+//	void saveData();
+//	void saveInfo();
+//	void saveGraph();
 
 
 

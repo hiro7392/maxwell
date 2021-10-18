@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////
 int ctrlHybrid(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, const Matrix *dJ, const Matrix *q, const Matrix *dq, const Matrix *re, const Matrix *dre, const Matrix *F, const Matrix *Fint, const Matrix *Md, const Matrix *Cd, const Matrix *Kd)
 {
-	auto _this = EntityManager::get();
+	auto _this = EntityManager::get()->getFinger();
 	int	jnt, crd;
 	static Matrix	S, I;	// Maxwell制御がS, Voigt制御がI-S
 	static Matrix	Jinv, Jt, Tmp21, Tmp21_1, Tmp21_2, Tmp22, Tmp22_1, Tmp22_2;
@@ -49,7 +49,7 @@ int ctrlHybrid(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, 
 // Maxwell制御則
 // 可変インピーダンス
 ////////////////////////////////////////////////////////
-int ctrlMaxwellVar(SIM *sim, Matrix *tau)
+int ctrlMaxwellVar(cFinger *sim, Matrix *tau)
 {
 	int	jnt, crd;
 	static Matrix	Tmp21, Tmp22;
@@ -86,7 +86,7 @@ int ctrlMaxwellVar(SIM *sim, Matrix *tau)
 ////////////////////////////////////////////////////////
 // SLS制御則(標準線形固体モデル)
 ////////////////////////////////////////////////////////
-int ctrlSLS(SIM *sim, Matrix *tau)
+int ctrlSLS(cFinger *sim, Matrix *tau)
 {
 	int	jnt, crd;
 	static Matrix	Tmp21, Tmp22;
@@ -128,7 +128,7 @@ int ctrlSLS(SIM *sim, Matrix *tau)
 ////////////////////////////////////////////////////////
 
 // 4次ルンゲクッタ法(状態空間表現 dX = AX+BU )
-int rk4(SIM *sim, Matrix *Xnext, Matrix *X, Matrix *A, Matrix *B, Matrix *U, double dt)
+int rk4(cFinger *sim, Matrix *Xnext, Matrix *X, Matrix *A, Matrix *B, Matrix *U, double dt)
 {
 	static Matrix	K1, K2, K3, K4, K;
 	static Matrix	Tmp41_1, Tmp41_2;		// 途中計算
@@ -145,7 +145,7 @@ int rk4(SIM *sim, Matrix *Xnext, Matrix *X, Matrix *A, Matrix *B, Matrix *U, dou
 	return	0;
 }
 
-int ctrlMaxwellInnerLoop(SIM *sim, Matrix *tau)
+int ctrlMaxwellInnerLoop(cFinger *sim, Matrix *tau)
 {
 	int	jnt, crd;
 	static Matrix	Tmp21, Tmp22, Tmp21_2;
@@ -204,7 +204,7 @@ int ctrlMaxwellInnerLoop(SIM *sim, Matrix *tau)
 // Maxwell制御則(作業座標)+インナーループ(関節座標)
 // デバッグ中．初期トルクが大きい．偏差が残る．ゲインを大きくすると発散．
 ////////////////////////////////////////////////////////
-int ctrlMaxwellInnerLoopJntSpace(SIM *sim, Matrix *tau)
+int ctrlMaxwellInnerLoopJntSpace(cFinger *sim, Matrix *tau)
 {
 	static Matrix	Tmp21, Tmp22, Tmp21_2;
 	static Matrix	tauNC, tauVE, tauIN, tauPL, Ec;
@@ -281,7 +281,7 @@ int ctrlMaxwellInnerLoopJntSpace(SIM *sim, Matrix *tau)
 // ctrlMaxwellInnerLoopと計算方法が違い加速度の値が少しずつずれていくので，インナーループゲインが0のとき(フィードバックがかかっていない)は値がずれてくる
 ////////////////////////////////////////////////////////
 // 4次ルンゲクッタ法(状態空間表現 dX = AX+BU )
-int rk4Acc(SIM *sim, Matrix *Xnext, Matrix *dX, Matrix *X, Matrix *A, Matrix *B, Matrix *U, double dt)
+int rk4Acc(cFinger *sim, Matrix *Xnext, Matrix *dX, Matrix *X, Matrix *A, Matrix *B, Matrix *U, double dt)
 {
 	static Matrix	K1, K2, K3, K4, K;
 	static Matrix	Tmp_1, Tmp_2;		// 途中計算
@@ -299,7 +299,7 @@ int rk4Acc(SIM *sim, Matrix *Xnext, Matrix *dX, Matrix *X, Matrix *A, Matrix *B,
 	return	0;
 }
 
-int ctrlMaxwellInnerLoopImplicit(SIM *sim, Matrix *tau)
+int ctrlMaxwellInnerLoopImplicit(cFinger *sim, Matrix *tau)
 {
 	int	jnt, crd;
 	static Matrix	Tmp21, Tmp22, Tmp21_2;
@@ -352,7 +352,7 @@ int ctrlMaxwellInnerLoopImplicit(SIM *sim, Matrix *tau)
 // 現在はK, Cが対角行列の時のみ対応
 // F = M*ddr+dM*dr+∫_0^t{exp(-(t-τ)*K*C^{-1})*K*dr}dτ
 ////////////////////////////////////////////////////////
-int ctrlMaxwellConv(SIM *sim, Matrix *tau)
+int ctrlMaxwellConv(cFinger *sim, Matrix *tau)
 {
 	static Matrix	Tmp21(2,1), Tmp22(2,2), Tmp21_2(2,1);
 	static Matrix	tauNC(2,1), tauVE(2,1), tauIN(2,1), E(2,2);
@@ -474,7 +474,7 @@ int ctrlMaxwellConvWithoutInertiaShaping(SIM *sim, Matrix *tau)
 
 #if 1
 // 速度変数の積分計算
-int simpson(SIM *sim, Matrix *Integ, double dt)
+int simpson(cFinger *sim, Matrix *Integ, double dt)
 {
 	static Matrix	K1(2,1), K2(2,1), K3(2,1), K(2,1);
 	static Matrix	Tmp21(2,1), Tmp22(2,2);
@@ -503,7 +503,7 @@ int simpson(SIM *sim, Matrix *Integ, double dt)
 }
 
 // 位置変数の積分計算
-int simpson2(SIM *sim, Matrix *Integ, double dt)
+int simpson2(cFinger *sim, Matrix *Integ, double dt)
 {
 	static Matrix	K1(2, 1), K2(2, 1), K3(2, 1), K(2, 1);
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2);
@@ -541,7 +541,7 @@ int simpson2(SIM *sim, Matrix *Integ, double dt)
 // A = [0, I, 0; 0, -M^{-1}*dM, -M^{-1}; 0, K, -K*C{-1}],  B = [0; M^{-1}; 0]
 // A = [0, I, 0; 0, 0, -M^{-1}; 0, K, -K*C{-1}],  B = [0; M^{-1}; 0]	// Mが定数の場合
 ////////////////////////////////////////////////////////
-int ctrlMaxwellConvInnerLoop(SIM *sim, Matrix *tau)
+int ctrlMaxwellConvInnerLoop(cFinger *sim, Matrix *tau)
 {
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp21_2(2, 1);
 	static Matrix	tauNC(2, 1), tauIN(2, 1);
@@ -592,7 +592,7 @@ int ctrlMaxwellConvInnerLoop(SIM *sim, Matrix *tau)
 // F = M*ddx + dM*dx + w (w=∫_0^t{exp(-(t-τ)*K*C^{-1})*K*dx}dτ)
 // dw = -K*C^{-1}*w+K*dx をルンゲクッタで計算
 ////////////////////////////////////////////////////////
-int ctrlMaxwellConvRK(SIM *sim, Matrix *tau)
+int ctrlMaxwellConvRK(cFinger *sim, Matrix *tau)
 {
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp21_2(2, 1);
 	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), E(2, 2);
@@ -646,7 +646,7 @@ int ctrlMaxwellConvRK(SIM *sim, Matrix *tau)
 // M*ddx + K*x - w = F (w=K*C^{-1}∫_0^t{exp(-(t-τ)*K*C^{-1})*K*x}dτ)
 // dw = -K*C^{-1}*w+K*C^{-1}*K*x をルンゲクッタで計算
 ////////////////////////////////////////////////////////
-int ctrlMaxwellConvRK2(SIM *sim, Matrix *tau)
+int ctrlMaxwellConvRK2(cFinger *sim, Matrix *tau)
 {
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp21_2(2, 1);
 	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), E(2, 2);
@@ -685,7 +685,7 @@ int ctrlMaxwellConvRK2(SIM *sim, Matrix *tau)
 }
 
 // まだ作成中
-int ctrlMaxwellConvObserver(SIM *sim, Matrix *tau)
+int ctrlMaxwellConvObserver(cFinger *sim, Matrix *tau)
 {
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp21_2(2, 1);
 	static Matrix	tauNC(2, 1), tauIN(2, 1);
@@ -730,8 +730,9 @@ int ctrlMaxwellConvObserver(SIM *sim, Matrix *tau)
 // Maxwell制御則
 // M*ddx + K*C^{-1}*M*dx + K*x = F + K*C^{-1}∫Fdt
 ////////////////////////////////////////////////////////
-int ctrlMaxwell(SIM *sim, Matrix *tau)
+int ctrlMaxwell(cFinger* sim, Matrix* tau)
 {
+	
 	int	jnt, crd;
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp21_2(2, 1);
 	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
@@ -741,7 +742,7 @@ int ctrlMaxwell(SIM *sim, Matrix *tau)
 		sim->armCalcImpPeriod();		// 周期計算
 	}
 	// 前処理
-	matSub(&re, &sim->var.r, &sim->var_init.r);		// 手先位置変位
+	matSub(&re, &sim->var.r,&sim->var_init.r);		// 手先位置変位
 	matSub(&dre, &sim->var.dr, &sim->var_init.dr);		// 手先速度変位
 #if 1
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt
@@ -767,7 +768,7 @@ int ctrlMaxwell(SIM *sim, Matrix *tau)
 // dK = 0, dC = 0, Mは時変対応
 // M*ddx + (K*C^{-1}*M+dM)*dx + K*x = F + K*C^{-1}∫Fdt
 ////////////////////////////////////////////////////////
-int ctrlMaxwellWithoutInertiaShaping(SIM *sim, Matrix *tau)
+int ctrlMaxwellWithoutInertiaShaping(cFinger *sim, Matrix *tau)
 {
 	int	jnt, crd;
 	static Matrix	Tmp21(2,1), Tmp22(2,2), Tmp21_2(2,1);
@@ -802,7 +803,7 @@ int ctrlMaxwellWithoutInertiaShaping(SIM *sim, Matrix *tau)
 ////////////////////////////////////////////////////////
 int ctrlVoigt(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, const Matrix *dJ, const Matrix *q, const Matrix *dq, const Matrix *re, const Matrix *dre, const Matrix *F, const Matrix *Md, const Matrix *Cd, const Matrix *Kd)
 {
-	auto _this = EntityManager::get();
+	auto _this = EntityManager::get()->getFinger();
 	int	jnt, crd;
 	static Matrix	Jinv, Jt, Tmp21, Tmp22;
 	static Matrix	tauNC, tauVE, tauIN, E;

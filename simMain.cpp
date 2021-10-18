@@ -86,7 +86,7 @@ void cFinger::control(){
 
 	// パラメータセット
 	//_this->armDynPara();
-	entity->armDynPara();
+	entity->getFinger()->armDynPara();
 
 	// インピーダンス設定
 	// 制御指令計算
@@ -97,9 +97,9 @@ void cFinger::control(){
 	//		double	impM[] = {1.0, 1.0}, impC[] = {10.0, 10.0}, impK[] = {10.0, 10.0}, impK0[] = {10.0, 10.0};
 	matSetValDiag(&_this->imp.M, impM); matSetValDiag(&_this->imp.C, impC); matSetValDiag(&_this->imp.K, impK); matSetValDiag(&_this->imp.K0, impK0);	// ゲイン設定
 	//_this->ctrlPreProcessing();		// インピーダンス補足処理（逆行列等）
-	entity->ctrlPreProcessing();
+	entity->getFinger()->ctrlPreProcessing();
 #if 1
-	ctrlMaxwell(EntityManager::get(), &tau);
+	ctrlMaxwell(_this.get() ,&tau);
 //	ctrlMaxwellWithoutInertiaShaping(_this, &tau);
 #elif 0
 //	ctrlMaxwellConv(_this, &tau);
@@ -170,22 +170,23 @@ void cFinger::control(){
 static void restart()
 {
 	auto sim = EntityManager::get();
+	auto finger = sim->getFinger();
 	//変数初期化
-	sim->step = 0;		//ステップ数初期化
-	sim->state_contact = 0;				// 状態変数初期化
-	sim->dist = 0.0;
+	finger->step = 0;		//ステップ数初期化
+	finger->state_contact = 0;				// 状態変数初期化
+	finger->dist = 0.0;
 	for(int jnt=0;jnt<ARM_JNT;jnt++){
-		sim->ref_jnt_pos[jnt] = 0.0;
-		sim->jnt_pos[jnt] = 0.0;
-		sim->jnt_vel[jnt] = 0.0;
-		sim->jnt_force[jnt] = 0.0;
-		sim->past_jnt_pos[jnt] = 0.0;
+		finger->ref_jnt_pos[jnt] = 0.0;
+		finger->jnt_pos[jnt] = 0.0;
+		finger->jnt_vel[jnt] = 0.0;
+		finger->jnt_force[jnt] = 0.0;
+		finger->past_jnt_pos[jnt] = 0.0;
 	}
 //	sim->jnt_pos[ARM_M1] = 4 * PI / 4.0; sim->jnt_pos[ARM_M2] = PI / 4.0;
 	for(int crd=0;crd<DIM3;crd++){
-		sim->ref_eff_pos[crd] = 0.0;
-		sim->eff_pos[crd] = 0.0;
-		sim->eff_force[crd] = 0.0;
+		finger->ref_eff_pos[crd] = 0.0;
+		finger->eff_pos[crd] = 0.0;
+		finger->eff_force[crd] = 0.0;
 	}
 	// ODE
 	sim->destroyRobot();  // ロボット破壊
@@ -241,11 +242,11 @@ int exeCmd(int argc, char *argv[])
 		}
 #endif
 		// ファイル保存
-		sprintf(sim->data_file_name, FILENAME_DATA, incount);		// ファイル名を連番に設定
-		sprintf(sim->filename_info, FILENAME_INFO, incount);		// ファイル名を連番に設定
-		sim->saveData();
-		sim->saveInfo();
-		sim->saveGraph();
+		sprintf(sim->getFinger()->data_file_name, FILENAME_DATA, incount);		// ファイル名を連番に設定
+		sprintf(sim->getFinger()->filename_info, FILENAME_INFO, incount);		// ファイル名を連番に設定
+		sim->getFinger()->saveData();
+		sim->getFinger()->saveInfo();
+		sim->getFinger()->saveGraph();
 		// シミュレーションリスタート
 		restart();
 		// インクリメント
@@ -320,17 +321,6 @@ int main(int argc, char** argv)
 
 #else
 
-//kawahara 物体生成用
-
-
-const int N=100;
-typedef struct {//球の構造体
-	dBodyID body; //動力学計算用のボディ
-	dGeomID geom; //衝突計算用のジオメトリ
-} MyObject;
-
-MyObject ball[];//球を描画するための配列
-
 
 ////////////////////////////////////////////////////////
 // main関数
@@ -344,12 +334,23 @@ int main(int argc, char *argv[])
 #endif
 	// 環境設定
 	sim->setEnv();
-	// パラメータ設定
-	for(int jnt=0;jnt<ARM_JNT;jnt++)	sim->init_jnt_pos[jnt] = init_jnt_pos[jnt];
-	for(int crd=0;crd<DIM3;crd++){
-		sim->init_obj_pos[crd] = init_obj_pos[crd];
-		for(int axis=0;axis<DIM3;axis++)	sim->init_obj_att[axis][crd] = init_obj_att[axis][crd];
-	}
+	//auto Finger1 = sim->getFinger();
+	//auto f1 = Finger1.get();
+	//auto Finger2 = sim->getFinger2();
+	//auto f2 = Finger2.get();
+
+	// パラメータ設定 指1
+	//for(int jnt=0;jnt<ARM_JNT;jnt++)	f1->init_jnt_pos[jnt] =init_jnt_pos[jnt];
+	//for(int crd=0;crd<DIM3;crd++){
+	//	Finger1->init_obj_pos[crd] = Finger1->init_obj_pos[crd];
+	//	for(int axis=0;axis<DIM3;axis++)	Finger1->init_obj_att[axis][crd] = Finger1->init_obj_att[axis][crd];
+	//}
+	//// パラメータ設定 指2
+	//for (int jnt = 0; jnt < ARM_JNT; jnt++)	Finger2->init_jnt_pos[jnt] = init_jnt_pos[jnt];
+	//for (int crd = 0; crd < DIM3; crd++) {
+	//	Finger2->init_obj_pos[crd] = init_obj_pos[crd];
+	//	for (int axis = 0; axis < DIM3; axis++)	Finger2->init_obj_att[axis][crd] = init_obj_att[axis][crd];
+	//}
 	
 	// 物体生成
 	sim->ground = dCreatePlane(sim->getSpace(), 0, 0, 1, 0);		// 地面の設定
@@ -554,8 +555,7 @@ void DrawStuff::simLoop(int pause)
 		
 		auto entity = EntityManager::get();
 		// 距離計算
-		calcDist(entity);
-		calcDist(entity);
+		//calcDist(entity);
 
 		//calcDist(_this);
 		//calcDist(_this2);
@@ -585,7 +585,7 @@ void DrawStuff::simLoop(int pause)
 		matCopy(&_this2->var_prev.r, &_this2->var.r); matCopy(&_this2->var_prev.dr, &_this2->var.dr);
 		
 		// 現在値を保存領域へコピー
-		copyData(entity);
+		//copyData(entity);
 		_this->state_contact = 0;
 
 		/*copyData(_this2);

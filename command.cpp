@@ -42,7 +42,7 @@ int setTimer(double delay)
 ////////////////////////////////////////////////////////
 // データコピー(SIM構造体からデータ保存メモリへコピー)
 ////////////////////////////////////////////////////////
-int copyData(SIM *sim)
+int copyData(cFinger *sim)
 {
 	if(sim->step < DATA_CNT_NUM){
 		sim->save_state_contact[sim->step] = sim->state_contact;
@@ -71,7 +71,7 @@ int copyData(SIM *sim)
 // ファイル保存
 // シミュレーション時系列データ
 ////////////////////////////////////////////////////////
-void SIM::saveData(){
+void cFinger::saveData(){
 //	auto sim = EntityManager::init();
 	ofstream outdata;
 	// シミュレーション停止までのデータを保存
@@ -116,7 +116,7 @@ void SIM::saveData(){
 // ファイル保存
 // シミュレーション情報
 ////////////////////////////////////////////////////////
-void SIM::saveInfo()
+void cFinger::saveInfo()
 {
 #define print(VarName) outdata<<#VarName"="<<VarName<<endl		// 出力先をofstream名とそろえること
 	ofstream outdata(filename_info);
@@ -192,7 +192,7 @@ int drawData()
 ////////////////////////////////////////////////////////
 // グラフ保存（gnuplot）
 ////////////////////////////////////////////////////////
-void SIM::saveGraph()
+void cFinger::saveGraph()
 {
 	FILE *gp;
 	if((gp=_popen(GNUPLOT_PATH,"w"))==NULL){fprintf(stderr,"Can not find %s!",GNUPLOT_PATH);}
