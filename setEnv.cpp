@@ -80,7 +80,7 @@ int calcDist(cFinger *sim)
 // 外力設定
 ////////////////////////////////////////////////////////
 void cFinger::addExtForce(){
-	auto sim = EntityManager::get()->getFinger();
+	auto sim = EntityManager::get();
 	double ext_force[DIM3];
 	double	time;
 	time = sim->step*SIM_CYCLE_TIME;
@@ -106,8 +106,8 @@ void cFinger::addExtForce(){
 		//ext_force[CRD_X] = 2.0;
 		//ext_force[CRD_Y] = 2.0;
 		//ext_force[CRD_Z] = 0.0;
-		ext_force[CRD_X] = 0.0;
-		ext_force[CRD_Y] = 0.0;
+		ext_force[CRD_X] = 0.05;
+		ext_force[CRD_Y] = -0.05;
 		ext_force[CRD_Z] = 0.0;
 	}else{
 		ext_force[CRD_X] = 0.0;
@@ -120,17 +120,18 @@ void cFinger::addExtForce(){
 	// 手先リンク表面の中心に外力入力
 //	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
-	auto sensor = sim->getParts()[3];
+	auto sensor =getParts()[3];
 
-	dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
+	dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y], eff_pos[CRD_Z]);
 
 }
 
 void cFinger::addExtForce2() {
 	auto Finger = EntityManager::get()->getFinger();
+	auto entity = EntityManager::get();
 	double ext_force[DIM3];
 	double	time;
-	time = Finger->step * SIM_CYCLE_TIME;
+	time = entity->step * SIM_CYCLE_TIME;
 	// 外力を設定
 #if 0
 	ext_force[CRD_X] = 2.0;//0.2;
@@ -149,7 +150,7 @@ void cFinger::addExtForce2() {
 	}
 #else
 	//2000ステップまでは外力を加える
-	if (Finger->step <= 2000) {
+	if (entity->step <= 2000) {
 		//	if(sim->step <= 1100){
 		ext_force[CRD_X] = 2.0;
 		ext_force[CRD_Y] = 2.0;

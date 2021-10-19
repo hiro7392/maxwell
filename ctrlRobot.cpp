@@ -12,9 +12,9 @@ int ctrlHybrid(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, 
 	static Matrix	S, I;	// Maxwell制御がS, Voigt制御がI-S
 	static Matrix	Jinv, Jt, Tmp21, Tmp21_1, Tmp21_2, Tmp22, Tmp22_1, Tmp22_2;
 	static Matrix	tauNC, tauVE, tauIN, tauPL, E;
-
+	auto entity = EntityManager::get();
 	// 初期化
-	if(_this->step == 0){
+	if(entity->step == 0){
 		matInit(&S,2,2); matUnit(matInit(&I,2,2));
 		matInit(&Jinv,2,2);	matInit(&Jt,2,2);
 		matInit(&Tmp21,2,1); matInit(&Tmp21_1,2,1); matInit(&Tmp21_2,2,1); matInit(&Tmp22,2,2); matInit(&Tmp22_1,2,2); matInit(&Tmp22_2,2,2);
@@ -31,7 +31,7 @@ int ctrlHybrid(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, 
 		}
 	}
 	// MaxwellとVoigtの方向切替
-	if(_this->step == IMP_SWITCH_STEP){ S.el[0][0] = 0.0;	S.el[1][1] = 1.0; }		// x方向がVoigt制御, y方向がMaxwell制御
+	if(entity->step == IMP_SWITCH_STEP){ S.el[0][0] = 0.0;	S.el[1][1] = 1.0; }		// x方向がVoigt制御, y方向がMaxwell制御
 	// 制御則
 	matTrans(&Jt, J);	matInv(&Jinv, NULL, J);	// J^T, J^{-1}
 	matMul3(&E, Mq, &Jinv, matInv(&Tmp22, NULL, Md));	// E = Mq*J^{-1}*Md^{-1}
@@ -56,7 +56,9 @@ int ctrlMaxwellVar(cFinger *sim, Matrix *tau)
 	static Matrix	tauNC, tauVE, tauIN, tauPL, E;
 	static Matrix	Integ, Integ2, Diff;
 	static Matrix	re, dre;	// 手先位置変位，手先速度変位
-	if (sim->step == 0){
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0){
 		matInit(&Tmp21, 2, 1); matInit(&Tmp22, 2, 2);
 		matInit(&tauNC, 2, 1); matInit(&tauVE, 2, 1); matInit(&tauIN, 2, 1); matInit(&tauPL, 2, 1); matInit(&E, 2, 2);
 		matInit(&Integ, 2, 1);	matInit(&Integ2, 2, 1);	matInit(&Diff, 2, 2);
@@ -94,7 +96,9 @@ int ctrlSLS(cFinger *sim, Matrix *tau)
 	static Matrix	tauP, tauI, tauD;		// tauVEのPID成分
 	static Matrix	IntegF, IntegX;
 	static Matrix	re, dre;	// 手先位置変位，手先速度変位
-	if (sim->step == 0){
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0){
 		matInit(&Tmp21, 2, 1); matInit(&Tmp22, 2, 2);
 		matInit(&tauNC, 2, 1); matInit(&tauVE, 2, 1); matInit(&tauIN, 2, 1); matInit(&tauPL, 2, 1); matInit(&E, 2, 2);
 		matInit(&tauP, 2, 1); matInit(&tauI, 2, 1); matInit(&tauD, 2, 1);
@@ -130,9 +134,10 @@ int ctrlSLS(cFinger *sim, Matrix *tau)
 // 4次ルンゲクッタ法(状態空間表現 dX = AX+BU )
 int rk4(cFinger *sim, Matrix *Xnext, Matrix *X, Matrix *A, Matrix *B, Matrix *U, double dt)
 {
+	auto entity = EntityManager::get();
 	static Matrix	K1, K2, K3, K4, K;
 	static Matrix	Tmp41_1, Tmp41_2;		// 途中計算
-	if (sim->step == 0){
+	if (entity->step == 0){
 		matInit(&K1,4,1); matInit(&K2,4,1); matInit(&K3,4,1); matInit(&K4,4,1); matInit(&K,4,1); 
 		matInit(&Tmp41_1,4,1); matInit(&Tmp41_2,4,1);
 	}
@@ -157,7 +162,9 @@ int ctrlMaxwellInnerLoop(cFinger *sim, Matrix *tau)
 	constexpr double GAIN_INNERLOOP = 20;		// 
 	double	GpVal[] = {GAIN_INNERLOOP*GAIN_INNERLOOP/4.0, GAIN_INNERLOOP*GAIN_INNERLOOP/4.0};	// 臨界減衰
 	double	GvVal[] = {GAIN_INNERLOOP, GAIN_INNERLOOP};
-	if (sim->step == 0){
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0){
 		// 行列初期化
 		matInit(&Tmp21, 2, 1); matInit(&Tmp22, 2, 2); matInit(&Tmp21_2, 2, 1); 
 		matInit(&tauNC, 2, 1); matInit(&tauVE, 2, 1); matInit(&tauIN, 2, 1); matInit(&tauPL, 2, 1); matInit(&E, 2, 2);
@@ -179,7 +186,7 @@ int ctrlMaxwellInnerLoop(cFinger *sim, Matrix *tau)
 #if 0
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt
 #else
-	if (sim->step > 0)	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt
+	if (entity->step > 0)	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt
 #endif
 	// インナーループ目標値計算
 	matCopy(&X, &Xnext);	// 1サイクル前の計算値を初期値として代入
@@ -219,7 +226,9 @@ int ctrlMaxwellInnerLoopJntSpace(cFinger *sim, Matrix *tau)
 //	double	GvVal[] = {GAIN_INNERLOOP, GAIN_INNERLOOP};
 	double	GpVal[] = {800, 800};
 	double	GvVal[] = {800, 800};
-	if (sim->step == 0){
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0){
 		// 行列初期化
 		matInit(&Tmp21, 2, 1); matInit(&Tmp22, 2, 2); matInit(&Tmp21_2, 2, 1); 
 		matInit(&tauNC, 2, 1); matInit(&tauVE, 2, 1); matInit(&tauIN, 2, 1); matInit(&tauPL, 2, 1); matInit(&Ec, 2, 2);
@@ -247,7 +256,7 @@ int ctrlMaxwellInnerLoopJntSpace(cFinger *sim, Matrix *tau)
 #if 0
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt
 #else
-	if (sim->step > 0)	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt
+	if (entity->step > 0)	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt
 #endif
 	// インナーループ目標値計算
 	matCopy(&X, &Xnext);	// 1サイクル前の計算値を初期値として代入(初回は0で上書き)
@@ -284,8 +293,9 @@ int ctrlMaxwellInnerLoopJntSpace(cFinger *sim, Matrix *tau)
 int rk4Acc(cFinger *sim, Matrix *Xnext, Matrix *dX, Matrix *X, Matrix *A, Matrix *B, Matrix *U, double dt)
 {
 	static Matrix	K1, K2, K3, K4, K;
-	static Matrix	Tmp_1, Tmp_2;		// 途中計算
-	if (sim->step == 0) {
+	static Matrix	Tmp_1, Tmp_2;		// 
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		matInit(&K1, X->row, X->col); matInit(&K2, X->row, X->col); matInit(&K3, X->row, X->col); matInit(&K4, X->row, X->col); matInit(&K, X->row, X->col);
 		matInit(&Tmp_1, X->row, X->col); matInit(&Tmp_2, X->row, X->col);
 	}
@@ -310,7 +320,9 @@ int ctrlMaxwellInnerLoopImplicit(cFinger *sim, Matrix *tau)
 	constexpr double GAIN_INNERLOOP = 20;		// 
 	double	GpVal[] = {GAIN_INNERLOOP*GAIN_INNERLOOP/4.0, GAIN_INNERLOOP*GAIN_INNERLOOP/4.0};	// 臨界減衰
 	double	GvVal[] = {GAIN_INNERLOOP, GAIN_INNERLOOP};
-	if (sim->step == 0){
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0){
 		// 行列初期化
 		matInit(&Tmp21, 2, 1); matInit(&Tmp22, 2, 2); matInit(&Tmp21_2, 2, 1); 
 		matInit(&tauNC, 2, 1); matInit(&tauVE, 2, 1); matInit(&tauIN, 2, 1); matInit(&tauPL, 2, 1); matInit(&E, 2, 2);
@@ -360,7 +372,9 @@ int ctrlMaxwellConv(cFinger *sim, Matrix *tau)
 	static Matrix	re(2,1), dre(2,1);	// 手先位置速度変位，目標位置速度変位
 	static Matrix	dre_prev(2,1);	// 
 	static Matrix	Exp(2,2), Inc(2,1), Expt(2,2);	// 
-	if (sim->step == 0) {
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		// 初期設定
 		matMulScl(&Tmp22, -SYSTEM_CYCLE_TIME, matMul(&Tmp22, &sim->imp.K, &sim->imp.Cinv));		//  = -Δt*K*C^{-1}
 		double	GpVal[] = {exp(Tmp22.el[0][0]), exp(Tmp22.el[1][1])};	// e^{-Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
@@ -479,8 +493,9 @@ int simpson(cFinger *sim, Matrix *Integ, double dt)
 	static Matrix	K1(2,1), K2(2,1), K3(2,1), K(2,1);
 	static Matrix	Tmp21(2,1), Tmp22(2,2);
 	static Matrix	dre(2,1), dre_prev(2,1), dre_prev2(2,1);	// 手先位置速度変位，目標位置速度変位
-	static Matrix	Exp(2,2), Exp2(2,2);	// 
-	if (sim->step == 0) {
+	static Matrix	Exp(2,2), Exp2(2,2);	//
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		matMulScl(&Tmp22, -dt, matMul(&Tmp22, &sim->imp.K, &sim->imp.Cinv));		//  = -Δt*K*C^{-1}
 		double	GpVal[] = {exp(Tmp22.el[0][0]), exp(Tmp22.el[1][1])};	// e^{-Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 		matSetValDiag(&Exp, GpVal);		// Exp = e^{-Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
@@ -488,7 +503,7 @@ int simpson(cFinger *sim, Matrix *Integ, double dt)
 		GpVal[0] = exp(Tmp22.el[0][0]); GpVal[1] = exp(Tmp22.el[1][1]);	// e^{-2Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 		matSetValDiag(&Exp2, GpVal);		// Exp = e^{-2Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 	}
-	if(sim->step % 2 == 0){
+	if(entity->step % 2 == 0){
 		matSub(&dre, &sim->var.dr, &sim->var_init.dr);		// 手先速度変位
 		matSub(&dre_prev, &sim->var_prev.dr, &sim->var_init.dr);		// 手先速度変位(1フレーム前)
 		matSub(&dre_prev2, &sim->var_prev2.dr, &sim->var_init.dr);		// 手先速度変位(2フレーム前)
@@ -508,8 +523,9 @@ int simpson2(cFinger *sim, Matrix *Integ, double dt)
 	static Matrix	K1(2, 1), K2(2, 1), K3(2, 1), K(2, 1);
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2);
 	static Matrix	re(2, 1), re_prev(2, 1), re_prev2(2, 1);	// 手先位置速度変位，目標位置速度変位
-	static Matrix	Exp(2, 2), Exp2(2, 2);	// 
-	if (sim->step == 0) {
+	static Matrix	Exp(2, 2), Exp2(2, 2);	//
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		matMulScl(&Tmp22, -dt, matMul(&Tmp22, &sim->imp.K, &sim->imp.Cinv));		//  = -Δt*K*C^{-1}
 		double	GpVal[] = { exp(Tmp22.el[0][0]), exp(Tmp22.el[1][1]) };	// e^{-Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 		matSetValDiag(&Exp, GpVal);		// Exp = e^{-Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
@@ -517,7 +533,7 @@ int simpson2(cFinger *sim, Matrix *Integ, double dt)
 		GpVal[0] = exp(Tmp22.el[0][0]); GpVal[1] = exp(Tmp22.el[1][1]);	// e^{-2Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 		matSetValDiag(&Exp2, GpVal);		// Exp = e^{-2Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 	}
-	if (sim->step % 2 == 0) {
+	if (entity->step % 2 == 0) {
 		matSub(&re, &sim->var.r, &sim->var_init.r);		// 手先位置変位
 		matSub(&re_prev, &sim->var_prev.r, &sim->var_init.r);		// 手先速度変位(1フレーム前)
 		matSub(&re_prev2, &sim->var_prev2.r, &sim->var_init.r);		// 手先速度変位(2フレーム前)
@@ -550,7 +566,9 @@ int ctrlMaxwellConvInnerLoop(cFinger *sim, Matrix *tau)
 	constexpr double GAIN_INNERLOOP = 20;		// 
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
-	if (sim->step == 0) {
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		// 初期設定
 		matShareInit(&rc, 2, 1); matShareInit(&drc, 2, 1); matShareBlock(&rc, &X, 0, 0); matShareBlock(&drc, &X, 2, 0);	// X = [rc; drc; w]
 		matShareInit(&ddrc, 2, 1); matShareBlock(&ddrc, &dX, 2, 0);	// dX = [drc; ddrc; dw]
@@ -601,7 +619,9 @@ int ctrlMaxwellConvRK(cFinger *sim, Matrix *tau)
 	constexpr double GAIN_INNERLOOP = 20;		// 
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
-	if (sim->step == 0) {
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		// 初期設定
 		matSetValDiag(&sim->imp.Gp, GpVal); matSetValDiag(&sim->imp.Gv, GvVal);	// ゲイン設定
 		sim->armCalcImpPeriod();		// 周期計算
@@ -655,7 +675,9 @@ int ctrlMaxwellConvRK2(cFinger *sim, Matrix *tau)
 	constexpr double GAIN_INNERLOOP = 20;		// 
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
-	if (sim->step == 0) {
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		// 初期設定
 		matSetValDiag(&sim->imp.Gp, GpVal); matSetValDiag(&sim->imp.Gv, GvVal);	// ゲイン設定
 		sim->armCalcImpPeriod();		// 周期計算
@@ -695,7 +717,9 @@ int ctrlMaxwellConvObserver(cFinger *sim, Matrix *tau)
 	constexpr double GAIN_INNERLOOP = 20;		// 
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
-	if (sim->step == 0) {
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		// 初期設定
 		matShareInit(&rc, 2, 1); matShareInit(&drc, 2, 1); matShareBlock(&rc, &X, 0, 0); matShareBlock(&drc, &X, 2, 0);	// X = [rc; drc; w]
 		matShareInit(&ddrc, 2, 1); matShareBlock(&ddrc, &dX, 2, 0);	// dX = [drc; ddrc; dw]
@@ -738,7 +762,9 @@ int ctrlMaxwell(cFinger* sim, Matrix* tau)
 	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
 	static Matrix	Integ(2, 1);
 	static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
-	if (sim->step == 0){
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0){
 		sim->armCalcImpPeriod();		// 周期計算
 	}
 	// 前処理
@@ -775,7 +801,9 @@ int ctrlMaxwellWithoutInertiaShaping(cFinger *sim, Matrix *tau)
 	static Matrix	tauNC(2,1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
 	static Matrix	Integ(2, 1);
 	static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
-	if (sim->step == 0) {
+
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		sim->armCalcImpPeriod();		// 周期計算
 	}
 	// 前処理
@@ -807,8 +835,10 @@ int ctrlVoigt(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, c
 	int	jnt, crd;
 	static Matrix	Jinv, Jt, Tmp21, Tmp22;
 	static Matrix	tauNC, tauVE, tauIN, E;
+
+	auto entity = EntityManager::get();
 	// 初期化
-	if(_this->step == 0){
+	if(entity->step == 0){
 		matInit(&Jinv,2,2);	matInit(&Jt,2,2);
 		matInit(&Tmp21,2,1); matInit(&Tmp22,2,2);
 		matInit(&tauNC,2,1); matInit(&tauVE,2,1); matInit(&tauIN,2,1); matInit(&E,2,2);

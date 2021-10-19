@@ -44,24 +44,25 @@ int setTimer(double delay)
 ////////////////////////////////////////////////////////
 int copyData(cFinger *sim)
 {
-	if(sim->step < DATA_CNT_NUM){
-		sim->save_state_contact[sim->step] = sim->state_contact;
-		sim->save_dist[sim->step] = sim->dist;
+	auto entity = EntityManager::get();
+	if(entity->step < DATA_CNT_NUM){
+		sim->save_state_contact[entity->step] = sim->state_contact;
+		sim->save_dist[entity->step] = sim->dist;
 		for(int jnt=0;jnt<ARM_JNT;jnt++){
-			sim->save_ref_jnt_pos[sim->step][jnt] = sim->ref_jnt_pos[jnt];
-			sim->save_ref_jnt_vel[sim->step][jnt] = sim->ref_jnt_vel[jnt];
-			sim->save_jnt_pos[sim->step][jnt] = sim->jnt_pos[jnt];
-			sim->save_jnt_vel[sim->step][jnt] = sim->jnt_vel[jnt];
-			sim->save_jnt_force[sim->step][jnt] = sim->jnt_force[jnt];
+			sim->save_ref_jnt_pos[entity->step][jnt] = sim->ref_jnt_pos[jnt];
+			sim->save_ref_jnt_vel[entity->step][jnt] = sim->ref_jnt_vel[jnt];
+			sim->save_jnt_pos[entity->step][jnt] = sim->jnt_pos[jnt];
+			sim->save_jnt_vel[entity->step][jnt] = sim->jnt_vel[jnt];
+			sim->save_jnt_force[entity->step][jnt] = sim->jnt_force[jnt];
 		}
 		for(int crd=0;crd<DIM3;crd++){
-			sim->save_ref_eff_pos[sim->step][crd] = sim->ref_eff_pos[crd];
-			sim->save_ref_eff_vel[sim->step][crd] = sim->ref_eff_vel[crd];
-			sim->save_eff_pos[sim->step][crd] = sim->eff_pos[crd];
-			sim->save_eff_vel[sim->step][crd] = sim->eff_vel[crd];
-			sim->save_eff_force[sim->step][crd] = sim->eff_force[crd];
-			sim->save_obj_pos[sim->step][crd] = sim->obj_pos[crd];
-			sim->save_obj_vel[sim->step][crd] = sim->obj_vel[crd];
+			sim->save_ref_eff_pos[entity->step][crd] = sim->ref_eff_pos[crd];
+			sim->save_ref_eff_vel[entity->step][crd] = sim->ref_eff_vel[crd];
+			sim->save_eff_pos[entity->step][crd] = sim->eff_pos[crd];
+			sim->save_eff_vel[entity->step][crd] = sim->eff_vel[crd];
+			sim->save_eff_force[entity->step][crd] = sim->eff_force[crd];
+			sim->save_obj_pos[entity->step][crd] = sim->obj_pos[crd];
+			sim->save_obj_vel[entity->step][crd] = sim->obj_vel[crd];
 		}
 	}
 	return 0;
@@ -75,7 +76,8 @@ void cFinger::saveData(){
 //	auto sim = EntityManager::init();
 	ofstream outdata;
 	// シミュレーション停止までのデータを保存
-	int min = (step<=DATA_CNT_NUM) ? step : DATA_CNT_NUM;	// stepかDATA_CNT_NUMの小さい値をminに代入
+	auto entity = EntityManager::get();
+	int min = (entity->step<=DATA_CNT_NUM) ? entity->step : DATA_CNT_NUM;	// stepかDATA_CNT_NUMの小さい値をminに代入
 	outdata.open(data_file_name);
 	for (int count = 0; count<min; count++){
 		outdata << count*SIM_CYCLE_TIME << " ";		// 時間

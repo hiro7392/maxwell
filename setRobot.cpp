@@ -137,8 +137,9 @@ int cFinger::armDynPara()
 	int	jnt;
 	static double	m1, m2, l1, l2, lg1, lg2, I1, I2;
 	double	C1, C2, S1, S2, C12, S12;
+	auto entity = EntityManager::get();
 	// パラメータ設定
-	if(this->step == 0){
+	if(entity->step == 0){
 		m1 = this->dyn.m[ARM_M1]; m2 = this->dyn.m[ARM_M2];
 		l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2];
 		lg1 = this->kine.lg[ARM_M1]; lg2 = this->kine.lg[ARM_M2];
@@ -183,8 +184,10 @@ int cFinger::armJacob(Kinematics *kine, Variable *var)
 {
 	static double	l1, l2;
 	double	C1, C2, S1, S2, C12, S12;
+
+	auto entity = EntityManager::get();
 	// パラメータ設定
-	if (this->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
+	if (entity->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
 	// 三角関数
 	C1 = cos(var->q.el[0][0]); C2 = cos(var->q.el[1][0]); S1 = sin(var->q.el[0][0]); S2 = sin(var->q.el[1][0]);
 	C12 = cos(var->q.el[0][0] + var->q.el[1][0]); S12 = sin(var->q.el[0][0] + var->q.el[1][0]);
@@ -211,8 +214,9 @@ int cFinger::armJacob(Kinematics *kine, Variable *var)
 int cFinger::armInvKine(Kinematics *kine, Variable *var)
 {
 	static double	l1, l2;
+	auto entity = EntityManager::get();
 	// パラメータ設定
-	if (this->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
+	if (entity->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
 	// 関節角
 #if 0
 	pos[0] = refPos->el[0][0] + initPos.el[0][0];

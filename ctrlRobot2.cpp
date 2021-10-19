@@ -163,7 +163,8 @@ int ctrlMaxwellImplicit(cFinger *sim, Matrix *tau)
 	static Matrix	Integ;
 	static Matrix	re, dre, rc, drc, ddr;	// 手先位置速度変位，目標位置速度変位
 	static Matrix	A, B, X, U, Xnext, dX;	// 状態空間
-	if (sim->step == 0) {
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		// 行列初期化
 		matInit(&Tmp21, 2, 1); matInit(&Tmp22, 2, 2); matInit(&Tmp21_2, 2, 1);
 		matInit(&tauNC, 2, 1); matInit(&tauVE, 2, 1); matInit(&tauIN, 2, 1); matInit(&tauPL, 2, 1); matInit(&E, 2, 2);

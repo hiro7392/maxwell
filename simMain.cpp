@@ -59,7 +59,7 @@ void cFinger::control(){
 	
 	static Matrix	tau;
 	// 初期化
-	if(_this->step == 0){
+	if(entity->step == 0){
 		matInit(&tau,2,1);
 		// 初期化
 		entity->ctrlInitErr();		// パラメータ誤差を追加
@@ -86,7 +86,8 @@ void cFinger::control(){
 
 	// パラメータセット
 	//_this->armDynPara();
-	entity->getFinger()->armDynPara();
+	armDynPara();
+	
 
 	// インピーダンス設定
 	// 制御指令計算
@@ -172,7 +173,7 @@ static void restart()
 	auto sim = EntityManager::get();
 	auto finger = sim->getFinger();
 	//変数初期化
-	finger->step = 0;		//ステップ数初期化
+	sim->step = 0;		//ステップ数初期化
 	finger->state_contact = 0;				// 状態変数初期化
 	finger->dist = 0.0;
 	for(int jnt=0;jnt<ARM_JNT;jnt++){
@@ -447,10 +448,10 @@ void cFinger::setJoint() {
 void cFinger::setJoint2() {
 	auto sim = EntityManager::get();
 
-	//把持する板を固定
-	graspObj = dJointCreateFixed(sim->getWorld(), 0);
+	//把持する板を設置(位置は可変)
+	graspObj = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(graspObj, plate.getBody(), 0);
-	dJointSetFixed(graspObj);
+	dJointSetHingeAnchor(graspObj,-1.2,-0.5,0.0);
 
 
 	// 固定ジョイント
@@ -488,24 +489,27 @@ void DrawStuff::simLoop(int pause)
 {
 	//auto _this = EntityManager::get();
 	//auto _this2 = EntityManager::get();
-	auto _this = EntityManager::get()->getFinger();
-	auto _this2 = EntityManager::get()->getFinger();
+	auto _this = EntityManager::get()->getFinger().get();
+	auto _this2 = EntityManager::get()->getFinger2().get();
 
 	auto finger = EntityManager::get()->getFinger();
 	auto finger2 = EntityManager::get()->getFinger2();	//kawahara二本目の指
 
+	auto sim = EntityManager::get();
 
 	if (!pause) {
 		//auto base = _this->getFinger()->getParts()[0];
 		//auto link1 = _this->getFinger()->getParts()[1];
 		//auto link2 = _this->getFinger()->getParts()[2];
-		auto sensor = EntityManager::get()->getFinger()->getParts()[3];
+		//auto sensor =_this->getParts()[3];
+		auto sensor = _this->sensor;
 
 		////二本目の指用　kawahara
 		//auto base2 = _this2->getFinger2()->getParts()[0];
 		//auto link21 = _this2->getFinger2()->getParts()[1];
 		//auto link22 = _this2->getFinger2()->getParts()[2];
-		auto sensor2 = EntityManager::get()->getFinger2()->getParts()[3];
+		//auto sensor2 = _this2->getParts()[3];
+		auto sensor2 = _this2->sensor;
 
 		auto obj = EntityManager::get()->getObj();
 		auto obj2 = EntityManager::get()->getObj();
@@ -517,7 +521,7 @@ void DrawStuff::simLoop(int pause)
 		if (_this->step == 0)	dBodySetLinearVel(obj.body, _this->init_obj_att[AXIS_X][CRD_X] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Y] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Z] * SIM_OBJ_INIT_ABS_VEL);		// 対象速度
 		if (_this->step == 0)	dBodySetAngularVel(obj.body, _this->init_obj_att[AXIS_Z][CRD_X] * SIM_OBJ_INIT_ABS_VEL / OBJ_RADIUS, _this->init_obj_att[AXIS_Z][CRD_Y] * SIM_OBJ_INIT_ABS_VEL / OBJ_RADIUS, _this->init_obj_att[AXIS_Z][CRD_Z] * SIM_OBJ_INIT_ABS_VEL / OBJ_RADIUS);		// 対象角速度
 #elif SIM_ADD_EXT_FORCE
-		if (_this->step == 0)	dBodyDisable(obj->getBody());		// 対象無効化
+		if (sim->step == 0)	dBodyDisable(obj->getBody());		// 対象無効化
 #endif
 		// 状態取得
 		for (int jnt = 0; jnt<ARM_JNT; jnt++) {
@@ -563,12 +567,12 @@ void DrawStuff::simLoop(int pause)
 		// 外力設定
 #if SIM_ADD_EXT_FORCE
 		finger->addExtForce();
-		//finger2->addExtForce2();
+		finger2->addExtForce();
 		
 #endif
 		// ODE摩擦手動設定(粘性摩擦)
 		finger->setJntFric();
-		finger2->setJntFric();
+		//finger2->setJntFric();
 
 		// 力計算
 		finger->control();
@@ -592,13 +596,13 @@ void DrawStuff::simLoop(int pause)
 		_this2->state_contact = 0;*/
 		// シミュレーションを１ステップ進行
 		entity->update();
-		_this->step++;
+		sim->step++;
 		//_this2->update();
 		//_this2->step++;
 
 #if FLAG_DRAW_SIM
 	// 終了設定
-		if (_this->step == DATA_CNT_NUM)	dsStop();
+		if (sim->step == DATA_CNT_NUM)	dsStop();
 #endif
 	}
 #if FLAG_DRAW_SIM
@@ -608,7 +612,7 @@ void DrawStuff::simLoop(int pause)
 	finger2->plate.draw();
 
 
-	std::cout << "step:" << _this->step << std::endl;
+	std::cout << "step:" << sim->step << std::endl;
 
 #if SIM_OBJ_IMPACT
 	//	drawObject(); // 衝突対象の描画
