@@ -63,6 +63,7 @@ void cFinger::control() {
 
 	static Matrix	tau;
 	// 初期化
+
 	if (entity->step == 0) {
 		matInit(&tau, 2, 1);
 		// 初期化
@@ -75,10 +76,12 @@ void cFinger::control() {
 			var_init.q.el[crd][0] = jnt_pos[crd]; var_init.dq.el[crd][0] = jnt_vel[crd] = 0.0;
 			var_init.r.el[crd][0] = eff_pos[crd]; var_init.dr.el[crd][0] = eff_vel[crd] = 0.0;
 			var_init.F.el[crd][0] = eff_force[crd] = 0.0;
+
 		}
 	}
 
 	// 手先変数代入
+
 	for (int crd = 0; crd < DIM2; crd++) {
 		var.r.el[crd][0] = eff_pos[crd]; var.dr.el[crd][0] = eff_vel[crd];
 		var.F.el[crd][0] = eff_force[crd];
@@ -86,10 +89,13 @@ void cFinger::control() {
 	// 関節変数代入
 	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 		var.q.el[jnt][0] = jnt_pos[jnt]; var.dq.el[jnt][0] = jnt_vel[jnt];
+
 	}
 
 	// パラメータセット
+
 	armDynPara();
+
 
 	// インピーダンス設定
 	// 制御指令計算
@@ -98,8 +104,10 @@ void cFinger::control() {
 	//		double	impM[] = {2.0, 2.0}, impC[] = {4.0, 4.0}, impK[] = {1000.0, 1000.0}, impK0[] = {10.0, 10.0};
 	//		double	impM[] = {2.0, 2.0}, impC[] = {4.0, 4.0}, impK[] = {100.0, 100.0}, impK0[] = {10.0, 10.0};
 	//		double	impM[] = {1.0, 1.0}, impC[] = {10.0, 10.0}, impK[] = {10.0, 10.0}, impK0[] = {10.0, 10.0};
+
 	matSetValDiag(&imp.M, impM); matSetValDiag(&imp.C, impC); matSetValDiag(&imp.K, impK); matSetValDiag(&imp.K0, impK0);	// ゲイン設定
 	ctrlPreProcessing();
+
 
 #if 1
 	ctrlMaxwell(&tau);
@@ -167,6 +175,7 @@ void cFinger::control() {
 	// 駆動力制限
 //	for(jnt=0;jnt<ARM_JNT;jnt++)	if(_this->jnt_force[jnt] > 100 || _this->jnt_force[jnt] < -100)	_this->jnt_force[jnt] = 0.0;
 	// 駆動力入力をODEに設定
+
 	for(int jnt=0;jnt<ARM_JNT;jnt++)	dJointAddHingeTorque(r_joint[jnt],jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 }
 
