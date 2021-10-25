@@ -70,7 +70,7 @@
     <ProjectGuid>{B67A2C6E-E838-664D-8D32-9E7976797124}</ProjectGuid>
     <RootNamespace>demo_buggy</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>maxwell</ProjectName>
+    <ProjectName>maxwell2021kawahara</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

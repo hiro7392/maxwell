@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////
 int ctrlMaxwellVar(cFinger *sim, Matrix *tau);
 int ctrlMaxwellInnerLoop(cFinger *sim, Matrix *tau);
-int ctrlMaxwell(cFinger *sim, Matrix *tau);
+//int ctrlMaxwell(cFinger *sim, Matrix *tau);
 int ctrlVoigt(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, const Matrix *dJ, const Matrix *q, const Matrix *dq, const Matrix *re, const Matrix *dre, const Matrix *F, const Matrix *Md, const Matrix *Cd, const Matrix *Kd);
 int ctrlHybrid(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, const Matrix *dJ, const Matrix *q, const Matrix *dq, const Matrix *re, const Matrix *dre, const Matrix *F, const Matrix *Fint, const Matrix *Md, const Matrix *Cd, const Matrix *Kd);
 int ctrlSLS(cFinger *sim, Matrix *tau);

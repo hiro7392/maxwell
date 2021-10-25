@@ -77,7 +77,7 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 ////////////////////////////////////////////////////////
 // パラメータ誤差を追加
 // 物理シミュレーションとは異なるパラメータを代入してロバスト性を検証
-int SIM::ctrlInitErr()
+int cFinger::ctrlInitErr()
 {
 #if 0
 	this->dyn.m[ARM_M1] += 0.3;	this->dyn.m[ARM_M2] += 0.2;		// 質量誤差は数百g程度
