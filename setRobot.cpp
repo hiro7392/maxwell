@@ -67,7 +67,9 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
 				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
 			}
-			if (n != 0)	_this->Fparams.state_contact = 1;
+
+			if (n != 0)	_this->getFinger()->state_contact = 1;
+
 		}
 	}
 }
@@ -77,7 +79,9 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 ////////////////////////////////////////////////////////
 // パラメータ誤差を追加
 // 物理シミュレーションとは異なるパラメータを代入してロバスト性を検証
-int FingerParams::ctrlInitErr()
+
+int cFinger::ctrlInitErr()
+
 {
 #if 0
 	this->dyn.m[ARM_M1] += 0.3;	this->dyn.m[ARM_M2] += 0.2;		// 質量誤差は数百g程度
@@ -92,7 +96,8 @@ int FingerParams::ctrlInitErr()
 // 入力：sim.imp.M, sim.imp.C, sim.imp.K
 // 出力：sim.imp.Minv, sim.imp.Cinv, sim.imp.Kinv
 ////////////////////////////////////////////////////////
-int FingerParams::ctrlPreProcessing()
+
+int cFinger::ctrlPreProcessing()
 {
 	// 前処理
 //	matTrans(&this->kine.Jt, &this->kine.J);		// Jt
@@ -110,7 +115,8 @@ int FingerParams::ctrlPreProcessing()
 // 慣性インピーダンスに固有慣性を設定(Inertia Shaping なし)
 // 出力：this->imp.M, this->imp.dM
 ////////////////////////////////////////////////////////
-int FingerParams::armWithoutInertiaShaping()
+
+int cFinger::armWithoutInertiaShaping()
 {
 	static Matrix	Jinvt(DIM2,ARM_JNT), d_Jinv(ARM_JNT,DIM2), d_Jinvt(DIM2,ARM_JNT);		// J^{-T}, d[J^{-1}], d[J^{-1}]^{T}
 	static Matrix	Tmp22(DIM2,DIM2), Tmp22_2(DIM2,DIM2), Tmp22_3(DIM2,DIM2);
@@ -132,13 +138,14 @@ int FingerParams::armWithoutInertiaShaping()
 // 入力：関節変数
 // 出力：ヤコビアン，慣性項，遠心・コリオリ力項
 ////////////////////////////////////////////////////////
-int SIM::armDynPara()
+int cFinger::armDynPara()
 {
 	int	jnt;
 	static double	m1, m2, l1, l2, lg1, lg2, I1, I2;
 	double	C1, C2, S1, S2, C12, S12;
+	auto entity = EntityManager::get();
 	// パラメータ設定
-	if(this->step == 0){
+	if(entity->step == 0){
 		m1 = this->dyn.m[ARM_M1]; m2 = this->dyn.m[ARM_M2];
 		l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2];
 		lg1 = this->kine.lg[ARM_M1]; lg2 = this->kine.lg[ARM_M2];
@@ -179,12 +186,14 @@ int SIM::armDynPara()
 // 入力：var, sim(リンク長はsimに設定済み)
 // 出力：kine
 ////////////////////////////////////////////////////////
-int SIM::armJacob(Kinematics *kine, Variable *var)
+int cFinger::armJacob(Kinematics *kine, Variable *var)
 {
 	static double	l1, l2;
 	double	C1, C2, S1, S2, C12, S12;
+
+	auto entity = EntityManager::get();
 	// パラメータ設定
-	if (this->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
+	if (entity->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
 	// 三角関数
 	C1 = cos(var->q.el[0][0]); C2 = cos(var->q.el[1][0]); S1 = sin(var->q.el[0][0]); S2 = sin(var->q.el[1][0]);
 	C12 = cos(var->q.el[0][0] + var->q.el[1][0]); S12 = sin(var->q.el[0][0] + var->q.el[1][0]);
@@ -208,11 +217,12 @@ int SIM::armJacob(Kinematics *kine, Variable *var)
 // 入力：var, sim(リンク長はsimに設定済み)
 // 出力：kine
 ////////////////////////////////////////////////////////
-int SIM::armInvKine(Kinematics *kine, Variable *var)
+int cFinger::armInvKine(Kinematics *kine, Variable *var)
 {
 	static double	l1, l2;
+	auto entity = EntityManager::get();
 	// パラメータ設定
-	if (this->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
+	if (entity->step == 0) { l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2]; }
 	// 関節角
 #if 0
 	pos[0] = refPos->el[0][0] + initPos.el[0][0];
@@ -241,7 +251,7 @@ int SIM::armInvKine(Kinematics *kine, Variable *var)
 #endif
 	// 関節速度
 #if 1
-	auto _this = EntityManager::get();
+	auto _this = EntityManager::get()->getFinger();
 	_this->armJacob(kine, var);		// 後で順番を要検討
 #endif
 //	matMul(&var->dq, &kine->Jinv, &var->dr);		// dq = J^{-1}*dr
@@ -252,7 +262,7 @@ int SIM::armInvKine(Kinematics *kine, Variable *var)
 // 行列初期化
 // 初期化が不要な構造体にはNULLを代入
 ////////////////////////////////////////////////////////
-int SIM::armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp)
+int cFinger::armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp)
 {
 	if(var != NULL){
 		matInit(&var->q,ARM_JNT,1);	matInit(&var->dq,ARM_JNT,1); matInit(&var->ddq,ARM_JNT,1);
@@ -295,7 +305,7 @@ int SIM::armInitMatKine(Kinematics *kine)
 #endif
 
 // 塑性変形制御の振動周期計算（インピーダンス制御とは異なるので注意）
-int SIM::armCalcImpPeriod()
+int cFinger::armCalcImpPeriod()
 {
 	for (int crd = 0; crd<2; crd++){
 		if (this->imp.C.el[crd][crd] * this->imp.C.el[crd][crd] > this->imp.M.el[crd][crd] * this->imp.K.el[crd][crd] / 4){

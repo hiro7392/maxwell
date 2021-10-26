@@ -24,7 +24,7 @@ void RungeKutta(MatrixXd &X, MatrixXd A, MatrixXd U, double dt) {
 }
 
 // まだ途中
-int ctrlMaxwellInLoopE(SIM *sim, Matrix *tau)
+int ctrlMaxwellInLoopE(cFinger *sim, Matrix *tau)
 {
 	// Inner Loop
 	MatrixXd	X(4,1), U(4,1);		// dX = AX+U
@@ -91,7 +91,7 @@ int ctrlMaxwellInLoopE(SIM *sim, Matrix *tau)
 ////////////////////////////////////////////////////////
 // Maxwell制御則(Eigen)
 ////////////////////////////////////////////////////////
-int ctrlMaxwellE(SIM *sim, Matrix *tau)
+int ctrlMaxwellE(cFinger *sim, Matrix *tau)
 {
 	// 定義
 	static MatrixXd	Mq = MatrixXd::Zero(2,2);		// 
@@ -155,7 +155,7 @@ int ctrlMaxwellE(SIM *sim, Matrix *tau)
 // 目標値を Mddr = F-K(r-p), K(r-p) = Cdp から計算
 ////////////////////////////////////////////////////////
 // うまくいっていない．デバッグ中．pの目標値ならば計算可能だが，実際のpの値が取得できない（対応点がない）ので無理か？
-int ctrlMaxwellImplicit(SIM *sim, Matrix *tau)
+int ctrlMaxwellImplicit(cFinger *sim, Matrix *tau)
 {
 	int	jnt, crd;
 	static Matrix	Tmp21, Tmp22, Tmp21_2;
@@ -163,7 +163,8 @@ int ctrlMaxwellImplicit(SIM *sim, Matrix *tau)
 	static Matrix	Integ;
 	static Matrix	re, dre, rc, drc, ddr;	// 手先位置速度変位，目標位置速度変位
 	static Matrix	A, B, X, U, Xnext, dX;	// 状態空間
-	if (sim->step == 0) {
+	auto entity = EntityManager::get();
+	if (entity->step == 0) {
 		// 行列初期化
 		matInit(&Tmp21, 2, 1); matInit(&Tmp22, 2, 2); matInit(&Tmp21_2, 2, 1);
 		matInit(&tauNC, 2, 1); matInit(&tauVE, 2, 1); matInit(&tauIN, 2, 1); matInit(&tauPL, 2, 1); matInit(&E, 2, 2);

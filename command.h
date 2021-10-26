@@ -8,7 +8,9 @@
 int getChar(char *buf, const char *msg);
 int showHelp();
 int setTimer(double delay);
-int copyData(SIM *sim);
+//int copyData(SIM *sim);
+int copyData(cFinger* sim);
+
 int saveImage(int width, int height);
 int drawData();
 int saveGraph2(int trial_num);

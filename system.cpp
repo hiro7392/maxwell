@@ -52,7 +52,7 @@ int display_arm(int count)
 	myBox(ARM_BASE_X/2.0, ARM_BASE_Y/2.0, ARM_BASE_Z/2.0);
 	glTranslated(-ARM_BASE_X_OFFSET, 0.0, 0.0);
 	// }Œ`ˆÚ“®
-	glTranslated(_this->save_jnt_pos[count][ARM_M1], 0.0, 0.0);	// ‰¼‚É1Ž²
+	glTranslated(_this->getFinger()->save_jnt_pos[count][ARM_M1], 0.0, 0.0);	// ‰¼‚É1Ž²
 	// ƒA[ƒ€
 	glRotated(90.0, 0.0, 0.0, 1.0);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
@@ -82,7 +82,7 @@ int display_obj(int count)
 	glPushMatrix();
 	// “y‘ä
 //	glTranslated(_this->save_obj_pos[count], ARM_BASE_Y/2.0, 0.0);	// 1Ž²
-	glTranslated(_this->save_obj_pos[count][CRD_X], _this->save_obj_pos[count][CRD_Z], _this->save_obj_pos[count][CRD_Y]);	// 1Ž²
+	glTranslated(_this->getFinger()->save_obj_pos[count][CRD_X], _this->getFinger()->save_obj_pos[count][CRD_Z], _this->getFinger()->save_obj_pos[count][CRD_Y]);	// 1Ž²
 	glRotated(90.0, 1.0, 0.0, 0.0);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess); 

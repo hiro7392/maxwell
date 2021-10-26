@@ -7,18 +7,18 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////
-// •¶šæ“¾
+// æ–‡å­—å–å¾—
 ////////////////////////////////////////////////////////
 int getChar(char *buf, const char *msg)
 {
   fprintf(stdout,"%s",msg);
   fgets(buf, BUFSIZE, stdin);
-  buf[strlen(buf)-1] = '\0';      // •œ‰ü‚ğíœ
+  buf[strlen(buf)-1] = '\0';      // å¾©æ”¹ã‚’å‰Šé™¤
   return 0;
 }
 
 ////////////////////////////////////////////////////////
-// ƒwƒ‹ƒv•\¦
+// ãƒ˜ãƒ«ãƒ—è¡¨ç¤º
 ////////////////////////////////////////////////////////
 int showHelp()
 {
@@ -28,127 +28,130 @@ int showHelp()
 }
 
 ////////////////////////////////////////////////////////
-// ƒ^ƒCƒ}[
+// ã‚¿ã‚¤ãƒãƒ¼
 ////////////////////////////////////////////////////////
 int setTimer(double delay)
 {
   clock_t st;
   double time;
-  st = clock();		// ŠJn‚Ìæ“¾
+  st = clock();		// é–‹å§‹æ™‚åˆ»ã®å–å¾—
   do{time = (double)(clock()-st)/CLOCKS_PER_SEC;}while(time < delay);
   return 0;
 }
 
 ////////////////////////////////////////////////////////
-// ƒf[ƒ^ƒRƒs[(SIM\‘¢‘Ì‚©‚çƒf[ƒ^•Û‘¶ƒƒ‚ƒŠ‚ÖƒRƒs[)
+// ãƒ‡ãƒ¼ã‚¿ã‚³ãƒ”ãƒ¼(SIMæ§‹é€ ä½“ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ä¿å­˜ãƒ¡ãƒ¢ãƒªã¸ã‚³ãƒ”ãƒ¼)
 ////////////////////////////////////////////////////////
-int copyData(SIM *sim)
+int copyData(cFinger *sim)
 {
-	if(sim->step < DATA_CNT_NUM){
-		sim->save_state_contact[sim->step] = sim->state_contact;
-		sim->save_dist[sim->step] = sim->dist;
+	auto entity = EntityManager::get();
+	if(entity->step < DATA_CNT_NUM){
+		sim->save_state_contact[entity->step] = sim->state_contact;
+		sim->save_dist[entity->step] = sim->dist;
 		for(int jnt=0;jnt<ARM_JNT;jnt++){
-			sim->save_ref_jnt_pos[sim->step][jnt] = sim->ref_jnt_pos[jnt];
-			sim->save_ref_jnt_vel[sim->step][jnt] = sim->ref_jnt_vel[jnt];
-			sim->save_jnt_pos[sim->step][jnt] = sim->jnt_pos[jnt];
-			sim->save_jnt_vel[sim->step][jnt] = sim->jnt_vel[jnt];
-			sim->save_jnt_force[sim->step][jnt] = sim->jnt_force[jnt];
+			sim->save_ref_jnt_pos[entity->step][jnt] = sim->ref_jnt_pos[jnt];
+			sim->save_ref_jnt_vel[entity->step][jnt] = sim->ref_jnt_vel[jnt];
+			sim->save_jnt_pos[entity->step][jnt] = sim->jnt_pos[jnt];
+			sim->save_jnt_vel[entity->step][jnt] = sim->jnt_vel[jnt];
+			sim->save_jnt_force[entity->step][jnt] = sim->jnt_force[jnt];
 		}
 		for(int crd=0;crd<DIM3;crd++){
-			sim->save_ref_eff_pos[sim->step][crd] = sim->ref_eff_pos[crd];
-			sim->save_ref_eff_vel[sim->step][crd] = sim->ref_eff_vel[crd];
-			sim->save_eff_pos[sim->step][crd] = sim->eff_pos[crd];
-			sim->save_eff_vel[sim->step][crd] = sim->eff_vel[crd];
-			sim->save_eff_force[sim->step][crd] = sim->eff_force[crd];
-			sim->save_obj_pos[sim->step][crd] = sim->obj_pos[crd];
-			sim->save_obj_vel[sim->step][crd] = sim->obj_vel[crd];
+			sim->save_ref_eff_pos[entity->step][crd] = sim->ref_eff_pos[crd];
+			sim->save_ref_eff_vel[entity->step][crd] = sim->ref_eff_vel[crd];
+			sim->save_eff_pos[entity->step][crd] = sim->eff_pos[crd];
+			sim->save_eff_vel[entity->step][crd] = sim->eff_vel[crd];
+			sim->save_eff_force[entity->step][crd] = sim->eff_force[crd];
+			sim->save_obj_pos[entity->step][crd] = sim->obj_pos[crd];
+			sim->save_obj_vel[entity->step][crd] = sim->obj_vel[crd];
 		}
 	}
 	return 0;
 }
 
 ////////////////////////////////////////////////////////
-// ƒtƒ@ƒCƒ‹•Û‘¶
-// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“Œn—ñƒf[ƒ^
+// ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜
+// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³æ™‚ç³»åˆ—ãƒ‡ãƒ¼ã‚¿
 ////////////////////////////////////////////////////////
-void SIM::saveData(){
+void cFinger::saveData(){
 //	auto sim = EntityManager::init();
 	ofstream outdata;
-	// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“’â~‚Ü‚Å‚Ìƒf[ƒ^‚ğ•Û‘¶
-	int min = (step<=DATA_CNT_NUM) ? step : DATA_CNT_NUM;	// step‚©DATA_CNT_NUM‚Ì¬‚³‚¢’l‚ğmin‚É‘ã“ü
+	// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³åœæ­¢ã¾ã§ã®ãƒ‡ãƒ¼ã‚¿ã‚’ä¿å­˜
+	auto entity = EntityManager::get();
+	int min = (entity->step<=DATA_CNT_NUM) ? entity->step : DATA_CNT_NUM;	// stepã‹DATA_CNT_NUMã®å°ã•ã„å€¤ã‚’minã«ä»£å…¥
 	outdata.open(data_file_name);
 	for (int count = 0; count<min; count++){
-		outdata << count*SIM_CYCLE_TIME << " ";		// ŠÔ
-		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_jnt_pos[count][jnt] << " ";		// ŠÖßˆÊ’u
-		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_jnt_vel[count][jnt] << " ";		// ŠÖß‘¬“x
-		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_jnt_force[count][jnt] << " ";		// ŠÖß—Í
-		for(int crd=0;crd<DIM3;crd++)	outdata << save_eff_pos[count][crd] << " ";		// èæˆÊ’u
-		for(int crd=0;crd<DIM3;crd++)	outdata << save_eff_vel[count][crd] << " ";		// èæˆÊ’u
-		for(int crd=0;crd<DIM3;crd++)	outdata << save_eff_force[count][crd] << " ";		// èæŠO—Í
-		for(int crd=0;crd<DIM3;crd++)	outdata << save_obj_pos[count][crd] << " ";		// ‘ÎÛˆÊ’u
-		for(int crd=0;crd<DIM3;crd++)	outdata << save_obj_vel[count][crd] << " ";		// ‘ÎÛ‘¬“x
-		outdata << save_state_contact[count] << " ";		// ÚGó‘Ô
-		outdata << save_dist[count] << " ";		// ‹——£
+		outdata << count*SIM_CYCLE_TIME << " ";		// æ™‚é–“
+		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_jnt_pos[count][jnt] << " ";		// é–¢ç¯€ä½ç½®
+		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_jnt_vel[count][jnt] << " ";		// é–¢ç¯€é€Ÿåº¦
+		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_jnt_force[count][jnt] << " ";		// é–¢ç¯€åŠ›
+		for(int crd=0;crd<DIM3;crd++)	outdata << save_eff_pos[count][crd] << " ";		// æ‰‹å…ˆä½ç½®
+		for(int crd=0;crd<DIM3;crd++)	outdata << save_eff_vel[count][crd] << " ";		// æ‰‹å…ˆä½ç½®
+		for(int crd=0;crd<DIM3;crd++)	outdata << save_eff_force[count][crd] << " ";		// æ‰‹å…ˆå¤–åŠ›
+		for(int crd=0;crd<DIM3;crd++)	outdata << save_obj_pos[count][crd] << " ";		// å¯¾è±¡ä½ç½®
+		for(int crd=0;crd<DIM3;crd++)	outdata << save_obj_vel[count][crd] << " ";		// å¯¾è±¡é€Ÿåº¦
+		outdata << save_state_contact[count] << " ";		// æ¥è§¦çŠ¶æ…‹
+		outdata << save_dist[count] << " ";		// è·é›¢
 		outdata << endl;
 	}
 	outdata.close();
 	outdata.open(FILE_SAVE_DIR "data_ref.txt");
 	for (int count = 0; count<min; count++){
-		outdata << count*SIM_CYCLE_TIME << " ";		// ŠÔ
-		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_ref_jnt_pos[count][jnt] << " ";		// –Ú•WŠÖßˆÊ’u
-		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_ref_jnt_vel[count][jnt] << " ";		// –Ú•WŠÖß‘¬“x
+		outdata << count*SIM_CYCLE_TIME << " ";		// æ™‚é–“
+		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_ref_jnt_pos[count][jnt] << " ";		// ç›®æ¨™é–¢ç¯€ä½ç½®
+		for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << save_ref_jnt_vel[count][jnt] << " ";		// ç›®æ¨™é–¢ç¯€é€Ÿåº¦
 		outdata << endl;
 	}
 	outdata.close();
 	outdata.open(FILE_SAVE_DIR "displacement.txt");
 	for (int count = 0; count<min; count++){
-		outdata << count*SIM_CYCLE_TIME << " ";		// ŠÔ
-		for(int crd=0;crd<DIM2;crd++)	outdata << save_eff_pos[count][crd]-save_eff_pos[0][crd] << " ";		// èæ•ÏˆÊ
-		for(int crd=0;crd<DIM2;crd++)	outdata << save_eff_vel[count][crd] << " ";		// èæ•ÏˆÊ‘¬“x
-		for(int crd=0;crd<DIM2;crd++)	outdata << save_ref_eff_pos[count][crd] << " ";		// èæˆÊ’u–Ú•W’liƒCƒ“ƒi[ƒ‹[ƒvj
-		for(int crd=0;crd<DIM2;crd++)	outdata << save_ref_eff_vel[count][crd] << " ";		// èæ‘¬“x–Ú•W’liƒCƒ“ƒi[ƒ‹[ƒvj
+		outdata << count*SIM_CYCLE_TIME << " ";		// æ™‚é–“
+		for(int crd=0;crd<DIM2;crd++)	outdata << save_eff_pos[count][crd]-save_eff_pos[0][crd] << " ";		// æ‰‹å…ˆå¤‰ä½
+		for(int crd=0;crd<DIM2;crd++)	outdata << save_eff_vel[count][crd] << " ";		// æ‰‹å…ˆå¤‰ä½é€Ÿåº¦
+		for(int crd=0;crd<DIM2;crd++)	outdata << save_ref_eff_pos[count][crd] << " ";		// æ‰‹å…ˆä½ç½®ç›®æ¨™å€¤ï¼ˆã‚¤ãƒ³ãƒŠãƒ¼ãƒ«ãƒ¼ãƒ—ï¼‰
+		for(int crd=0;crd<DIM2;crd++)	outdata << save_ref_eff_vel[count][crd] << " ";		// æ‰‹å…ˆé€Ÿåº¦ç›®æ¨™å€¤ï¼ˆã‚¤ãƒ³ãƒŠãƒ¼ãƒ«ãƒ¼ãƒ—ï¼‰
 		outdata << endl;
 	}
 	outdata.close();
 }
 
 ////////////////////////////////////////////////////////
-// ƒtƒ@ƒCƒ‹•Û‘¶
-// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“î•ñ
+// ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜
+// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³æƒ…å ±
 ////////////////////////////////////////////////////////
-void variables::saveInfo()
+
+void cFinger::saveInfo()
 {
-#define print(VarName) outdata<<#VarName"="<<VarName<<endl		// o—Íæ‚ğofstream–¼‚Æ‚»‚ë‚¦‚é‚±‚Æ
+#define print(VarName) outdata<<#VarName"="<<VarName<<endl		// å‡ºåŠ›å…ˆã‚’ofstreamåã¨ãã‚ãˆã‚‹ã“ã¨
 	ofstream outdata(filename_info);
 	if (!outdata) { cout << "Can't open file: " << filename_info << endl; cin.get(); }
 	print(ARM_LINK1_LEN); print(ARM_LINK2_LEN);
 	print(ARM_LINK1_MASS); print(ARM_LINK2_MASS); print(ARM_JNT1_VISCOUS); print(ARM_JNT2_VISCOUS);
-//	for(int jnt=0;jnt<ARM_JNT;jnt++)	print(dyn.m[jnt]);		// •¶š—ñjnt‚ª“WŠJ‚³‚ê‚È‚¢
-	for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << "m[" << jnt << "] = " << dyn.m[jnt] << endl;		// ƒŠƒ“ƒN¿—Ê
-	for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << "V[" << jnt << "] = " << dyn.V[jnt] << endl;		// ŠÖß–€C
-	for(int crd=0;crd<DIM2;crd++)	outdata << "M[" << crd << "] = " << imp.M.el[crd][crd] << endl;		// Šµ«
-	for(int crd=0;crd<DIM2;crd++)	outdata << "C[" << crd << "] = " << imp.C.el[crd][crd] << endl;		// ”S«
-	for(int crd=0;crd<DIM2;crd++)	outdata << "K[" << crd << "] = " << imp.K.el[crd][crd] << endl;		// ’e«
-//	for(int crd=0;crd<DIM2;crd++)	outdata << "K0[" << crd << "] = " << imp.K0.el[crd][crd] << endl;		// ’e«(Zenerƒ‚ƒfƒ‹)
-	for(int crd=0;crd<DIM2;crd++)	outdata << "Gp[" << crd << "] = " << imp.Gp.el[crd][crd] << endl;		// ƒCƒ“ƒi[ƒ‹[ƒv”ä—áƒQƒCƒ“
-	for(int crd=0;crd<DIM2;crd++)	outdata << "Gv[" << crd << "] = " << imp.Gv.el[crd][crd] << endl;		// ƒCƒ“ƒi[ƒ‹[ƒv‘¬“xƒQƒCƒ“
-	for(int crd=0;crd<DIM3;crd++)	outdata << "T[" << crd << "] = " << imp.T[crd] << endl;		// U“®üŠú
+//	for(int jnt=0;jnt<ARM_JNT;jnt++)	print(dyn.m[jnt]);		// æ–‡å­—åˆ—jntãŒå±•é–‹ã•ã‚Œãªã„
+	for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << "m[" << jnt << "] = " << dyn.m[jnt] << endl;		// ãƒªãƒ³ã‚¯è³ªé‡
+	for(int jnt=0;jnt<ARM_JNT;jnt++)	outdata << "V[" << jnt << "] = " << dyn.V[jnt] << endl;		// é–¢ç¯€æ‘©æ“¦
+	for(int crd=0;crd<DIM2;crd++)	outdata << "M[" << crd << "] = " << imp.M.el[crd][crd] << endl;		// æ…£æ€§
+	for(int crd=0;crd<DIM2;crd++)	outdata << "C[" << crd << "] = " << imp.C.el[crd][crd] << endl;		// ç²˜æ€§
+	for(int crd=0;crd<DIM2;crd++)	outdata << "K[" << crd << "] = " << imp.K.el[crd][crd] << endl;		// å¼¾æ€§
+//	for(int crd=0;crd<DIM2;crd++)	outdata << "K0[" << crd << "] = " << imp.K0.el[crd][crd] << endl;		// å¼¾æ€§(Zenerãƒ¢ãƒ‡ãƒ«)
+	for(int crd=0;crd<DIM2;crd++)	outdata << "Gp[" << crd << "] = " << imp.Gp.el[crd][crd] << endl;		// ã‚¤ãƒ³ãƒŠãƒ¼ãƒ«ãƒ¼ãƒ—æ¯”ä¾‹ã‚²ã‚¤ãƒ³
+	for(int crd=0;crd<DIM2;crd++)	outdata << "Gv[" << crd << "] = " << imp.Gv.el[crd][crd] << endl;		// ã‚¤ãƒ³ãƒŠãƒ¼ãƒ«ãƒ¼ãƒ—é€Ÿåº¦ã‚²ã‚¤ãƒ³
+	for(int crd=0;crd<DIM3;crd++)	outdata << "T[" << crd << "] = " << imp.T[crd] << endl;		// æŒ¯å‹•å‘¨æœŸ
 	outdata.close();
 }
 
 ////////////////////////////////////////////////////////
-// ‰æ‘œ•Û‘¶
-// ƒtƒ@ƒCƒ‹–¼‚ğ˜A”Ô‚Å•Û‘¶(3Œ…000`999‚Ü‚Å‘Î‰)
+// ç”»åƒä¿å­˜
+// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’é€£ç•ªã§ä¿å­˜(3æ¡000ï½999ã¾ã§å¯¾å¿œ)
 ////////////////////////////////////////////////////////
 int saveImage(int width, int height)
 {
-	static string filename = FILE_SAVE_DIR "img/000.bmp";	// u000`999v‚Ì˜A”Ô‚Æ‚È‚éƒtƒ@ƒCƒ‹
-	static int pos = filename.find("000");		// 000‚Ìæ“ª‚ÌˆÊ’u‚ğæ“¾(ˆê”Ô‰‚ß‚Ì0‚ÌˆÊ’u)
-	_mkdir(FILE_SAVE_DIR "img");		// imgƒtƒHƒ‹ƒ_ì¬
-	writeBMP(filename.c_str(), width, height);	// BMPƒtƒ@ƒCƒ‹‚ğo—Í
-	// ƒtƒ@ƒCƒ‹–¼‚ğƒCƒ“ƒNƒŠƒƒ“ƒg
-	filename[pos+2]++;		// 0`9‚Ì•¶šƒR[ƒh‚ª1‚¸‚Âˆá‚¤‚±‚Æ‚ğ—˜—p
-	if (filename[pos+2] == '9' + 1) {		// Œ…ã‚°
+	static string filename = FILE_SAVE_DIR "img/000.bmp";	// ã€Œ000ï½999ã€ã®é€£ç•ªã¨ãªã‚‹ãƒ•ã‚¡ã‚¤ãƒ«
+	static int pos = filename.find("000");		// 000ã®å…ˆé ­ã®ä½ç½®ã‚’å–å¾—(ä¸€ç•ªåˆã‚ã®0ã®ä½ç½®)
+	_mkdir(FILE_SAVE_DIR "img");		// imgãƒ•ã‚©ãƒ«ãƒ€ä½œæˆ
+	writeBMP(filename.c_str(), width, height);	// BMPãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‡ºåŠ›
+	// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ã‚¤ãƒ³ã‚¯ãƒªãƒ¡ãƒ³ãƒˆ
+	filename[pos+2]++;		// 0ï½9ã®æ–‡å­—ã‚³ãƒ¼ãƒ‰ãŒ1ãšã¤é•ã†ã“ã¨ã‚’åˆ©ç”¨
+	if (filename[pos+2] == '9' + 1) {		// æ¡ä¸Šã’
 		filename[pos+2] = '0';	filename[pos+1]++;
 		if (filename[pos+1] == '9' + 1) { filename[pos+1] = '0'; filename[pos]++; }
 	}
@@ -156,95 +159,95 @@ int saveImage(int width, int height)
 }
 
 ////////////////////////////////////////////////////////
-// ƒOƒ‰ƒt•\¦ignuplotj
+// ã‚°ãƒ©ãƒ•è¡¨ç¤ºï¼ˆgnuplotï¼‰
 ////////////////////////////////////////////////////////
 #if 0
 int drawData()
 {
 	FILE *gp;
 	if((gp=_popen(GNUPLOT_PATH,"w"))==NULL){fprintf(stderr,"Can not find %s!",GNUPLOT_PATH);return -1;}
-	// gnuplot‚ÉƒRƒ}ƒ“ƒh‚ğ‘—‚é
+	// gnuplotã«ã‚³ãƒãƒ³ãƒ‰ã‚’é€ã‚‹
 	fprintf(gp, "pl \"%s\" us 1:2 w l, \"%s\" us 1:3 w l\n", DATA_FILE_NAME, DATA_FILE_NAME);
-	// ƒOƒ‰ƒt•Û‘¶
-	fprintf(gp, "set terminal png\n set out \"img_pos_vel.png\"\n rep\n");		// pngo—Í
-	// gnuplot‚ÉƒRƒ}ƒ“ƒh‚ğ‘—‚é
+	// ã‚°ãƒ©ãƒ•ä¿å­˜
+	fprintf(gp, "set terminal png\n set out \"img_pos_vel.png\"\n rep\n");		// pngå‡ºåŠ›
+	// gnuplotã«ã‚³ãƒãƒ³ãƒ‰ã‚’é€ã‚‹
 	fprintf(gp, "pl \"%s\" us 1:4 w l\n", DATA_FILE_NAME);
-	// ƒOƒ‰ƒt•Û‘¶
-	fprintf(gp, "set terminal png\n set out \"img_force.png\"\n rep\n");		// pngo—Í
+	// ã‚°ãƒ©ãƒ•ä¿å­˜
+	fprintf(gp, "set terminal png\n set out \"img_force.png\"\n rep\n");		// pngå‡ºåŠ›
 //	fprintf(gp, "rep \"%s\" us 1:12 w l\n", DATA_FILE_NAME);
 //	fprintf(gp, "rep \"%s\" us 1:21 w l\n", DATA_FILE_NAME);
 //	fprintf(gp, "rep \"%s\" us 1:29 w l\n", DATA_FILE_NAME);
 //	fprintf(gp, "rep \"%s\" us 1:22 w l, \"%s\" us 1:32 w l\n", DATA_FILE_NAME, DATA_FILE_NAME);
-//	fprintf(gp, "cd \"%s\" \n", "data");	// ƒf[ƒ^‚Ì‚ ‚éƒfƒBƒŒƒNƒgƒŠ‚ÖˆÚ“®
-//	fprintf(gp, "load \"%s\" \n", "jnt_pos.gp");	// gnuplotƒXƒNƒŠƒvƒgŒÄ‚Ño‚µ
-//	fprintf(gp, "load \"%s\" \n", "jnt_trq.gp");	// gnuplotƒXƒNƒŠƒvƒgŒÄ‚Ño‚µ
+//	fprintf(gp, "cd \"%s\" \n", "data");	// ãƒ‡ãƒ¼ã‚¿ã®ã‚ã‚‹ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¸ç§»å‹•
+//	fprintf(gp, "load \"%s\" \n", "jnt_pos.gp");	// gnuplotã‚¹ã‚¯ãƒªãƒ—ãƒˆå‘¼ã³å‡ºã—
+//	fprintf(gp, "load \"%s\" \n", "jnt_trq.gp");	// gnuplotã‚¹ã‚¯ãƒªãƒ—ãƒˆå‘¼ã³å‡ºã—
 //	fprintf(gp, "rep \"%s\" us 1:22 w l, \"%s\" us 1:32 w l\n", "biped_trq.dat", "biped_trq2.dat");
-	// ƒOƒ‰ƒt•Û‘¶
-//	fprintf(gp, "set terminal png\n set out \"img.png\"\n rep\n");		// pngo—Í
-//	fprintf(gp, "set terminal postscript eps\n set out \"img.eps\"\n rep\n");		// epso—Í
-	fflush(gp); // ƒoƒbƒtƒ@‚ÉŠi”[‚³‚ê‚Ä‚¢‚éƒf[ƒ^‚ğ“f‚«o‚·i•K{j
-	getchar(); // “ü—Í‘Ò‚¿
+	// ã‚°ãƒ©ãƒ•ä¿å­˜
+//	fprintf(gp, "set terminal png\n set out \"img.png\"\n rep\n");		// pngå‡ºåŠ›
+//	fprintf(gp, "set terminal postscript eps\n set out \"img.eps\"\n rep\n");		// epså‡ºåŠ›
+	fflush(gp); // ãƒãƒƒãƒ•ã‚¡ã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’åãå‡ºã™ï¼ˆå¿…é ˆï¼‰
+	getchar(); // å…¥åŠ›å¾…ã¡
 	_pclose(gp);
 	return 0;
 }
 #endif
 
 ////////////////////////////////////////////////////////
-// ƒOƒ‰ƒt•Û‘¶ignuplotj
+// ã‚°ãƒ©ãƒ•ä¿å­˜ï¼ˆgnuplotï¼‰
 ////////////////////////////////////////////////////////
-void SIM::saveGraph()
+void cFinger::saveGraph()
 {
 	FILE *gp;
 	if((gp=_popen(GNUPLOT_PATH,"w"))==NULL){fprintf(stderr,"Can not find %s!",GNUPLOT_PATH);}
-//	fflush(gp); // ƒoƒbƒtƒ@‚ÉŠi”[‚³‚ê‚Ä‚¢‚éƒf[ƒ^‚ğ“f‚«o‚·i•K{j// ‹N“®‚ª’x‚¢‚Æ‚«‚Í‚±‚ê‚ğ“ü‚ê‚é
+//	fflush(gp); // ãƒãƒƒãƒ•ã‚¡ã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’åãå‡ºã™ï¼ˆå¿…é ˆï¼‰// èµ·å‹•ãŒé…ã„ã¨ãã¯ã“ã‚Œã‚’å…¥ã‚Œã‚‹
 #if 0
-	fprintf(gp, "pl \"%s\" us 1:2 w l\n", data_file_name);	// ˆÊ’u‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH1);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:3 w l\n", data_file_name);	// ˆÊ’u‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_jnt_pos2.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:($2+$3) w l\n", data_file_name);	// ˆÊ’u‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_eff_pos.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:4 w l\n", data_file_name);	// ‘¬“x‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH2);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:5 w l\n", data_file_name);	// ‘¬“x‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_jnt_vel2.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:6 w l\n", data_file_name);		// ŠÖß—Í‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH3);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:7 w l\n", data_file_name);		// ŠÖß—Í‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_jnt_force2.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:8 w l\n", data_file_name);		// ŠO—Í‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH4);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:($2+$3-$9-0.75/2-0.0001-0.15) w l\n", data_file_name);		// èæ‚Æ•¨‘Ì‚Ì‹——£‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH5);		// pngo—Í
+	fprintf(gp, "pl \"%s\" us 1:2 w l\n", data_file_name);	// ä½ç½®ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH1);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:3 w l\n", data_file_name);	// ä½ç½®ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_jnt_pos2.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:($2+$3) w l\n", data_file_name);	// ä½ç½®ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_eff_pos.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:4 w l\n", data_file_name);	// é€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH2);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:5 w l\n", data_file_name);	// é€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_jnt_vel2.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:6 w l\n", data_file_name);		// é–¢ç¯€åŠ›ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH3);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:7 w l\n", data_file_name);		// é–¢ç¯€åŠ›ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "img_jnt_force2.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:8 w l\n", data_file_name);		// å¤–åŠ›ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH4);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:($2+$3-$9-0.75/2-0.0001-0.15) w l\n", data_file_name);		// æ‰‹å…ˆã¨ç‰©ä½“ã®è·é›¢ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH5);		// pngå‡ºåŠ›
 #else
-	fprintf(gp, "pl \"%s\" us 1:2 w l, \"%s\" us 1:3 w l, \"%s\" us 1:2 w l, \"%s\" us 1:3 w l\n", data_file_name, data_file_name, FILE_SAVE_DIR "data_ref.txt", FILE_SAVE_DIR "data_ref.txt");	// ŠÖßˆÊ’u‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH1);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:4 w l, \"%s\" us 1:5 w l\n", data_file_name, data_file_name);	// ŠÖß‘¬“x‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH2);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:6 w l, \"%s\" us 1:7 w l\n", data_file_name, data_file_name);		// ŠÖß—Í‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH3);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:8 w l, \"%s\" us 1:9 w l\n", data_file_name, data_file_name);		// èæˆÊ’u‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_eff_pos.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:11 w l, \"%s\" us 1:12 w l\n", data_file_name, data_file_name);		// èæ‘¬“x‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_eff_vel.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:14 w l, \"%s\" us 1:15 w l\n", data_file_name, data_file_name);		// èæŠO—Í‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH4);		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:17 w l, \"%s\" us 1:18 w l\n", data_file_name, data_file_name);		// ‘ÎÛˆÊ’u‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_obj_pos.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:20 w l, \"%s\" us 1:21 w l\n", data_file_name, data_file_name);		// ‘ÎÛ‘¬“x‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_obj_vel.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:23 w l\n", data_file_name);		// ÚGó‘Ô‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_state_contact.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:24 w l\n", data_file_name);		// ‹——£‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_dist.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:2 w l, \"%s\" us 1:3 w l, \"%s\" us 1:6 w l, \"%s\" us 1:7 w l\n", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt");		// èæ•ÏˆÊ‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_dev_eff.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 1:4 w l, \"%s\" us 1:5 w l, \"%s\" us 1:8 w l, \"%s\" us 1:9 w l\n", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt");		// èæ•ÏˆÊ‘¬“x‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_dev_eff_vel.png");		// pngo—Í
-	fprintf(gp, "pl \"%s\" us 2:3 w l, \"%s\" us 6:7 w l\n", "./data/displacement.txt", "./data/displacement.txt");		// èæ•ÏˆÊ‚ÌƒOƒ‰ƒt
-	fprintf(gp, "set size ratio -1\n set terminal png\n set out \"%s\"\n rep\n", "./data/img_dev_eff_xy.png");		// pngo—Í
+	fprintf(gp, "pl \"%s\" us 1:2 w l, \"%s\" us 1:3 w l, \"%s\" us 1:2 w l, \"%s\" us 1:3 w l\n", data_file_name, data_file_name, FILE_SAVE_DIR "data_ref.txt", FILE_SAVE_DIR "data_ref.txt");	// é–¢ç¯€ä½ç½®ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH1);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:4 w l, \"%s\" us 1:5 w l\n", data_file_name, data_file_name);	// é–¢ç¯€é€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH2);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:6 w l, \"%s\" us 1:7 w l\n", data_file_name, data_file_name);		// é–¢ç¯€åŠ›ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH3);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:8 w l, \"%s\" us 1:9 w l\n", data_file_name, data_file_name);		// æ‰‹å…ˆä½ç½®ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_eff_pos.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:11 w l, \"%s\" us 1:12 w l\n", data_file_name, data_file_name);		// æ‰‹å…ˆé€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_eff_vel.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:14 w l, \"%s\" us 1:15 w l\n", data_file_name, data_file_name);		// æ‰‹å…ˆå¤–åŠ›ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH4);		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:17 w l, \"%s\" us 1:18 w l\n", data_file_name, data_file_name);		// å¯¾è±¡ä½ç½®ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_obj_pos.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:20 w l, \"%s\" us 1:21 w l\n", data_file_name, data_file_name);		// å¯¾è±¡é€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_obj_vel.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:23 w l\n", data_file_name);		// æ¥è§¦çŠ¶æ…‹ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_state_contact.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:24 w l\n", data_file_name);		// è·é›¢ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_dist.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:2 w l, \"%s\" us 1:3 w l, \"%s\" us 1:6 w l, \"%s\" us 1:7 w l\n", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt");		// æ‰‹å…ˆå¤‰ä½ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_dev_eff.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 1:4 w l, \"%s\" us 1:5 w l, \"%s\" us 1:8 w l, \"%s\" us 1:9 w l\n", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt", "./data/displacement.txt");		// æ‰‹å…ˆå¤‰ä½é€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", "./data/img_dev_eff_vel.png");		// pngå‡ºåŠ›
+	fprintf(gp, "pl \"%s\" us 2:3 w l, \"%s\" us 6:7 w l\n", "./data/displacement.txt", "./data/displacement.txt");		// æ‰‹å…ˆå¤‰ä½ã®ã‚°ãƒ©ãƒ•
+	fprintf(gp, "set size ratio -1\n set terminal png\n set out \"%s\"\n rep\n", "./data/img_dev_eff_xy.png");		// pngå‡ºåŠ›
 #endif
-	fflush(gp); // ƒoƒbƒtƒ@‚ÉŠi”[‚³‚ê‚Ä‚¢‚éƒf[ƒ^‚ğ“f‚«o‚·i•K{j
+	fflush(gp); // ãƒãƒƒãƒ•ã‚¡ã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’åãå‡ºã™ï¼ˆå¿…é ˆï¼‰
 	_pclose(gp);
 }
 
@@ -256,36 +259,36 @@ int saveGraph2(int trial_num)
 
 	if((gp=_popen(GNUPLOT_PATH,"w"))==NULL){fprintf(stderr,"Can not find %s!",GNUPLOT_PATH);return -1;}
 	for(incount=0;incount<trial_num;incount++){
-		sprintf(filename, FILENAME_DATA, incount);		// ƒtƒ@ƒCƒ‹–¼‚ğ˜A”Ô‚Éİ’è
-		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:2 w l\n", filename);	// ˆÊ’u‚ÌƒOƒ‰ƒt
-		else	fprintf(gp, "rep \"%s\" us 1:2 w l\n", filename);	// ˆÊ’u‚ÌƒOƒ‰ƒt
+		sprintf(filename, FILENAME_DATA, incount);		// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’é€£ç•ªã«è¨­å®š
+		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:2 w l\n", filename);	// ä½ç½®ã®ã‚°ãƒ©ãƒ•
+		else	fprintf(gp, "rep \"%s\" us 1:2 w l\n", filename);	// ä½ç½®ã®ã‚°ãƒ©ãƒ•
 	}
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH1);		// pngo—Í
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH1);		// pngå‡ºåŠ›
 	for(incount=0;incount<trial_num;incount++){
-		sprintf(filename, FILENAME_DATA, incount);		// ƒtƒ@ƒCƒ‹–¼‚ğ˜A”Ô‚Éİ’è
-		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:3 w l\n", filename);	// ‘¬“x‚ÌƒOƒ‰ƒt
-		else	fprintf(gp, "rep \"%s\" us 1:3 w l\n", filename);	// ‘¬“x‚ÌƒOƒ‰ƒt
+		sprintf(filename, FILENAME_DATA, incount);		// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’é€£ç•ªã«è¨­å®š
+		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:3 w l\n", filename);	// é€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
+		else	fprintf(gp, "rep \"%s\" us 1:3 w l\n", filename);	// é€Ÿåº¦ã®ã‚°ãƒ©ãƒ•
 	}
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH2);		// pngo—Í
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH2);		// pngå‡ºåŠ›
 	for(incount=0;incount<trial_num;incount++){
-		sprintf(filename, FILENAME_DATA, incount);		// ƒtƒ@ƒCƒ‹–¼‚ğ˜A”Ô‚Éİ’è
-		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:4 w l\n", filename);		// ŠÖß—Í‚ÌƒOƒ‰ƒt
-		else	fprintf(gp, "rep \"%s\" us 1:4 w l\n", filename);		// ŠÖß—Í‚ÌƒOƒ‰ƒt
+		sprintf(filename, FILENAME_DATA, incount);		// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’é€£ç•ªã«è¨­å®š
+		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:4 w l\n", filename);		// é–¢ç¯€åŠ›ã®ã‚°ãƒ©ãƒ•
+		else	fprintf(gp, "rep \"%s\" us 1:4 w l\n", filename);		// é–¢ç¯€åŠ›ã®ã‚°ãƒ©ãƒ•
 	}
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH3);		// pngo—Í
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH3);		// pngå‡ºåŠ›
 	for(incount=0;incount<trial_num;incount++){
-		sprintf(filename, FILENAME_DATA, incount);		// ƒtƒ@ƒCƒ‹–¼‚ğ˜A”Ô‚Éİ’è
-		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:5 w l\n", filename);		// ŠO—Í‚ÌƒOƒ‰ƒt
-		else	fprintf(gp, "rep \"%s\" us 1:5 w l\n", filename);		// ŠO—Í‚ÌƒOƒ‰ƒt
+		sprintf(filename, FILENAME_DATA, incount);		// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’é€£ç•ªã«è¨­å®š
+		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:5 w l\n", filename);		// å¤–åŠ›ã®ã‚°ãƒ©ãƒ•
+		else	fprintf(gp, "rep \"%s\" us 1:5 w l\n", filename);		// å¤–åŠ›ã®ã‚°ãƒ©ãƒ•
 	}
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH4);		// pngo—Í
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH4);		// pngå‡ºåŠ›
 	for(incount=0;incount<trial_num;incount++){
-		sprintf(filename, FILENAME_DATA, incount);		// ƒtƒ@ƒCƒ‹–¼‚ğ˜A”Ô‚Éİ’è
-		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:($2-$6-0.75/2-0.0001-0.15) w l\n", filename);		// èæ‚Æ•¨‘Ì‚Ì‹——£‚ÌƒOƒ‰ƒt
-		else	fprintf(gp, "rep \"%s\" us 1:($2-$6-0.75/2-0.0001-0.15) w l\n", filename);		// èæ‚Æ•¨‘Ì‚Ì‹——£‚ÌƒOƒ‰ƒt
+		sprintf(filename, FILENAME_DATA, incount);		// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’é€£ç•ªã«è¨­å®š
+		if(incount == 0)	fprintf(gp, "pl \"%s\" us 1:($2-$6-0.75/2-0.0001-0.15) w l\n", filename);		// æ‰‹å…ˆã¨ç‰©ä½“ã®è·é›¢ã®ã‚°ãƒ©ãƒ•
+		else	fprintf(gp, "rep \"%s\" us 1:($2-$6-0.75/2-0.0001-0.15) w l\n", filename);		// æ‰‹å…ˆã¨ç‰©ä½“ã®è·é›¢ã®ã‚°ãƒ©ãƒ•
 	}
-	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH5);		// pngo—Í
-	fflush(gp); // ƒoƒbƒtƒ@‚ÉŠi”[‚³‚ê‚Ä‚¢‚éƒf[ƒ^‚ğ“f‚«o‚·i•K{j
+	fprintf(gp, "set terminal png\n set out \"%s\"\n rep\n", FILENAME_GRAPH5);		// pngå‡ºåŠ›
+	fflush(gp); // ãƒãƒƒãƒ•ã‚¡ã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’åãå‡ºã™ï¼ˆå¿…é ˆï¼‰
 	_pclose(gp);
 	return 0;
 }
