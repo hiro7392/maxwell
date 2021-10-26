@@ -102,11 +102,11 @@ void cFinger::addExtForce(){
 	}
 #else
 	//2000ステップまでは外力を加える
-	if(sim->step <= 1000){
+	if(sim->step <= 2000){
 
 		if (fingerID == 1) {
-			ext_force[CRD_X] = 0.0;
-			ext_force[CRD_Y] = 0.0;
+			ext_force[CRD_X] =2.0;
+			ext_force[CRD_Y] = 2.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
@@ -148,8 +148,17 @@ void cFinger::printInfo() {
 	for (int i = 0; i < ARM_JNT; i++)std::cout << "jnt_force  " << i << " : " << jnt_force[i] << std::endl;
 
 	for (int i = 0; i < ARM_JNT; i++)std::cout << "obj_pos  " << i << " : " << obj_pos[i] << std::endl;
+	
 	std::cout << "kine " << kine.J.el[0][0] << std::endl;
-	std::cout << "this kine " << this->kine.J.el[0][0] << std::endl;
+	matPrint(&kine.J);
+	matPrint(&kine.dJ);
+	matPrint(&kine.Jt);
+
+	std::cout << "var F " << std::endl;
+	matPrint(&var.F);
+	matPrint(&kine.dJ);
+	matPrint(&kine.Jt);
+
 	std::cout << std::endl;
 
 }

@@ -269,15 +269,15 @@ public:
 // 指
 class cFinger {
 
-	cPartsBox	base{ 14.0, Vec3(0.3, 0.5, 0.4)};
+	cPartsBox	base{ 14.0, Vec3(0.3, 0.3, 0.4)};
 
 	cPartsCylinder	link1{ ARM_LINK1_MASS, ARM_LINK1_LEN, ARM_LINK1_RAD };
 	cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 //	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	std::vector<cParts*> finger;
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
-	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
-	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
+	dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
+	dReal x1 = 0.0, y1 = -1.5, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
 
 	double Z_OFFSET = 0.08;
 	//double jnt_pos[ARM_JNT];
@@ -286,7 +286,7 @@ public:
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 
 	//{質量,初期位置(x,y,z),大きさ(x,y,z)}
-	cPartsBox	plate{ 10.0, Vec3(-1.2,-0.5, 0.0),Vec3(1.5,0.5,0.5) };
+	cPartsBox	plate{ 10.0, Vec3(-20,-20, 0.0),Vec3(1.5,0.5,0.5) };
 
 	dJointFeedback force, *p_force;
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
@@ -325,6 +325,14 @@ public:
 	Dynamics	dyn;
 	// インピーダンス変数
 	Impedance	imp;
+	//static Matrix	Tmp21(2, 1);
+	//static Matrix	Tmp22(2, 2), Tmp21_2(2, 1);
+	//static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
+	//static Matrix	Integ(2, 1);
+	//Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
+
+
+
 	// 保存用データ変数
 	int save_state_contact[DATA_CNT_NUM] = {};
 	double	save_dist[DATA_CNT_NUM] = {};
@@ -370,7 +378,17 @@ public:
 
 	//	cFinger(double* init_jnt_pos) : jnt_pos{init_jnt_pos[0], init_jnt_pos[1]} { finger[0] = &base; finger[1] = &link1; finger[2] = &link2; finger[3] = &sensor; }
 	//コンストラクタ
-	cFinger(double* init_jnt_pos) : jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, finger{&base, &link1, &link2, &sensor} {}
+	cFinger(double* init_jnt_pos) 
+		: jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, 
+		finger{&base, &link1, &link2, &sensor} {
+		this->kine = Kinematics();
+		this->dyn = Dynamics();
+		this->imp = Impedance();
+		this->var = Variable();
+		this->var_prev = Variable();
+		this->var_prev2 = Variable();
+		this->var_init = Variable();
+	}
 	~cFinger() {		// ジョイント破壊
 		dJointDestroy(f_joint);   // 土台固定
 		dJointDestroy(r_joint[ARM_M1]);   // アーム
@@ -397,7 +415,7 @@ public:
 		//finger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
 		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
 
-		/*for(int jnt=0;jnt<ARM_JNT;jnt++)init_jnt_pos[jnt] = init_jnt_posOrigin[jnt];
+	/*	for(int jnt=0;jnt<ARM_JNT;jnt++)init_jnt_pos[jnt] = init_jnt_posOrigin[jnt];
 		for(int crd=0;crd<DIM3;crd++){
 			init_obj_pos[crd] = init_obj_pos[crd];
 			for(int axis=0;axis<DIM3;axis++)init_obj_att[axis][crd] = init_obj_att[axis][crd];
@@ -424,6 +442,7 @@ public:
 
 	//kawaharaが追加
 	int calcDist();
+	int ctrlMaxwell2(Matrix* tau);
 	int ctrlMaxwell(Matrix* tau);
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
@@ -475,7 +494,9 @@ public:
 		dCloseODE();
 	}
 	void setEnv() {		// 環境設定
+		//dWorldSetGravity(this->world, 0, 0, -9.8);	// 重力設定
 		dWorldSetGravity(this->world, 0, 0, -9.8);	// 重力設定
+
 		dWorldSetERP(this->world, 0.9);          // ERPの設定
 		dWorldSetCFM(this->world, 1e-4);         // CFMの設定
 	}
@@ -503,7 +524,7 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 		//各関節の初期姿勢(角度)
 		double init_jnt_pos[2] = { 4 * PI / 4.0, PI/4.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0,0 };//二本目の指
+		double init_jnt_posF2[2] = { 4 * PI / 4.0,PI / 4.0 };//二本目の指
 
 
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
