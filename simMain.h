@@ -21,14 +21,16 @@
 #endif
 
 ////////////////////////////////////////////////////////
-// 行�E計算Eigen(マクロ定義はインクルードより前に忁E��E
-#define EIGEN_NO_DEBUG // コード�Eのassertを無効化！E
-#define EIGEN_DONT_VECTORIZE // SIMDを無効化！E
-#define EIGEN_DONT_PARALLELIZE // 並列を無効化！E
-#define EIGEN_MPL2_ONLY // LGPLライセンスのコードを使わなぁE��E
+
+// 行列計算Eigen(マクロ定義はインクルードより前に必要)
+#define EIGEN_NO_DEBUG // コード内のassertを無効化．
+#define EIGEN_DONT_VECTORIZE // SIMDを無効化．
+#define EIGEN_DONT_PARALLELIZE // 並列を無効化．
+#define EIGEN_MPL2_ONLY // LGPLライセンスのコードを使わない．
 //#include "eigen-3.3.7/Eigen/Core"
-//#include "eigen-3.3.7/Eigen/LU"		// 送E���EめE���E式�E計算に忁E��E
-//#include "c:/software/eigen-3.3.7/Eigen/Dense"		// 丁Eつの代わりにこれ1つでもOK
+//#include "eigen-3.3.7/Eigen/LU"		// 逆行列や行列式の計算に必要
+//#include "c:/software/eigen-3.3.7/Eigen/Dense"		// 上2つの代わりにこれ1つでもOK
+
 #include "c:/eigen-3.4.0/Eigen/Dense"
 ////////////////////////////////////////////////////////
 // バイナリフラグ
@@ -36,8 +38,10 @@
 ////////////////////////////////////////////////////////
 #define	GLAPHIC_OPENGL		0		// OpenGLで描画
 #define	FLAG_DRAW_SIM		1		// ODEの標準描画
-#define	FLAG_SAVE_IMAGE		0		// 画像保孁E
-#define	FLAG_SAVE_VIDEO		0		// 動画保孁EOpenCVが忁E��E
+
+#define	FLAG_SAVE_IMAGE		0		// 画像保存
+#define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
+
 
 ////////////////////////////////////////////////////////
 // define定義
@@ -48,50 +52,57 @@
 // 画面表示定義
 #define	DISPLAY_WIDTH	640
 #define	DISPLAY_HEIGHT	480
-// 次允E�E座標識別定義
+
+// 次元・座標識別定義
 #define DIM2	2
-#define	DIM3	3	// 3次允E�E位置めE��勢
+#define	DIM3	3	// 3次元の位置や姿勢
+
 #define	CRD_X	0
 #define	CRD_Y	1
 #define	CRD_Z	2
 #define	AXIS_X	0
 #define	AXIS_Y	1
 #define	AXIS_Z	2
-#define DIR_LONG_AXIS_Z	3	// 長軸方吁EdMassSetCylinderTotalなどに利用)
+
+#define DIR_LONG_AXIS_Z	3	// 長軸方向(dMassSetCylinderTotalなどに利用)
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	5000	// チE�Eタ保存カウント数
+#define DATA_CNT_NUM	5000	// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
-// 斁E���E定義
+// 文字列定義
 //#define GNUPLOT_PATH	"\"C:\\Program Files\\gnuplot\\bin\\pgnuplot.exe\""	// パスに空白があるため[\"]を前後に追加
 #define GNUPLOT_PATH	"\"C:\\Program Files (x86)\\gnuplot\\bin\\gnuplot.exe\""	// パスに空白があるため[\"]を前後に追加
 #define FILE_SAVE_DIR	"./data/"		// ファイル保存ディレクトリ
-#define FILENAME_DATA	FILE_SAVE_DIR "data_%.3d.txt"		// 連番3桁対忁E
-#define FILENAME_INFO	FILE_SAVE_DIR "info_%.3d.txt"		// 連番3桁対忁E
+#define FILENAME_DATA	FILE_SAVE_DIR "data_%.3d.txt"		// 連番3桁対応
+#define FILENAME_INFO	FILE_SAVE_DIR "info_%.3d.txt"		// 連番3桁対応
 #define FILENAME_GRAPH1	FILE_SAVE_DIR "img_jnt_pos.png"
 #define FILENAME_GRAPH2	FILE_SAVE_DIR "img_jnt_vel.png"
 #define FILENAME_GRAPH3	FILE_SAVE_DIR "img_jnt_force.png"
 #define FILENAME_GRAPH4	FILE_SAVE_DIR "img_eff_force.png"
 #define FILENAME_GRAPH5	FILE_SAVE_DIR "img_err.png"
 #define	DATA_FILE_NAME_MAXLEN	20
-#define FILENAME_VIDEO	FILE_SAVE_DIR "cap.mp4"		// ビデオ吁E
+
+#define FILENAME_VIDEO	FILE_SAVE_DIR "cap.mp4"		// ビデオ名
 
 // アーム定義
-// 2自由度アーム　吁E��ンクは冁E��で構�E
+// 2自由度アーム　各リンクは円柱で構成
+
 #if 0
 #define	ARM_JNT	2
 #define	ARM_M1	0
 #define	ARM_M2	1
 #define	ARM_LINK1_LEN	0.75		// リンク長
 #define	ARM_LINK2_LEN	0.75		// リンク長
-#define	ARM_LINK1_COG_LEN	(ARM_LINK1_LEN/2.0)		// 質量中忁E
-#define	ARM_LINK2_COG_LEN	(ARM_LINK2_LEN/2.0)		// 質量中忁E
-#define	ARM_LINK1_RAD	0.125		// リンク半征E
-#define	ARM_LINK2_RAD	0.10		// リンク半征E
-#define	ARM_LINK1_MASS	1.0		// 質釁E
-#define	ARM_LINK2_MASS	0.8		// 質釁E
+
+#define	ARM_LINK1_COG_LEN	(ARM_LINK1_LEN/2.0)		// 質量中心
+#define	ARM_LINK2_COG_LEN	(ARM_LINK2_LEN/2.0)		// 質量中心
+#define	ARM_LINK1_RAD	0.125		// リンク半径
+#define	ARM_LINK2_RAD	0.10		// リンク半径
+#define	ARM_LINK1_MASS	1.0		// 質量
+#define	ARM_LINK2_MASS	0.8		// 質量
+
 #define	ARM_JNT1_VISCOUS	1.0		// 粘性係数
 #define	ARM_JNT2_VISCOUS	1.0		// 粘性係数
 #elif 1
@@ -104,12 +115,14 @@ constexpr int	ARM_M1 = 0;	// アーム関節番号
 constexpr int	ARM_M2 = 1;	// アーム関節番号
 constexpr double	ARM_LINK1_LEN = 0.75;		// リンク長
 constexpr double	ARM_LINK2_LEN = 0.75;		// リンク長
-constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// 質量中忁E
-constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// 質量中忁E
-constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半征E
-constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半征E
-constexpr double	ARM_LINK1_MASS = 1.0;		// 質釁E
-constexpr double	ARM_LINK2_MASS = 0.8;		// 質釁E
+
+constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// 質量中心
+constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// 質量中心
+constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
+constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
+constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
+constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
+
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
 
@@ -118,22 +131,23 @@ constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
 ////////////////////////////////////////////////////////
 // 構造体定義
 ////////////////////////////////////////////////////////
-// 変数構造佁E
+
+// 変数構造体
 struct Variable {
-	Matrix	q, dq, ddq;	// 関節角度�E�関節速度�E�関節加速度
-	Matrix	r, dr, ddr;	// 手�E位置�E�手先速度�E�手先加速度
-	Matrix	F;	// 手�E外力
+	Matrix	q, dq, ddq;	// 関節角度，関節速度，関節加速度
+	Matrix	r, dr, ddr;	// 手先位置，手先速度，手先加速度
+	Matrix	F;	// 手先外力
 //	Matrix	dq;	// 関節速度
-//	Matrix	dr;	// 手�E速度
+//	Matrix	dr;	// 手先速度
 //	Matrix	ddq;	// 関節加速度
-//	Matrix	ddr;	// 手�E加速度
+//	Matrix	ddr;	// 手先加速度
 	/*
-	// 補足変数�E��E期値�E�E
-	Matrix	q0;	// 関節见E
-	Matrix	r0;	// 手�E位置
-	Matrix	F0;	// 手�E外力
+	// 補足変数（初期値）
+	Matrix	q0;	// 関節角
+	Matrix	r0;	// 手先位置
+	Matrix	F0;	// 手先外力
 	Matrix	dq0;	// 関節速度
-	Matrix	dr0;	// 手�E速度
+	Matrix	dr0;	// 手先速度
 	*/
 	Variable() {
 		matInit(&q, ARM_JNT, 1); matInit(&dq, ARM_JNT, 1); matInit(&ddq, ARM_JNT, 1);
@@ -142,14 +156,16 @@ struct Variable {
 	}
 };
 
-// 運動学構造佁E
+
+// 運動学構造体
 struct Kinematics {       //
 	double	l[ARM_JNT];		// リンク長
-	double	lg[ARM_JNT];		// リンク重忁E��置までの長ぁE
-	double	r[ARM_JNT];		// リンク半征E��太さ方向！E
+	double	lg[ARM_JNT];		// リンク重心位置までの長さ
+	double	r[ARM_JNT];		// リンク半径（太さ方向）
 	Matrix	J;	// ヤコビアン
-	Matrix	dJ;	// ヤコビアン微刁E
-	Matrix	Jt, Jinv;	// 転置行�E�E�送E���E
+	Matrix	dJ;	// ヤコビアン微分
+	Matrix	Jt, Jinv;	// 転置行列，逆行列
+
 	Kinematics(){
 		this->l[ARM_M1] = ARM_LINK1_LEN;	this->l[ARM_M2] = ARM_LINK2_LEN;
 		this->lg[ARM_M1] = ARM_LINK1_COG_LEN;	this->lg[ARM_M2] = ARM_LINK2_COG_LEN;
@@ -159,15 +175,17 @@ struct Kinematics {       //
 	}
 };
 
-// 動力学構造佁E
+
+// 動力学構造体
 // Mq*ddq + h + V*dq = tau + Jt*F
 struct Dynamics {       //
-	double	m[ARM_JNT];		// リンク質釁E
-	Matrix	Mq;		// 慣性頁E
-	Matrix	h;	// コリオリ・遠忁E��頁E
+	double	m[ARM_JNT];		// リンク質量
+	Matrix	Mq;		// 慣性項
+	Matrix	h;	// コリオリ・遠心力項
 	double	V[ARM_JNT];	// 粘性摩擦係数
 	// 補足変数
-	Matrix	dMq;		// 慣性頁E��刁E
+	Matrix	dMq;		// 慣性項微分
+
 	Dynamics() {
 		this->m[ARM_M1] = ARM_LINK1_MASS;	this->m[ARM_M2] = ARM_LINK2_MASS;
 		this->V[ARM_M1] = ARM_JNT1_VISCOUS;	this->V[ARM_M2] = ARM_JNT2_VISCOUS;
@@ -176,15 +194,17 @@ struct Dynamics {       //
 	}
 };
 
-// インピ�Eダンス構造佁E
+
+// インピーダンス構造体
 struct  Impedance {
-	Matrix	M, C, K;	// 目標インピ�Eダンス�E�手先座標！E
+	Matrix	M, C, K;	// 目標インピーダンス（手先座標）
 	Matrix	K0;	// SLS用
-	Matrix	Gp, Gv;	// インナ�Eループ用ゲイン�E�比例ゲイン�E�微刁E��イン�E�E
-	double	T[DIM3];	// 周朁E
+	Matrix	Gp, Gv;	// インナーループ用ゲイン（比例ゲイン，微分ゲイン）
+	double	T[DIM3];	// 周期
 	// 補足変数
-	Matrix	dM, dC, dK;	// 目標インピ�Eダンス微刁E��手先座標！E
-	Matrix	Minv, Cinv, Kinv;	// 送E���E
+	Matrix	dM, dC, dK;	// 目標インピーダンス微分（手先座標）
+	Matrix	Minv, Cinv, Kinv;	// 逆行列
+
 	Impedance() {
 		matInit(&M, DIM2, DIM2); matInit(&C, DIM2, DIM2); matInit(&K, DIM2, DIM2);
 		matInit(&Minv, DIM2, DIM2); matInit(&Cinv, DIM2, DIM2); matInit(&Kinv, DIM2, DIM2);
@@ -195,15 +215,17 @@ struct  Impedance {
 };
 
 ////////////////////////////////////////////////////////
-// プロトタイチE
+
+// プロトタイプ
 ////////////////////////////////////////////////////////
 struct Vec3 { double x, y, z; Vec3(double x, double y, double z) : x(x), y(y), z(z) {} };
 
-// パ�EチE��ラス
+// パーツクラス
 class cParts {
 protected:
-	dBodyID body;        // ボディ(剛佁EのID番号�E�動力学計算用�E�E
-	dGeomID geom;        // ジオメトリのID番号(衝突検�E計算用�E�E
+	dBodyID body;        // ボディ(剛体)のID番号（動力学計算用）
+	dGeomID geom;        // ジオメトリのID番号(衝突検出計算用）
+
 	dReal  m;       // 質量[kg]
 	dMass mass;
 	std::vector<float> color{1,1,1};
@@ -269,7 +291,7 @@ public:
 // 指
 class cFinger {
 
-	cPartsBox	base{ 14.0, Vec3(0.3, 0.3, 0.4)};
+	cPartsBox	base{ 14.0, Vec3(0.3, 0.5, 0.4)};
 
 	cPartsCylinder	link1{ ARM_LINK1_MASS, ARM_LINK1_LEN, ARM_LINK1_RAD };
 	cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
@@ -284,19 +306,20 @@ class cFinger {
 	//double jnt_pos[ARM_JNT];
 public:
 	
-	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと寁E��をそろえめE
 
+	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 
 	//{質量,初期位置(x,y,z),大きさ(x,y,z)}
-	cPartsBox	plate{ 10.0, Vec3(-20,-20, 0.0),Vec3(1.5,0.5,0.5) };
+	cPartsBox	plate{ 10.0, Vec3(-1.2,-0.5, 0.0),Vec3(1.5,0.5,0.5) };
 
 	dJointFeedback force, *p_force;
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
-	dJointID graspObj; 							  //把持対象のプレーチEkawahara
+	dJointID graspObj; 							  //把持対象のプレート kawahara
 
-	// 持E�E制御用変数
+	// 指の制御用変数
 	int fingerID;
-	int state_contact;			// 接触状慁E0:OFF, 1:ON)
+	int state_contact;			// 接触状態(0:OFF, 1:ON)
+
 	double	dist;				// アームと対象の距離
 	double	jnt_pos[ARM_JNT] = {};
 	double	jnt_vel[ARM_JNT] = {};
@@ -315,18 +338,26 @@ public:
 	// 初期変数
 	double	init_jnt_pos[ARM_JNT] = {};
 	double	init_obj_pos[DIM3] = {};
-	double	init_obj_att[DIM3][DIM3] = {};	// 絶対座標における対象座標軸の姿勢�E�軸は正規直交基底！E
-	// 変数構造佁E
+
+	double	init_obj_att[DIM3][DIM3] = {};	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
+	// 変数構造体
 	Variable	var;			// 現在値
-	Variable	var_prev;		// 過去値�E�Eサイクル前！E
-	Variable	var_prev2;		// 過去値�E�Eサイクル前！E
+	Variable	var_prev;		// 過去値（1サイクル前）
+	Variable	var_prev2;		// 過去値（2サイクル前）
+
 	Variable	var_init;		// 初期値
 	// 運動学変数
 	Kinematics	kine;
 	// 動力学変数
 	Dynamics	dyn;
+
 	// インピ�Eダンス変数
 	Impedance	imp;
+
+
+	// インピーダンス変数
+	Impedance	imp;
+	// 保存用データ変数
 
 	int save_state_contact[DATA_CNT_NUM] = {};
 	double	save_dist[DATA_CNT_NUM] = {};
@@ -355,7 +386,8 @@ public:
 	int armJacob(Kinematics* kine, Variable* var);
 	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
 	
-	//kawaharaの変更以前からコメントアウチE
+
+	//kawaharaの変更以前からコメントアウト
 	////	int armInitMatVar(Variable *var);
 	////	int armInitMatKine(Kinematics *kine);
 
@@ -367,12 +399,11 @@ public:
 
 	//debug用　kawaharaが追加
 	void printInfo();
+
 	////Finger classの中に移勁E
 	//int ctrlMaxwell(Matrix* tau);
 
-	//	cFinger(double* init_jnt_pos) : jnt_pos{init_jnt_pos[0], init_jnt_pos[1]} { finger[0] = &base; finger[1] = &link1; finger[2] = &link2; finger[3] = &sensor; }
-
-	//�R���X�g���N�^
+	
 	cFinger(double* init_jnt_pos) 
 		: jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, 
 		finger{&base, &link1, &link2, &sensor} {
@@ -384,11 +415,12 @@ public:
 		this->var_prev2 = Variable();
 		this->var_init = Variable();
 	}
-	~cFinger() {		// �W���C���g�j��
-		dJointDestroy(f_joint);   // �y��Œ�
-		dJointDestroy(r_joint[ARM_M1]);   // �A�[��
-		dJointDestroy(r_joint[ARM_M2]);   // �A�[��
-		dJointDestroy(f2_joint);   // �Z���T�Œ�
+~cFinger() {		// ジョイント破壊
+		dJointDestroy(f_joint);   // 土台固定
+		dJointDestroy(r_joint[ARM_M1]);   // アーム
+		dJointDestroy(r_joint[ARM_M2]);   // アーム
+		dJointDestroy(f2_joint);   // センサ固定
+
 	}
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
@@ -405,12 +437,13 @@ public:
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 	}
-	//kawaharaが追加　二本目の持E��
+
+	//kawaharaが追加　二本目の指用
 	void setPosition2() {
 		//finger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
 		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
 
-	/*	for(int jnt=0;jnt<ARM_JNT;jnt++)init_jnt_pos[jnt] = init_jnt_posOrigin[jnt];
+		/*for(int jnt=0;jnt<ARM_JNT;jnt++)init_jnt_pos[jnt] = init_jnt_posOrigin[jnt];
 		for(int crd=0;crd<DIM3;crd++){
 			init_obj_pos[crd] = init_obj_pos[crd];
 			for(int axis=0;axis<DIM3;axis++)init_obj_att[axis][crd] = init_obj_att[axis][crd];
@@ -429,17 +462,15 @@ public:
 		auto i = color.begin();
 		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) 	(*j)->setColor((*i).x, (*i).y, (*i).z);
 	}
-	void setJoint();	// 関節設宁E
-	void setJoint2();	// 関節設宁E2本目の持E
-	void setJntFric();	// 摩擦設宁E
+
+	void setJoint();	// 関節設定
+	void setJoint2();	// 関節設定 2本目の指
+	void setJntFric();	// 摩擦設定
 	void addExtForce();		// 外力
 
 	void addExtForce2();	// 外力
-
-
 	//kawaharaが追加
 	int calcDist();
-	int ctrlMaxwell2(Matrix* tau);
 	int ctrlMaxwell(Matrix* tau);
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
@@ -453,14 +484,16 @@ class DrawStuff {
 	static dsFunctions fn;	// 描画変数
 	// 視点変数
 	static float xyz[3];
-	static float hpr[3];	// 単位�Edeg
+
+	static float hpr[3];	// 単位はdeg
 public:
-	DrawStuff()	{	// 描画関数の設宁E
-		fn.version = DS_VERSION;    // ドロースタチE��のバ�Eジョン
-		fn.start = &start;			// 前�E琁Estart関数のポインタ
+	DrawStuff()	{	// 描画関数の設定
+		fn.version = DS_VERSION;    // ドロースタッフのバージョン
+		fn.start = &start;			// 前処理 start関数のポインタ
 		fn.step = &simLoop;			// simLoop関数のポインタ
 		fn.command = &command;      // キー入力関数へのポインタ
-		fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH; // チE��スチャ
+		fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH; // テクスチャ
+
 	}
 	static void start();
 	static void simLoop(int pause);
@@ -473,30 +506,33 @@ public:
 ////////////////////////////////////////////////////////
 class ODE {
 	// ODE
-	dWorldID world;  // 動力学計算用ワールチE
-	dSpaceID space;  // 衝突検�E用スペ�Eス
+
+	dWorldID world;  // 動力学計算用ワールド
+	dSpaceID space;  // 衝突検出用スペース
 public:
 	dGeomID  ground; // 地面
-	dJointGroupID contactgroup; // コンタクトグルーチE
-	ODE() {		// チE��ォルトコンストラクタ
+	dJointGroupID contactgroup; // コンタクトグループ
+	ODE() {		// デフォルトコンストラクタ
+
 		dInitODE();
 		this->world = dWorldCreate();
 		this->space = dHashSpaceCreate(0);
 		this->contactgroup = dJointGroupCreate(0);
 	}
-	~ODE() {		// チE��トラクタ
-		dJointGroupDestroy(this->contactgroup);     // ジョイントグループ�E破壁E
+
+	~ODE() {		// デストラクタ
+		dJointGroupDestroy(this->contactgroup);     // ジョイントグループの破壊
+
 		dSpaceDestroy(this->space);
 		dWorldDestroy(this->world);
 		dCloseODE();
 	}
 
-	void setEnv() {		// ���ݒ�
-		//dWorldSetGravity(this->world, 0, 0, -9.8);	// �d�͐ݒ�
-		dWorldSetGravity(this->world, 0, 0, -9.8);	// �d�͐ݒ�
+	void setEnv() {		// 環境設定
+		dWorldSetGravity(this->world, 0, 0, -9.8);	// 重力設定
+		dWorldSetERP(this->world, 0.9);          // ERPの設定
+		dWorldSetCFM(this->world, 1e-4);         // CFMの設定
 
-		dWorldSetERP(this->world, 0.9);          // ERP�̐ݒ�
-		dWorldSetCFM(this->world, 1e-4);         // CFM�̐ݒ�
 	}
 	auto getWorld() const -> decltype(world) { return this->world; }
 	auto getSpace() const -> decltype(space) { return this->space; }
@@ -510,7 +546,9 @@ class EntityODE : public ODE {
 	std::shared_ptr<cFinger> pFinger;
 	//std::shared_ptr<cFinger> pFinger;
 
-	std::shared_ptr<cFinger> pFinger2;	//二本目の持E��kawahara
+
+	std::shared_ptr<cFinger> pFinger2;	//二本目の指　kawahara
+
 
 	std::shared_ptr<cPartsCylinder> pObj;
 
@@ -521,19 +559,18 @@ public:
 	void setup() {
 		constexpr auto OBJ_RADIUS = 0.10;
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
-		//吁E��節の初期姿勢(角度)
+		//各関節の初期姿勢(角度)
 
 		double init_jnt_pos[2] = { 4 * PI / 4.0, PI/4.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0,PI / 4.0 };//��{�ڂ̎w
-
-
+		double init_jnt_posF2[2] = { 4 * PI / 4.0,PI / 4.0  };//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
-		//1本目の持E
+
+		//1本目の指
 		this->pFinger = std::make_shared<cFinger>(init_jnt_pos);
 		this->pFinger->fingerID = ++FingerNum;
 
-		//2本目の持E
+		//2本目の指
 		this->pFinger2 = std::make_shared<cFinger>(init_jnt_posF2);	
 		this->pFinger2->fingerID = ++FingerNum;
 
@@ -544,21 +581,23 @@ public:
 		std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5, 0.5), Vec3(0, 0.5, 0.5) };
 		
 		this->pFinger->setColor(color);
-		this->pFinger2->setColor(color);	//二本目の持E��kawaharaが追加
+
+		this->pFinger2->setColor(color);	//二本目の指　kawaharaが追加
 
 
 	}
-	void createRobot();		// ロボット生成（�EチE��・ジオメトリ・ジョイント！E
-	void createObject();	// 対象生�E�E��EチE��・ジオメトリ�E�E
-	void destroyRobot() {	// ロボット破壊（ジョイント�Eボディ・ジオメトリ�E�E
-		pFinger.reset();	// インスタンスの破壁E
+	void createRobot();		// ロボット生成（ボディ・ジオメトリ・ジョイント）
+	void createObject();	// 対象生成（ボディ・ジオメトリ）
+	void destroyRobot() {	// ロボット破壊（ジョイント・ボディ・ジオメトリ）
+		pFinger.reset();	// インスタンスの破壊
 		pFinger2.reset();
 		//this->pFinger->destroy();
 	}
-	void destroyObject() {	pObj.reset(); } // インスタンスの破壁E// 対象破壊（�EチE��・ジオメトリ�E�E
-	void update() {		// シミュレーションを１スチE��プ進衁E
-		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// 衝突判宁E
-		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1スチE��プ進める
+	void destroyObject() {	pObj.reset(); } // インスタンスの破壊	// 対象破壊（ボディ・ジオメトリ）
+	void update() {		// シミュレーションを１ステップ進行
+		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// 衝突判定
+		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ステップ進める
+
 		dJointGroupEmpty(this->contactgroup); // ジョイントグループを空にする
 	}
 	auto getFinger() { return pFinger; }
@@ -571,19 +610,19 @@ public:
 };
 
 ////////////////////////////////////////////////////////
-// シミュレーション構造佁E
+
+// シミュレーション構造体
+
 ////////////////////////////////////////////////////////
 class SIM: public EntityODE {
 
 public:
-
-//	
-	int	step;					//経過スチE��プ数
-
-//	// 1本目の持E��
+	int	step;					//経過ステップ数
+//	// 1本目の指用
 //	// 制御用変数
-//	int	step;					//経過スチE��プ数
-//	int state_contact;			// 接触状慁E0:OFF, 1:ON)
+//	int	step;					//経過ステップ数
+//	int state_contact;			// 接触状態(0:OFF, 1:ON)
+
 //	double	dist;				// アームと対象の距離
 
 //	double	jnt_pos[ARM_JNT];
@@ -603,21 +642,23 @@ public:
 //	// 初期変数
 //	double	init_jnt_pos[ARM_JNT];
 //	double	init_obj_pos[DIM3];
-//	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢�E�軸は正規直交基底！E
-//	// 変数構造佁E
+
+//	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
+//	// 変数構造体
 
 //	Variable	var;			// 現在値
 
-//	Variable	var_prev;		// 過去値�E�Eサイクル前！E
-//	Variable	var_prev2;		// 過去値�E�Eサイクル前！E
+//	Variable	var_prev;		// 過去値（1サイクル前）
+//	Variable	var_prev2;		// 過去値（2サイクル前）
 //	Variable	var_init;		// 初期値
 //	// 運動学変数
 //	Kinematics	kine;
 //	// 動力学変数
 //	Dynamics	dyn;
-//	// インピ�Eダンス変数
+//	// インピーダンス変数
 //	Impedance	imp;
-//	// 保存用チE�Eタ変数
+//	// 保存用データ変数
+
 //	int save_state_contact[DATA_CNT_NUM];
 //	double	save_dist[DATA_CNT_NUM];
 //	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
@@ -661,7 +702,8 @@ public:
 
 
 
-// 単一インスタンス管琁E
+
+// 単一インスタンス管理
 template<typename WorldT>
 struct Manager{
 	static std::unique_ptr<WorldT> pWorldInstance;
@@ -677,7 +719,8 @@ template<typename WorldT> std::unique_ptr<WorldT> Manager<WorldT>::pWorldInstanc
 using EntityManager = Manager<SIM>;
 
 ////////////////////////////////////////////////////////
-// プロトタイチE
+
+// プロトタイプ
 ////////////////////////////////////////////////////////
 static void restart();
 int exeCmd(int argc, char *argv[]);
