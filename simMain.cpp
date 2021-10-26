@@ -29,7 +29,7 @@
 #endif
 
 #define finger2_use 1
-#define print_debug 0
+#define print_debug 1
 
 // クラス静的メンバの初期化
 dsFunctions DrawStuff::fn;
@@ -60,8 +60,8 @@ void cFinger::control() {
 	auto entity = EntityManager::get();
 
 	Matrix	tau;
-	// 初期化
 
+	// 初期化
 	if (entity->step == 0) {
 		matInit(&tau, 2, 1);
 		// 初期化
@@ -97,9 +97,10 @@ void cFinger::control() {
 
 
 #if 1
-	if(fingerID==1)ctrlMaxwell(&tau);
+	if(fingerID==1)RestrictedCtrlMaxwell(&tau);
 	else {
-		ctrlMaxwell2(&tau);
+		//ctrlMaxwell2(&tau);
+		RestrictedCtrlMaxwell(&tau);
 	}
 	
 
@@ -356,13 +357,13 @@ int main(int argc, char** argv)
 
 
 ////////////////////////////////////////////////////////
+	// 描画設定
 // main関数
 ////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
 	auto sim = EntityManager::init();
 #if FLAG_DRAW_SIM
-	// 描画設定
 //	setDrawStuff();		//ドロースタッフ
 #endif
 	// 環境設定
@@ -481,9 +482,9 @@ void cFinger::setJoint2() {
 	auto sim = EntityManager::get();
 
 	//把持する板を設置(位置は可変)
-	/*graspObj = dJointCreateHinge(sim->getWorld(), 0);
+	graspObj = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(graspObj, plate.getBody(), 0);
-	dJointSetHingeAnchor(graspObj,-1.2,-0.5,0.0);*/
+	dJointSetHingeAnchor(graspObj,-5,-5,0.0);
 
 
 	// 固定ジョイント
@@ -521,10 +522,7 @@ void cFinger::setJoint2() {
 ////////////////////////////////////////////////////////
 void DrawStuff::simLoop(int pause)
 {
-	
 	auto _this = EntityManager::get()->getFinger();
-	//_this->printInfo();
-
 #if finger2_use
 	//二本目の指用　kawahara
 	auto _this2 = EntityManager::get()->getFinger2();//kawahara二本目の指
@@ -588,7 +586,7 @@ void DrawStuff::simLoop(int pause)
 		// 距離計算
 		_this->calcDist();
 #if finger2_use
-		//_this2->calcDist();
+		_this2->calcDist();
 #endif
 
 		// 外力設定
@@ -627,7 +625,7 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 		_this2->state_contact = 0;
 #endif	
-		_this->printInfo();
+		
 		// シミュレーションを１ステップ進行
 		entity->update();
 		sim->step++;
@@ -653,8 +651,8 @@ void DrawStuff::simLoop(int pause)
 	//	drawObject(); // 衝突対象の描画
 	_this->getObj()->draw();
 #elif SIM_ADD_EXT_FORCE
-	//drawExtForce();		// 外力の描画
-	//drawExtForce2();	// 外力の描画
+	drawExtForce();		// 外力の描画
+	drawExtForce2();	// 外力の描画
 
 #endif
 #endif
