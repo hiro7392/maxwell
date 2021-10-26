@@ -1,4 +1,4 @@
-#ifndef _INC_SIMMAIN
+ï»¿#ifndef _INC_SIMMAIN
 #define _INC_SIMMAIN
 
 #include <vector>
@@ -21,119 +21,119 @@
 #endif
 
 ////////////////////////////////////////////////////////
-// s—ñŒvZEigen(ƒ}ƒNƒ’è‹`‚ÍƒCƒ“ƒNƒ‹[ƒh‚æ‚è‘O‚É•K—v)
-#define EIGEN_NO_DEBUG // ƒR[ƒh“à‚Ìassert‚ğ–³Œø‰»D
-#define EIGEN_DONT_VECTORIZE // SIMD‚ğ–³Œø‰»D
-#define EIGEN_DONT_PARALLELIZE // •À—ñ‚ğ–³Œø‰»D
-#define EIGEN_MPL2_ONLY // LGPLƒ‰ƒCƒZƒ“ƒX‚ÌƒR[ƒh‚ğg‚í‚È‚¢D
+// è¡Œï¿½Eè¨ˆç®—Eigen(ãƒã‚¯ãƒ­å®šç¾©ã¯ã‚¤ãƒ³ã‚¯ãƒ«ãƒ¼ãƒ‰ã‚ˆã‚Šå‰ã«å¿Eï¿½ï¿½E
+#define EIGEN_NO_DEBUG // ã‚³ãƒ¼ãƒ‰ï¿½Eã®assertã‚’ç„¡åŠ¹åŒ–ï¼E
+#define EIGEN_DONT_VECTORIZE // SIMDã‚’ç„¡åŠ¹åŒ–ï¼E
+#define EIGEN_DONT_PARALLELIZE // ä¸¦åˆ—ã‚’ç„¡åŠ¹åŒ–ï¼E
+#define EIGEN_MPL2_ONLY // LGPLãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã®ã‚³ãƒ¼ãƒ‰ã‚’ä½¿ã‚ãªãEï¿½ï¿½E
 //#include "eigen-3.3.7/Eigen/Core"
-//#include "eigen-3.3.7/Eigen/LU"		// ‹ts—ñ‚âs—ñ®‚ÌŒvZ‚É•K—v
-//#include "c:/software/eigen-3.3.7/Eigen/Dense"		// ã2‚Â‚Ì‘ã‚í‚è‚É‚±‚ê1‚Â‚Å‚àOK
+//#include "eigen-3.3.7/Eigen/LU"		// é€Eï¿½ï¿½ï¿½Eã‚Eï¿½ï¿½ï¿½Eå¼ï¿½Eè¨ˆç®—ã«å¿Eï¿½ï¿½E
+//#include "c:/software/eigen-3.3.7/Eigen/Dense"		// ä¸Eã¤ã®ä»£ã‚ã‚Šã«ã“ã‚Œ1ã¤ã§ã‚‚OK
 #include "c:/eigen-3.4.0/Eigen/Dense"
 ////////////////////////////////////////////////////////
-// ƒoƒCƒiƒŠƒtƒ‰ƒO
-// ON(1)‚ÆOFF(0)‚Ì‚İİ’è‰Â”\
+// ãƒã‚¤ãƒŠãƒªãƒ•ãƒ©ã‚°
+// ON(1)ã¨OFF(0)ã®ã¿è¨­å®šå¯èƒ½
 ////////////////////////////////////////////////////////
-#define	GLAPHIC_OPENGL		0		// OpenGL‚Å•`‰æ
-#define	FLAG_DRAW_SIM		1		// ODE‚Ì•W€•`‰æ
-#define	FLAG_SAVE_IMAGE		0		// ‰æ‘œ•Û‘¶
-#define	FLAG_SAVE_VIDEO		0		// “®‰æ•Û‘¶(OpenCV‚ª•K—v)
+#define	GLAPHIC_OPENGL		0		// OpenGLã§æç”»
+#define	FLAG_DRAW_SIM		1		// ODEã®æ¨™æº–æç”»
+#define	FLAG_SAVE_IMAGE		0		// ç”»åƒä¿å­E
+#define	FLAG_SAVE_VIDEO		0		// å‹•ç”»ä¿å­EOpenCVãŒå¿Eï¿½ï¿½E
 
 ////////////////////////////////////////////////////////
-// define’è‹`
+// defineå®šç¾©
 ////////////////////////////////////////////////////////
 #ifndef PI
 #define PI (3.14159265358979323846)
 #endif
-// ‰æ–Ê•\¦’è‹`
+// ç”»é¢è¡¨ç¤ºå®šç¾©
 #define	DISPLAY_WIDTH	640
 #define	DISPLAY_HEIGHT	480
-// ŸŒ³EÀ•W¯•Ê’è‹`
+// æ¬¡å…Eï¿½Eåº§æ¨™è­˜åˆ¥å®šç¾©
 #define DIM2	2
-#define	DIM3	3	// 3ŸŒ³‚ÌˆÊ’u‚âp¨
+#define	DIM3	3	// 3æ¬¡å…Eï¿½Eä½ç½®ã‚Eï¿½ï¿½å‹¢
 #define	CRD_X	0
 #define	CRD_Y	1
 #define	CRD_Z	2
 #define	AXIS_X	0
 #define	AXIS_Y	1
 #define	AXIS_Z	2
-#define DIR_LONG_AXIS_Z	3	// ’·²•ûŒü(dMassSetCylinderTotal‚È‚Ç‚É—˜—p)
-// ’è”’è‹`
-#define SYSTEM_CYCLE_TIME	(0.001)	// ÀŒ±—pƒTƒCƒNƒ‹ƒ^ƒCƒ€
-#define SIM_CYCLE_TIME	(0.001)	// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“—pƒTƒCƒNƒ‹ƒ^ƒCƒ€
-#define DATA_CNT_NUM	5000	// ƒf[ƒ^•Û‘¶ƒJƒEƒ“ƒg”
-#define SAVE_IMG_RATE	200		// ‰æ‘œ•Û‘¶ŠÔŠuƒJƒEƒ“ƒg”
-#define SAVE_VIDEO_RATE	33		// “®‰æ•Û‘¶ŠÔŠuƒJƒEƒ“ƒg”
-// •¶š—ñ’è‹`
-//#define GNUPLOT_PATH	"\"C:\\Program Files\\gnuplot\\bin\\pgnuplot.exe\""	// ƒpƒX‚É‹ó”’‚ª‚ ‚é‚½‚ß[\"]‚ğ‘OŒã‚É’Ç‰Á
-#define GNUPLOT_PATH	"\"C:\\Program Files (x86)\\gnuplot\\bin\\gnuplot.exe\""	// ƒpƒX‚É‹ó”’‚ª‚ ‚é‚½‚ß[\"]‚ğ‘OŒã‚É’Ç‰Á
-#define FILE_SAVE_DIR	"./data/"		// ƒtƒ@ƒCƒ‹•Û‘¶ƒfƒBƒŒƒNƒgƒŠ
-#define FILENAME_DATA	FILE_SAVE_DIR "data_%.3d.txt"		// ˜A”Ô3Œ…‘Î‰
-#define FILENAME_INFO	FILE_SAVE_DIR "info_%.3d.txt"		// ˜A”Ô3Œ…‘Î‰
+#define DIR_LONG_AXIS_Z	3	// é•·è»¸æ–¹åEdMassSetCylinderTotalãªã©ã«åˆ©ç”¨)
+// å®šæ•°å®šç¾©
+#define SYSTEM_CYCLE_TIME	(0.001)	// å®Ÿé¨“ç”¨ã‚µã‚¤ã‚¯ãƒ«ã‚¿ã‚¤ãƒ 
+#define SIM_CYCLE_TIME	(0.001)	// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã‚µã‚¤ã‚¯ãƒ«ã‚¿ã‚¤ãƒ 
+#define DATA_CNT_NUM	5000	// ãƒEï¿½Eã‚¿ä¿å­˜ã‚«ã‚¦ãƒ³ãƒˆæ•°
+#define SAVE_IMG_RATE	200		// ç”»åƒä¿å­˜é–“éš”ã‚«ã‚¦ãƒ³ãƒˆæ•°
+#define SAVE_VIDEO_RATE	33		// å‹•ç”»ä¿å­˜é–“éš”ã‚«ã‚¦ãƒ³ãƒˆæ•°
+// æ–Eï¿½ï¿½ï¿½Eå®šç¾©
+//#define GNUPLOT_PATH	"\"C:\\Program Files\\gnuplot\\bin\\pgnuplot.exe\""	// ãƒ‘ã‚¹ã«ç©ºç™½ãŒã‚ã‚‹ãŸã‚[\"]ã‚’å‰å¾Œã«è¿½åŠ 
+#define GNUPLOT_PATH	"\"C:\\Program Files (x86)\\gnuplot\\bin\\gnuplot.exe\""	// ãƒ‘ã‚¹ã«ç©ºç™½ãŒã‚ã‚‹ãŸã‚[\"]ã‚’å‰å¾Œã«è¿½åŠ 
+#define FILE_SAVE_DIR	"./data/"		// ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª
+#define FILENAME_DATA	FILE_SAVE_DIR "data_%.3d.txt"		// é€£ç•ª3æ¡å¯¾å¿E
+#define FILENAME_INFO	FILE_SAVE_DIR "info_%.3d.txt"		// é€£ç•ª3æ¡å¯¾å¿E
 #define FILENAME_GRAPH1	FILE_SAVE_DIR "img_jnt_pos.png"
 #define FILENAME_GRAPH2	FILE_SAVE_DIR "img_jnt_vel.png"
 #define FILENAME_GRAPH3	FILE_SAVE_DIR "img_jnt_force.png"
 #define FILENAME_GRAPH4	FILE_SAVE_DIR "img_eff_force.png"
 #define FILENAME_GRAPH5	FILE_SAVE_DIR "img_err.png"
 #define	DATA_FILE_NAME_MAXLEN	20
-#define FILENAME_VIDEO	FILE_SAVE_DIR "cap.mp4"		// ƒrƒfƒI–¼
+#define FILENAME_VIDEO	FILE_SAVE_DIR "cap.mp4"		// ãƒ“ãƒ‡ã‚ªåE
 
-// ƒA[ƒ€’è‹`
-// 2©—R“xƒA[ƒ€@ŠeƒŠƒ“ƒN‚Í‰~’Œ‚Å\¬
+// ã‚¢ãƒ¼ãƒ å®šç¾©
+// 2è‡ªç”±åº¦ã‚¢ãƒ¼ãƒ ã€€åEï¿½ï¿½ãƒ³ã‚¯ã¯å†Eï¿½ï¿½ã§æ§‹ï¿½E
 #if 0
 #define	ARM_JNT	2
 #define	ARM_M1	0
 #define	ARM_M2	1
-#define	ARM_LINK1_LEN	0.75		// ƒŠƒ“ƒN’·
-#define	ARM_LINK2_LEN	0.75		// ƒŠƒ“ƒN’·
-#define	ARM_LINK1_COG_LEN	(ARM_LINK1_LEN/2.0)		// ¿—Ê’†S
-#define	ARM_LINK2_COG_LEN	(ARM_LINK2_LEN/2.0)		// ¿—Ê’†S
-#define	ARM_LINK1_RAD	0.125		// ƒŠƒ“ƒN”¼Œa
-#define	ARM_LINK2_RAD	0.10		// ƒŠƒ“ƒN”¼Œa
-#define	ARM_LINK1_MASS	1.0		// ¿—Ê
-#define	ARM_LINK2_MASS	0.8		// ¿—Ê
-#define	ARM_JNT1_VISCOUS	1.0		// ”S«ŒW”
-#define	ARM_JNT2_VISCOUS	1.0		// ”S«ŒW”
+#define	ARM_LINK1_LEN	0.75		// ãƒªãƒ³ã‚¯é•·
+#define	ARM_LINK2_LEN	0.75		// ãƒªãƒ³ã‚¯é•·
+#define	ARM_LINK1_COG_LEN	(ARM_LINK1_LEN/2.0)		// è³ªé‡ä¸­å¿E
+#define	ARM_LINK2_COG_LEN	(ARM_LINK2_LEN/2.0)		// è³ªé‡ä¸­å¿E
+#define	ARM_LINK1_RAD	0.125		// ãƒªãƒ³ã‚¯åŠå¾E
+#define	ARM_LINK2_RAD	0.10		// ãƒªãƒ³ã‚¯åŠå¾E
+#define	ARM_LINK1_MASS	1.0		// è³ªé‡E
+#define	ARM_LINK2_MASS	0.8		// è³ªé‡E
+#define	ARM_JNT1_VISCOUS	1.0		// ç²˜æ€§ä¿‚æ•°
+#define	ARM_JNT2_VISCOUS	1.0		// ç²˜æ€§ä¿‚æ•°
 #elif 1
-constexpr int	ARM_NUM = 2;	// ƒA[ƒ€–{”
-constexpr int	ARM_N1 = 0;	// ƒA[ƒ€”Ô†
-constexpr int	ARM_N2 = 1;	// ƒA[ƒ€”Ô†
+constexpr int	ARM_NUM = 2;	// ã‚¢ãƒ¼ãƒ æœ¬æ•°
+constexpr int	ARM_N1 = 0;	// ã‚¢ãƒ¼ãƒ ç•ªå·
+constexpr int	ARM_N2 = 1;	// ã‚¢ãƒ¼ãƒ ç•ªå·
 
-constexpr int	ARM_JNT = 2;	// ƒA[ƒ€ŠÖß”
-constexpr int	ARM_M1 = 0;	// ƒA[ƒ€ŠÖß”Ô†
-constexpr int	ARM_M2 = 1;	// ƒA[ƒ€ŠÖß”Ô†
-constexpr double	ARM_LINK1_LEN = 0.75;		// ƒŠƒ“ƒN’·
-constexpr double	ARM_LINK2_LEN = 0.75;		// ƒŠƒ“ƒN’·
-constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// ¿—Ê’†S
-constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// ¿—Ê’†S
-constexpr double	ARM_LINK1_RAD = 0.125;		// ƒŠƒ“ƒN”¼Œa
-constexpr double	ARM_LINK2_RAD = 0.10;		// ƒŠƒ“ƒN”¼Œa
-constexpr double	ARM_LINK1_MASS = 1.0;		// ¿—Ê
-constexpr double	ARM_LINK2_MASS = 0.8;		// ¿—Ê
-constexpr double	ARM_JNT1_VISCOUS = 1.0;		// ”S«ŒW”
-constexpr double	ARM_JNT2_VISCOUS = 1.0;		// ”S«ŒW”
+constexpr int	ARM_JNT = 2;	// ã‚¢ãƒ¼ãƒ é–¢ç¯€æ•°
+constexpr int	ARM_M1 = 0;	// ã‚¢ãƒ¼ãƒ é–¢ç¯€ç•ªå·
+constexpr int	ARM_M2 = 1;	// ã‚¢ãƒ¼ãƒ é–¢ç¯€ç•ªå·
+constexpr double	ARM_LINK1_LEN = 0.75;		// ãƒªãƒ³ã‚¯é•·
+constexpr double	ARM_LINK2_LEN = 0.75;		// ãƒªãƒ³ã‚¯é•·
+constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// è³ªé‡ä¸­å¿E
+constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// è³ªé‡ä¸­å¿E
+constexpr double	ARM_LINK1_RAD = 0.125;		// ãƒªãƒ³ã‚¯åŠå¾E
+constexpr double	ARM_LINK2_RAD = 0.10;		// ãƒªãƒ³ã‚¯åŠå¾E
+constexpr double	ARM_LINK1_MASS = 1.0;		// è³ªé‡E
+constexpr double	ARM_LINK2_MASS = 0.8;		// è³ªé‡E
+constexpr double	ARM_JNT1_VISCOUS = 1.0;		// ç²˜æ€§ä¿‚æ•°
+constexpr double	ARM_JNT2_VISCOUS = 1.0;		// ç²˜æ€§ä¿‚æ•°
 
 #endif
 
 ////////////////////////////////////////////////////////
-// \‘¢‘Ì’è‹`
+// æ§‹é€ ä½“å®šç¾©
 ////////////////////////////////////////////////////////
-// •Ï”\‘¢‘Ì
+// å¤‰æ•°æ§‹é€ ä½E
 struct Variable {
-	Matrix	q, dq, ddq;	// ŠÖßŠp“xCŠÖß‘¬“xCŠÖß‰Á‘¬“x
-	Matrix	r, dr, ddr;	// èæˆÊ’uCèæ‘¬“xCèæ‰Á‘¬“x
-	Matrix	F;	// èæŠO—Í
-//	Matrix	dq;	// ŠÖß‘¬“x
-//	Matrix	dr;	// èæ‘¬“x
-//	Matrix	ddq;	// ŠÖß‰Á‘¬“x
-//	Matrix	ddr;	// èæ‰Á‘¬“x
+	Matrix	q, dq, ddq;	// é–¢ç¯€è§’åº¦ï¿½Eï¿½é–¢ç¯€é€Ÿåº¦ï¿½Eï¿½é–¢ç¯€åŠ é€Ÿåº¦
+	Matrix	r, dr, ddr;	// æ‰‹ï¿½Eä½ç½®ï¿½Eï¿½æ‰‹å…ˆé€Ÿåº¦ï¿½Eï¿½æ‰‹å…ˆåŠ é€Ÿåº¦
+	Matrix	F;	// æ‰‹ï¿½Eå¤–åŠ›
+//	Matrix	dq;	// é–¢ç¯€é€Ÿåº¦
+//	Matrix	dr;	// æ‰‹ï¿½Eé€Ÿåº¦
+//	Matrix	ddq;	// é–¢ç¯€åŠ é€Ÿåº¦
+//	Matrix	ddr;	// æ‰‹ï¿½EåŠ é€Ÿåº¦
 	/*
-	// •â‘«•Ï”i‰Šú’lj
-	Matrix	q0;	// ŠÖßŠp
-	Matrix	r0;	// èæˆÊ’u
-	Matrix	F0;	// èæŠO—Í
-	Matrix	dq0;	// ŠÖß‘¬“x
-	Matrix	dr0;	// èæ‘¬“x
+	// è£œè¶³å¤‰æ•°ï¿½Eï¿½ï¿½EæœŸå€¤ï¿½Eï¿½E
+	Matrix	q0;	// é–¢ç¯€è§E
+	Matrix	r0;	// æ‰‹ï¿½Eä½ç½®
+	Matrix	F0;	// æ‰‹ï¿½Eå¤–åŠ›
+	Matrix	dq0;	// é–¢ç¯€é€Ÿåº¦
+	Matrix	dr0;	// æ‰‹ï¿½Eé€Ÿåº¦
 	*/
 	Variable() {
 		matInit(&q, ARM_JNT, 1); matInit(&dq, ARM_JNT, 1); matInit(&ddq, ARM_JNT, 1);
@@ -142,14 +142,14 @@ struct Variable {
 	}
 };
 
-// ‰^“®Šw\‘¢‘Ì
+// é‹å‹•å­¦æ§‹é€ ä½E
 struct Kinematics {       //
-	double	l[ARM_JNT];		// ƒŠƒ“ƒN’·
-	double	lg[ARM_JNT];		// ƒŠƒ“ƒNdSˆÊ’u‚Ü‚Å‚Ì’·‚³
-	double	r[ARM_JNT];		// ƒŠƒ“ƒN”¼Œai‘¾‚³•ûŒüj
-	Matrix	J;	// ƒ„ƒRƒrƒAƒ“
-	Matrix	dJ;	// ƒ„ƒRƒrƒAƒ“”÷•ª
-	Matrix	Jt, Jinv;	// “]’us—ñC‹ts—ñ
+	double	l[ARM_JNT];		// ãƒªãƒ³ã‚¯é•·
+	double	lg[ARM_JNT];		// ãƒªãƒ³ã‚¯é‡å¿Eï¿½ï¿½ç½®ã¾ã§ã®é•·ãE
+	double	r[ARM_JNT];		// ãƒªãƒ³ã‚¯åŠå¾Eï¿½ï¿½å¤ªã•æ–¹å‘ï¼E
+	Matrix	J;	// ãƒ¤ã‚³ãƒ“ã‚¢ãƒ³
+	Matrix	dJ;	// ãƒ¤ã‚³ãƒ“ã‚¢ãƒ³å¾®åˆE
+	Matrix	Jt, Jinv;	// è»¢ç½®è¡Œï¿½Eï¿½Eï¿½é€Eï¿½ï¿½ï¿½E
 	Kinematics(){
 		this->l[ARM_M1] = ARM_LINK1_LEN;	this->l[ARM_M2] = ARM_LINK2_LEN;
 		this->lg[ARM_M1] = ARM_LINK1_COG_LEN;	this->lg[ARM_M2] = ARM_LINK2_COG_LEN;
@@ -159,15 +159,15 @@ struct Kinematics {       //
 	}
 };
 
-// “®—ÍŠw\‘¢‘Ì
+// å‹•åŠ›å­¦æ§‹é€ ä½E
 // Mq*ddq + h + V*dq = tau + Jt*F
 struct Dynamics {       //
-	double	m[ARM_JNT];		// ƒŠƒ“ƒN¿—Ê
-	Matrix	Mq;		// Šµ«€
-	Matrix	h;	// ƒRƒŠƒIƒŠE‰“S—Í€
-	double	V[ARM_JNT];	// ”S«–€CŒW”
-	// •â‘«•Ï”
-	Matrix	dMq;		// Šµ«€”÷•ª
+	double	m[ARM_JNT];		// ãƒªãƒ³ã‚¯è³ªé‡E
+	Matrix	Mq;		// æ…£æ€§é E
+	Matrix	h;	// ã‚³ãƒªã‚ªãƒªãƒ»é å¿Eï¿½ï¿½é E
+	double	V[ARM_JNT];	// ç²˜æ€§æ‘©æ“¦ä¿‚æ•°
+	// è£œè¶³å¤‰æ•°
+	Matrix	dMq;		// æ…£æ€§é Eï¿½ï¿½åˆE
 	Dynamics() {
 		this->m[ARM_M1] = ARM_LINK1_MASS;	this->m[ARM_M2] = ARM_LINK2_MASS;
 		this->V[ARM_M1] = ARM_JNT1_VISCOUS;	this->V[ARM_M2] = ARM_JNT2_VISCOUS;
@@ -176,15 +176,15 @@ struct Dynamics {       //
 	}
 };
 
-// ƒCƒ“ƒs[ƒ_ƒ“ƒX\‘¢‘Ì
+// ã‚¤ãƒ³ãƒ”ï¿½Eãƒ€ãƒ³ã‚¹æ§‹é€ ä½E
 struct  Impedance {
-	Matrix	M, C, K;	// –Ú•WƒCƒ“ƒs[ƒ_ƒ“ƒXièæÀ•Wj
-	Matrix	K0;	// SLS—p
-	Matrix	Gp, Gv;	// ƒCƒ“ƒi[ƒ‹[ƒv—pƒQƒCƒ“i”ä—áƒQƒCƒ“C”÷•ªƒQƒCƒ“j
-	double	T[DIM3];	// üŠú
-	// •â‘«•Ï”
-	Matrix	dM, dC, dK;	// –Ú•WƒCƒ“ƒs[ƒ_ƒ“ƒX”÷•ªièæÀ•Wj
-	Matrix	Minv, Cinv, Kinv;	// ‹ts—ñ
+	Matrix	M, C, K;	// ç›®æ¨™ã‚¤ãƒ³ãƒ”ï¿½Eãƒ€ãƒ³ã‚¹ï¿½Eï¿½æ‰‹å…ˆåº§æ¨™ï¼E
+	Matrix	K0;	// SLSç”¨
+	Matrix	Gp, Gv;	// ã‚¤ãƒ³ãƒŠï¿½Eãƒ«ãƒ¼ãƒ—ç”¨ã‚²ã‚¤ãƒ³ï¿½Eï¿½æ¯”ä¾‹ã‚²ã‚¤ãƒ³ï¿½Eï¿½å¾®åˆEï¿½ï¿½ã‚¤ãƒ³ï¿½Eï¿½E
+	double	T[DIM3];	// å‘¨æœE
+	// è£œè¶³å¤‰æ•°
+	Matrix	dM, dC, dK;	// ç›®æ¨™ã‚¤ãƒ³ãƒ”ï¿½Eãƒ€ãƒ³ã‚¹å¾®åˆEï¿½ï¿½æ‰‹å…ˆåº§æ¨™ï¼E
+	Matrix	Minv, Cinv, Kinv;	// é€Eï¿½ï¿½ï¿½E
 	Impedance() {
 		matInit(&M, DIM2, DIM2); matInit(&C, DIM2, DIM2); matInit(&K, DIM2, DIM2);
 		matInit(&Minv, DIM2, DIM2); matInit(&Cinv, DIM2, DIM2); matInit(&Kinv, DIM2, DIM2);
@@ -195,16 +195,16 @@ struct  Impedance {
 };
 
 ////////////////////////////////////////////////////////
-// ƒvƒƒgƒ^ƒCƒv
+// ãƒ—ãƒ­ãƒˆã‚¿ã‚¤ãƒE
 ////////////////////////////////////////////////////////
 struct Vec3 { double x, y, z; Vec3(double x, double y, double z) : x(x), y(y), z(z) {} };
 
-// ƒp[ƒcƒNƒ‰ƒX
+// ãƒ‘ï¿½EãƒEï¿½ï¿½ãƒ©ã‚¹
 class cParts {
 protected:
-	dBodyID body;        // ƒ{ƒfƒB(„‘Ì)‚ÌID”Ô†i“®—ÍŠwŒvZ—pj
-	dGeomID geom;        // ƒWƒIƒƒgƒŠ‚ÌID”Ô†(Õ“ËŒŸoŒvZ—pj
-	dReal  m;       // ¿—Ê[kg]
+	dBodyID body;        // ãƒœãƒ‡ã‚£(å‰›ä½Eã®IDç•ªå·ï¿½Eï¿½å‹•åŠ›å­¦è¨ˆç®—ç”¨ï¿½Eï¿½E
+	dGeomID geom;        // ã‚¸ã‚ªãƒ¡ãƒˆãƒªã®IDç•ªå·(è¡çªæ¤œï¿½Eè¨ˆç®—ç”¨ï¿½Eï¿½E
+	dReal  m;       // è³ªé‡[kg]
 	dMass mass;
 	std::vector<float> color{1,1,1};
 public:
@@ -213,51 +213,51 @@ public:
 	~cParts() { dBodyDestroy(this->body); dGeomDestroy(this->geom);	std::cout << "destroy" << std::endl; }
 	dBodyID getBody() { return this->body; }
 	dGeomID getGeom() { return this->geom; }
-	// ˆÊ’u‚ğİ’è
+	// ä½ç½®ã‚’è¨­å®š
 	void setPosition(double x, double y, double z) { dBodySetPosition(getBody(), x, y, z); }
-	// ˆÊ’u‚ğæ“¾
+	// ä½ç½®ã‚’å–å¾—
 	auto getPosition() { return dBodyGetPosition(getBody()); }
-	// ‰ñ“]‚ğİ’è
+	// å›è»¢ã‚’è¨­å®š
 	void setRotation(double ang) {
 		dMatrix3	R;
 		dRFromAxisAndAngle(R, -sin(ang), cos(ang), 0, PI / 2);
 		dBodySetRotation(getBody(), R);
 	}
 	void setColor(float r, float g, float b) { color[0] = r; color[1] = g; color[2] = b; }
-	// ‰ñ“]‚ğæ“¾
+	// å›è»¢ã‚’å–å¾—
 	//	Quaternion getRotation() const;
-	// ƒTƒCƒY‚ğæ“¾
+	// ã‚µã‚¤ã‚ºã‚’å–å¾—
 	//	Vec3 getSize() const { return this->size; }
 	void destroy() { dBodyDestroy(getBody()); dGeomDestroy(getGeom()); }
-	// ‰¼‘zŠÖ”
-	virtual dReal getl() { return 0; }	// æ‚è‚ ‚¦‚¸return‚Å0‚ğ•Ô‚µ‚Ä‚¢‚é
-	virtual dReal getr() { return 0; }	// æ‚è‚ ‚¦‚¸return‚Å0‚ğ•Ô‚µ‚Ä‚¢‚é
+	// ä»®æƒ³é–¢æ•°
+	virtual dReal getl() { return 0; }	// å–ã‚Šã‚ãˆãšreturnã§0ã‚’è¿”ã—ã¦ã„ã‚‹
+	virtual dReal getr() { return 0; }	// å–ã‚Šã‚ãˆãšreturnã§0ã‚’è¿”ã—ã¦ã„ã‚‹
 	virtual void draw() {}
 };
 
-// ƒIƒuƒWƒFƒNƒg
+// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 class cPartsBox : public cParts {
-	dReal	sides[DIM3];	// ’¼•û‘Ìx,y,z‚Ì•Ó’·
+	dReal	sides[DIM3];	// ç›´æ–¹ä½“x,y,zã®è¾ºé•·
 public:
 	cPartsBox(dReal m, Vec3 l);
 	cPartsBox(dReal m, Vec3 init_pos, Vec3 l);
-	~cPartsBox() {}		// ƒfƒXƒgƒ‰ƒNƒ^
-	// •`‰æ
+	~cPartsBox() {}		// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	// æç”»
 	auto get() { return this->sides; }
-	// •`‰æ
-	void draw() {		// ŠÂ‹«İ’è
+	// æç”»
+	void draw() {		// ç’°å¢ƒè¨­å®š
 		dsSetColor(color[0], color[1], color[2]);
 		dsDrawBox(dBodyGetPosition(getBody()), dBodyGetRotation(getBody()), this->sides);
 	}
 };
 
-// ƒIƒuƒWƒFƒNƒg
+// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 class cPartsCylinder : public cParts {
-	dReal  l, r;       // ’·‚³[m], ”¼Œa[m]
+	dReal  l, r;       // é•·ã•[m], åŠå¾„[m]
 public:
 	cPartsCylinder(dReal m, dReal l, dReal r);
 	cPartsCylinder(dReal m, Vec3 init_pos, dReal l, dReal r);
-	~cPartsCylinder() {}		// ƒfƒXƒgƒ‰ƒNƒ^
+	~cPartsCylinder() {}		// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	dReal getl() { return l; }
 	dReal getr() { return r; }
 	void draw() {
@@ -266,7 +266,7 @@ public:
 	}
 };
 
-// w
+// æŒ‡
 class cFinger {
 
 	cPartsBox	base{ 14.0, Vec3(0.3, 0.3, 0.4)};
@@ -276,26 +276,28 @@ class cFinger {
 //	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	std::vector<cParts*> finger;
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
-	dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;			//	‘‚«Š·‚¦‚½Œã1–{–Ú‚Ìw‚Ì“y‘ä‚ÌˆÊ’u@kawahara
-	dReal x1 = 0.0, y1 = -1.5, z1 = 1.5;		//	‘‚«Š·‚¦‚½Œã2–{–Ú‚Ìw‚Ì“y‘ä‚ÌˆÊ’u@kawahara
+
+	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	æ›¸ãæ›ãˆãŸå¾Œ1æœ¬ç›®ã®æŒ‡ã®åœŸå°ã®ä½ç½®ã€€kawahara
+	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	æ›¸ãæ›ãˆãŸå¾Œ2æœ¬ç›®ã®æŒ‡ã®åœŸå°ã®ä½ç½®ã€€kawahara
 
 	double Z_OFFSET = 0.08;
 	//double jnt_pos[ARM_JNT];
 public:
 	
-	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// ƒA[ƒ€‚Æ–§“x‚ğ‚»‚ë‚¦‚é
+	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// ã‚¢ãƒ¼ãƒ ã¨å¯Eï¿½ï¿½ã‚’ãã‚ãˆã‚E
 
-	//{¿—Ê,‰ŠúˆÊ’u(x,y,z),‘å‚«‚³(x,y,z)}
+
+	//{è³ªé‡,åˆæœŸä½ç½®(x,y,z),å¤§ãã•(x,y,z)}
 	cPartsBox	plate{ 10.0, Vec3(-20,-20, 0.0),Vec3(1.5,0.5,0.5) };
 
 	dJointFeedback force, *p_force;
-	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // ŒÅ’èŠÖß‚Æ‰ñ“]ŠÖß
-	dJointID graspObj; 							  //”c‘ÎÛ‚ÌƒvƒŒ[ƒg kawahara
+	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // å›ºå®šé–¢ç¯€ã¨å›è»¢é–¢ç¯€
+	dJointID graspObj; 							  //æŠŠæŒå¯¾è±¡ã®ãƒ—ãƒ¬ãƒ¼ãƒEkawahara
 
-	// w‚Ì§Œä—p•Ï”
+	// æŒEï¿½Eåˆ¶å¾¡ç”¨å¤‰æ•°
 	int fingerID;
-	int state_contact;			// ÚGó‘Ô(0:OFF, 1:ON)
-	double	dist;				// ƒA[ƒ€‚Æ‘ÎÛ‚Ì‹——£
+	int state_contact;			// æ¥è§¦çŠ¶æ…E0:OFF, 1:ON)
+	double	dist;				// ã‚¢ãƒ¼ãƒ ã¨å¯¾è±¡ã®è·é›¢
 	double	jnt_pos[ARM_JNT] = {};
 	double	jnt_vel[ARM_JNT] = {};
 	double	jnt_force[ARM_JNT] = {};
@@ -305,35 +307,27 @@ public:
 	double	eff_force[DIM3] = {};
 	double	obj_pos[DIM3] = {};
 	double	obj_vel[DIM3] = {};
-	// –Ú•W•Ï”
+	// ç›®æ¨™å¤‰æ•°
 	double	ref_jnt_pos[ARM_JNT] = {};
 	double	ref_jnt_vel[ARM_JNT] = {};
 	double	ref_eff_pos[DIM3] = {};
 	double	ref_eff_vel[DIM3] = {};
-	// ‰Šú•Ï”
+	// åˆæœŸå¤‰æ•°
 	double	init_jnt_pos[ARM_JNT] = {};
 	double	init_obj_pos[DIM3] = {};
-	double	init_obj_att[DIM3][DIM3] = {};	// â‘ÎÀ•W‚É‚¨‚¯‚é‘ÎÛÀ•W²‚Ìp¨i²‚Í³‹K’¼ŒğŠî’êj
-	// •Ï”\‘¢‘Ì
-	Variable	var;			// Œ»İ’l
-	Variable	var_prev;		// ‰ß‹’li1ƒTƒCƒNƒ‹‘Oj
-	Variable	var_prev2;		// ‰ß‹’li2ƒTƒCƒNƒ‹‘Oj
-	Variable	var_init;		// ‰Šú’l
-	// ‰^“®Šw•Ï”
+	double	init_obj_att[DIM3][DIM3] = {};	// çµ¶å¯¾åº§æ¨™ã«ãŠã‘ã‚‹å¯¾è±¡åº§æ¨™è»¸ã®å§¿å‹¢ï¿½Eï¿½è»¸ã¯æ­£è¦ç›´äº¤åŸºåº•ï¼E
+	// å¤‰æ•°æ§‹é€ ä½E
+	Variable	var;			// ç¾åœ¨å€¤
+	Variable	var_prev;		// éå»å€¤ï¿½Eï¿½Eã‚µã‚¤ã‚¯ãƒ«å‰ï¼E
+	Variable	var_prev2;		// éå»å€¤ï¿½Eï¿½Eã‚µã‚¤ã‚¯ãƒ«å‰ï¼E
+	Variable	var_init;		// åˆæœŸå€¤
+	// é‹å‹•å­¦å¤‰æ•°
 	Kinematics	kine;
-	// “®—ÍŠw•Ï”
+	// å‹•åŠ›å­¦å¤‰æ•°
 	Dynamics	dyn;
-	// ƒCƒ“ƒs[ƒ_ƒ“ƒX•Ï”
+	// ã‚¤ãƒ³ãƒ”ï¿½Eãƒ€ãƒ³ã‚¹å¤‰æ•°
 	Impedance	imp;
-	//static Matrix	Tmp21(2, 1);
-	//static Matrix	Tmp22(2, 2), Tmp21_2(2, 1);
-	//static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
-	//static Matrix	Integ(2, 1);
-	//Matrix	re(2, 1), dre(2, 1);	// èæˆÊ’u•ÏˆÊCèæ‘¬“x•ÏˆÊ
 
-
-
-	// •Û‘¶—pƒf[ƒ^•Ï”
 	int save_state_contact[DATA_CNT_NUM] = {};
 	double	save_dist[DATA_CNT_NUM] = {};
 	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT] = {};
@@ -348,11 +342,11 @@ public:
 	double	save_eff_force[DATA_CNT_NUM][DIM3] = {};
 	double	save_obj_pos[DATA_CNT_NUM][DIM3] = {};
 	double	save_obj_vel[DATA_CNT_NUM][DIM3] = {};
-	// •Û‘¶—pƒtƒ@ƒCƒ‹–¼•Ï”
+	// ä¿å­˜ç”¨ãƒ•ã‚¡ã‚¤ãƒ«åå¤‰æ•°
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_info[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_graph[DATA_FILE_NAME_MAXLEN] = {};
-	// ƒƒ“ƒoŠÖ”
+	// ãƒ¡ãƒ³ãƒé–¢æ•°
 	void initJntPos(double* init_jnt_pos) {}
 	int armWithoutInertiaShaping();
 	int ctrlPreProcessing();
@@ -361,7 +355,7 @@ public:
 	int armJacob(Kinematics* kine, Variable* var);
 	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
 	
-	//kawahara‚Ì•ÏXˆÈ‘O‚©‚çƒRƒƒ“ƒgƒAƒEƒg
+	//kawaharaã®å¤‰æ›´ä»¥å‰ã‹ã‚‰ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒE
 	////	int armInitMatVar(Variable *var);
 	////	int armInitMatKine(Kinematics *kine);
 
@@ -371,13 +365,14 @@ public:
 	void saveInfo();
 	void saveGraph();
 
-	//debug—p@kawahara‚ª’Ç‰Á
+	//debugç”¨ã€€kawaharaãŒè¿½åŠ 
 	void printInfo();
-	////Finger class‚Ì’†‚ÉˆÚ“®
+	////Finger classã®ä¸­ã«ç§»å‹E
 	//int ctrlMaxwell(Matrix* tau);
 
 	//	cFinger(double* init_jnt_pos) : jnt_pos{init_jnt_pos[0], init_jnt_pos[1]} { finger[0] = &base; finger[1] = &link1; finger[2] = &link2; finger[3] = &sensor; }
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+
+	//ï¿½Rï¿½ï¿½ï¿½Xï¿½gï¿½ï¿½ï¿½Nï¿½^
 	cFinger(double* init_jnt_pos) 
 		: jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, 
 		finger{&base, &link1, &link2, &sensor} {
@@ -389,11 +384,11 @@ public:
 		this->var_prev2 = Variable();
 		this->var_init = Variable();
 	}
-	~cFinger() {		// ƒWƒ‡ƒCƒ“ƒg”j‰ó
-		dJointDestroy(f_joint);   // “y‘äŒÅ’è
-		dJointDestroy(r_joint[ARM_M1]);   // ƒA[ƒ€
-		dJointDestroy(r_joint[ARM_M2]);   // ƒA[ƒ€
-		dJointDestroy(f2_joint);   // ƒZƒ“ƒTŒÅ’è
+	~cFinger() {		// ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½gï¿½jï¿½ï¿½
+		dJointDestroy(f_joint);   // ï¿½yï¿½ï¿½Å’ï¿½
+		dJointDestroy(r_joint[ARM_M1]);   // ï¿½Aï¿½[ï¿½ï¿½
+		dJointDestroy(r_joint[ARM_M2]);   // ï¿½Aï¿½[ï¿½ï¿½
+		dJointDestroy(f2_joint);   // ï¿½Zï¿½ï¿½ï¿½Tï¿½Å’ï¿½
 	}
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
@@ -410,7 +405,7 @@ public:
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 	}
-	//kawahara‚ª’Ç‰Á@“ñ–{–Ú‚Ìw—p
+	//kawaharaãŒè¿½åŠ ã€€äºŒæœ¬ç›®ã®æŒEï¿½ï¿½
 	void setPosition2() {
 		//finger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
 		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
@@ -434,36 +429,38 @@ public:
 		auto i = color.begin();
 		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) 	(*j)->setColor((*i).x, (*i).y, (*i).z);
 	}
-	void setJoint();	// ŠÖßİ’è
-	void setJoint2();	// ŠÖßİ’è 2–{–Ú‚Ìw
-	void setJntFric();	// –€Cİ’è
-	void addExtForce();		// ŠO—Í
-	void addExtForce2();	// ŠO—Í
+	void setJoint();	// é–¢ç¯€è¨­å®E
+	void setJoint2();	// é–¢ç¯€è¨­å®E2æœ¬ç›®ã®æŒE
+	void setJntFric();	// æ‘©æ“¦è¨­å®E
+	void addExtForce();		// å¤–åŠ›
 
-	//kawahara‚ª’Ç‰Á
+	void addExtForce2();	// å¤–åŠ›
+
+
+	//kawaharaãŒè¿½åŠ 
 	int calcDist();
 	int ctrlMaxwell2(Matrix* tau);
 	int ctrlMaxwell(Matrix* tau);
-	void control();		// §Œä
+	void control();		// åˆ¶å¾¡
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { for (auto &x : finger) { x->draw(); } }
 };
 
 ////////////////////////////////////////////////////////
-// DrawStuffƒNƒ‰ƒX
+// DrawStuffã‚¯ãƒ©ã‚¹
 ////////////////////////////////////////////////////////
 class DrawStuff {
-	static dsFunctions fn;	// •`‰æ•Ï”
-	// ‹“_•Ï”
+	static dsFunctions fn;	// æç”»å¤‰æ•°
+	// è¦–ç‚¹å¤‰æ•°
 	static float xyz[3];
-	static float hpr[3];	// ’PˆÊ‚Ídeg
+	static float hpr[3];	// å˜ä½ï¿½Edeg
 public:
-	DrawStuff()	{	// •`‰æŠÖ”‚Ìİ’è
-		fn.version = DS_VERSION;    // ƒhƒ[ƒXƒ^ƒbƒt‚Ìƒo[ƒWƒ‡ƒ“
-		fn.start = &start;			// ‘Oˆ— startŠÖ”‚Ìƒ|ƒCƒ“ƒ^
-		fn.step = &simLoop;			// simLoopŠÖ”‚Ìƒ|ƒCƒ“ƒ^
-		fn.command = &command;      // ƒL[“ü—ÍŠÖ”‚Ö‚Ìƒ|ƒCƒ“ƒ^
-		fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH; // ƒeƒNƒXƒ`ƒƒ
+	DrawStuff()	{	// æç”»é–¢æ•°ã®è¨­å®E
+		fn.version = DS_VERSION;    // ãƒ‰ãƒ­ãƒ¼ã‚¹ã‚¿ãƒEï¿½ï¿½ã®ãƒï¿½Eã‚¸ãƒ§ãƒ³
+		fn.start = &start;			// å‰ï¿½EçEstarté–¢æ•°ã®ãƒã‚¤ãƒ³ã‚¿
+		fn.step = &simLoop;			// simLoopé–¢æ•°ã®ãƒã‚¤ãƒ³ã‚¿
+		fn.command = &command;      // ã‚­ãƒ¼å…¥åŠ›é–¢æ•°ã¸ã®ãƒã‚¤ãƒ³ã‚¿
+		fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH; // ãƒEï¿½ï¿½ã‚¹ãƒãƒ£
 	}
 	static void start();
 	static void simLoop(int pause);
@@ -472,33 +469,34 @@ public:
 };
 
 ////////////////////////////////////////////////////////
-// ODEƒNƒ‰ƒX
+// ODEã‚¯ãƒ©ã‚¹
 ////////////////////////////////////////////////////////
 class ODE {
 	// ODE
-	dWorldID world;  // “®—ÍŠwŒvZ—pƒ[ƒ‹ƒh
-	dSpaceID space;  // Õ“ËŒŸo—pƒXƒy[ƒX
+	dWorldID world;  // å‹•åŠ›å­¦è¨ˆç®—ç”¨ãƒ¯ãƒ¼ãƒ«ãƒE
+	dSpaceID space;  // è¡çªæ¤œï¿½Eç”¨ã‚¹ãƒšï¿½Eã‚¹
 public:
-	dGeomID  ground; // ’n–Ê
-	dJointGroupID contactgroup; // ƒRƒ“ƒ^ƒNƒgƒOƒ‹[ƒv
-	ODE() {		// ƒfƒtƒHƒ‹ƒgƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	dGeomID  ground; // åœ°é¢
+	dJointGroupID contactgroup; // ã‚³ãƒ³ã‚¿ã‚¯ãƒˆã‚°ãƒ«ãƒ¼ãƒE
+	ODE() {		// ãƒEï¿½ï¿½ã‚©ãƒ«ãƒˆã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		dInitODE();
 		this->world = dWorldCreate();
 		this->space = dHashSpaceCreate(0);
 		this->contactgroup = dJointGroupCreate(0);
 	}
-	~ODE() {		// ƒfƒXƒgƒ‰ƒNƒ^
-		dJointGroupDestroy(this->contactgroup);     // ƒWƒ‡ƒCƒ“ƒgƒOƒ‹[ƒv‚Ì”j‰ó
+	~ODE() {		// ãƒEï¿½ï¿½ãƒˆãƒ©ã‚¯ã‚¿
+		dJointGroupDestroy(this->contactgroup);     // ã‚¸ãƒ§ã‚¤ãƒ³ãƒˆã‚°ãƒ«ãƒ¼ãƒ—ï¿½Eç ´å£E
 		dSpaceDestroy(this->space);
 		dWorldDestroy(this->world);
 		dCloseODE();
 	}
-	void setEnv() {		// ŠÂ‹«İ’è
-		//dWorldSetGravity(this->world, 0, 0, -9.8);	// d—Íİ’è
-		dWorldSetGravity(this->world, 0, 0, -9.8);	// d—Íİ’è
 
-		dWorldSetERP(this->world, 0.9);          // ERP‚Ìİ’è
-		dWorldSetCFM(this->world, 1e-4);         // CFM‚Ìİ’è
+	void setEnv() {		// ï¿½Â‹ï¿½ï¿½İ’ï¿½
+		//dWorldSetGravity(this->world, 0, 0, -9.8);	// ï¿½dï¿½Íİ’ï¿½
+		dWorldSetGravity(this->world, 0, 0, -9.8);	// ï¿½dï¿½Íİ’ï¿½
+
+		dWorldSetERP(this->world, 0.9);          // ERPï¿½Ìİ’ï¿½
+		dWorldSetCFM(this->world, 1e-4);         // CFMï¿½Ìİ’ï¿½
 	}
 	auto getWorld() const -> decltype(world) { return this->world; }
 	auto getSpace() const -> decltype(space) { return this->space; }
@@ -512,9 +510,10 @@ class EntityODE : public ODE {
 	std::shared_ptr<cFinger> pFinger;
 	//std::shared_ptr<cFinger> pFinger;
 
-	std::shared_ptr<cFinger> pFinger2;	//“ñ–{–Ú‚Ìw@kawahara
+	std::shared_ptr<cFinger> pFinger2;	//äºŒæœ¬ç›®ã®æŒEï¿½ï¿½kawahara
 
 	std::shared_ptr<cPartsCylinder> pObj;
+
 	std::shared_ptr<cPartsCylinder> pObj2;
 
 public:
@@ -522,18 +521,19 @@ public:
 	void setup() {
 		constexpr auto OBJ_RADIUS = 0.10;
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
-		//ŠeŠÖß‚Ì‰Šúp¨(Šp“x)
+		//åEï¿½ï¿½ç¯€ã®åˆæœŸå§¿å‹¢(è§’åº¦)
+
 		double init_jnt_pos[2] = { 4 * PI / 4.0, PI/4.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0,PI / 4.0 };//“ñ–{–Ú‚Ìw
+		double init_jnt_posF2[2] = { 4 * PI / 4.0,PI / 4.0 };//ï¿½ï¿½{ï¿½Ú‚Ìw
 
 
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
-		//1–{–Ú‚Ìw
+		//1æœ¬ç›®ã®æŒE
 		this->pFinger = std::make_shared<cFinger>(init_jnt_pos);
 		this->pFinger->fingerID = ++FingerNum;
 
-		//2–{–Ú‚Ìw
+		//2æœ¬ç›®ã®æŒE
 		this->pFinger2 = std::make_shared<cFinger>(init_jnt_posF2);	
 		this->pFinger2->fingerID = ++FingerNum;
 
@@ -544,22 +544,22 @@ public:
 		std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5, 0.5), Vec3(0, 0.5, 0.5) };
 		
 		this->pFinger->setColor(color);
-		this->pFinger2->setColor(color);	//“ñ–{–Ú‚Ìw@kawahara‚ª’Ç‰Á
+		this->pFinger2->setColor(color);	//äºŒæœ¬ç›®ã®æŒEï¿½ï¿½kawaharaãŒè¿½åŠ 
 
 
 	}
-	void createRobot();		// ƒƒ{ƒbƒg¶¬iƒ{ƒfƒBEƒWƒIƒƒgƒŠEƒWƒ‡ƒCƒ“ƒgj
-	void createObject();	// ‘ÎÛ¶¬iƒ{ƒfƒBEƒWƒIƒƒgƒŠj
-	void destroyRobot() {	// ƒƒ{ƒbƒg”j‰óiƒWƒ‡ƒCƒ“ƒgEƒ{ƒfƒBEƒWƒIƒƒgƒŠj
-		pFinger.reset();	// ƒCƒ“ƒXƒ^ƒ“ƒX‚Ì”j‰ó
+	void createRobot();		// ãƒ­ãƒœãƒƒãƒˆç”Ÿæˆï¼ˆï¿½EãƒEï¿½ï¿½ãƒ»ã‚¸ã‚ªãƒ¡ãƒˆãƒªãƒ»ã‚¸ãƒ§ã‚¤ãƒ³ãƒˆï¼E
+	void createObject();	// å¯¾è±¡ç”Ÿï¿½Eï¿½Eï¿½ï¿½EãƒEï¿½ï¿½ãƒ»ã‚¸ã‚ªãƒ¡ãƒˆãƒªï¿½Eï¿½E
+	void destroyRobot() {	// ãƒ­ãƒœãƒƒãƒˆç ´å£Šï¼ˆã‚¸ãƒ§ã‚¤ãƒ³ãƒˆï¿½Eãƒœãƒ‡ã‚£ãƒ»ã‚¸ã‚ªãƒ¡ãƒˆãƒªï¿½Eï¿½E
+		pFinger.reset();	// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ç ´å£E
 		pFinger2.reset();
-//		this->pFinger->destroy();
+		//this->pFinger->destroy();
 	}
-	void destroyObject() {	pObj.reset(); } // ƒCƒ“ƒXƒ^ƒ“ƒX‚Ì”j‰ó	// ‘ÎÛ”j‰óiƒ{ƒfƒBEƒWƒIƒƒgƒŠj
-	void update() {		// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚ğ‚PƒXƒeƒbƒvis
-		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// Õ“Ë”»’è
-		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ƒXƒeƒbƒvi‚ß‚é
-		dJointGroupEmpty(this->contactgroup); // ƒWƒ‡ƒCƒ“ƒgƒOƒ‹[ƒv‚ğ‹ó‚É‚·‚é
+	void destroyObject() {	pObj.reset(); } // ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ç ´å£E// å¯¾è±¡ç ´å£Šï¼ˆï¿½EãƒEï¿½ï¿½ãƒ»ã‚¸ã‚ªãƒ¡ãƒˆãƒªï¿½Eï¿½E
+	void update() {		// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã‚’ï¼‘ã‚¹ãƒEï¿½ï¿½ãƒ—é€²è¡E
+		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// è¡çªåˆ¤å®E
+		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ã‚¹ãƒEï¿½ï¿½ãƒ—é€²ã‚ã‚‹
+		dJointGroupEmpty(this->contactgroup); // ã‚¸ãƒ§ã‚¤ãƒ³ãƒˆã‚°ãƒ«ãƒ¼ãƒ—ã‚’ç©ºã«ã™ã‚‹
 	}
 	auto getFinger() { return pFinger; }
 	auto getFinger2() { return pFinger2; }
@@ -571,19 +571,21 @@ public:
 };
 
 ////////////////////////////////////////////////////////
-// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“\‘¢‘Ì
+// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³æ§‹é€ ä½E
 ////////////////////////////////////////////////////////
 class SIM: public EntityODE {
 
 public:
-//	
-	int	step;					//Œo‰ßƒXƒeƒbƒv”
 
-//	// 1–{–Ú‚Ìw—p
-//	// §Œä—p•Ï”
-//	int	step;					//Œo‰ßƒXƒeƒbƒv”
-//	int state_contact;			// ÚGó‘Ô(0:OFF, 1:ON)
-//	double	dist;				// ƒA[ƒ€‚Æ‘ÎÛ‚Ì‹——£
+//	
+	int	step;					//çµŒéã‚¹ãƒEï¿½ï¿½ãƒ—æ•°
+
+//	// 1æœ¬ç›®ã®æŒEï¿½ï¿½
+//	// åˆ¶å¾¡ç”¨å¤‰æ•°
+//	int	step;					//çµŒéã‚¹ãƒEï¿½ï¿½ãƒ—æ•°
+//	int state_contact;			// æ¥è§¦çŠ¶æ…E0:OFF, 1:ON)
+//	double	dist;				// ã‚¢ãƒ¼ãƒ ã¨å¯¾è±¡ã®è·é›¢
+
 //	double	jnt_pos[ARM_JNT];
 //	double	jnt_vel[ARM_JNT];
 //	double	jnt_force[ARM_JNT];
@@ -593,27 +595,29 @@ public:
 //	double	eff_force[DIM3];
 //	double	obj_pos[DIM3];
 //	double	obj_vel[DIM3];
-//	// –Ú•W•Ï”
+//	// ç›®æ¨™å¤‰æ•°
 //	double	ref_jnt_pos[ARM_JNT];
 //	double	ref_jnt_vel[ARM_JNT];
 //	double	ref_eff_pos[DIM3];
 //	double	ref_eff_vel[DIM3];
-//	// ‰Šú•Ï”
+//	// åˆæœŸå¤‰æ•°
 //	double	init_jnt_pos[ARM_JNT];
 //	double	init_obj_pos[DIM3];
-//	double	init_obj_att[DIM3][DIM3];	// â‘ÎÀ•W‚É‚¨‚¯‚é‘ÎÛÀ•W²‚Ìp¨i²‚Í³‹K’¼ŒğŠî’êj
-//	// •Ï”\‘¢‘Ì
-//	Variable	var;			// Œ»İ’l
-//	Variable	var_prev;		// ‰ß‹’li1ƒTƒCƒNƒ‹‘Oj
-//	Variable	var_prev2;		// ‰ß‹’li2ƒTƒCƒNƒ‹‘Oj
-//	Variable	var_init;		// ‰Šú’l
-//	// ‰^“®Šw•Ï”
+//	double	init_obj_att[DIM3][DIM3];	// çµ¶å¯¾åº§æ¨™ã«ãŠã‘ã‚‹å¯¾è±¡åº§æ¨™è»¸ã®å§¿å‹¢ï¿½Eï¿½è»¸ã¯æ­£è¦ç›´äº¤åŸºåº•ï¼E
+//	// å¤‰æ•°æ§‹é€ ä½E
+
+//	Variable	var;			// ç¾åœ¨å€¤
+
+//	Variable	var_prev;		// éå»å€¤ï¿½Eï¿½Eã‚µã‚¤ã‚¯ãƒ«å‰ï¼E
+//	Variable	var_prev2;		// éå»å€¤ï¿½Eï¿½Eã‚µã‚¤ã‚¯ãƒ«å‰ï¼E
+//	Variable	var_init;		// åˆæœŸå€¤
+//	// é‹å‹•å­¦å¤‰æ•°
 //	Kinematics	kine;
-//	// “®—ÍŠw•Ï”
+//	// å‹•åŠ›å­¦å¤‰æ•°
 //	Dynamics	dyn;
-//	// ƒCƒ“ƒs[ƒ_ƒ“ƒX•Ï”
+//	// ã‚¤ãƒ³ãƒ”ï¿½Eãƒ€ãƒ³ã‚¹å¤‰æ•°
 //	Impedance	imp;
-//	// •Û‘¶—pƒf[ƒ^•Ï”
+//	// ä¿å­˜ç”¨ãƒEï¿½Eã‚¿å¤‰æ•°
 //	int save_state_contact[DATA_CNT_NUM];
 //	double	save_dist[DATA_CNT_NUM];
 //	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
@@ -628,11 +632,11 @@ public:
 //	double	save_eff_force[DATA_CNT_NUM][DIM3];
 //	double	save_obj_pos[DATA_CNT_NUM][DIM3];
 //	double	save_obj_vel[DATA_CNT_NUM][DIM3];
-//	// •Û‘¶—pƒtƒ@ƒCƒ‹–¼•Ï”
+//	// ä¿å­˜ç”¨ãƒ•ã‚¡ã‚¤ãƒ«åå¤‰æ•°
 //	char	data_file_name[DATA_FILE_NAME_MAXLEN];
 //	char	filename_info[DATA_FILE_NAME_MAXLEN];
 //	char	filename_graph[DATA_FILE_NAME_MAXLEN];
-//	// ƒƒ“ƒoŠÖ”
+//	// ãƒ¡ãƒ³ãƒé–¢æ•°
 //	void initJntPos(double *init_jnt_pos) {}
 //	int armWithoutInertiaShaping();
 //	int ctrlPreProcessing();
@@ -640,9 +644,11 @@ public:
 //	int armInvKine(Kinematics *kine, Variable *var);
 //	int armJacob(Kinematics *kine, Variable *var);
 //	int armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp);
+
 //////	int armInitMatVar(Variable *var);
 //////	int armInitMatKine(Kinematics *kine);
 //int ctrlInitErr();	
+
 //	int armCalcImpPeriod();
 //	void saveData();
 //	void saveInfo();
@@ -650,11 +656,12 @@ public:
 
 
 
+
 };
 
 
 
-// ’PˆêƒCƒ“ƒXƒ^ƒ“ƒXŠÇ—
+// å˜ä¸€ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ç®¡çE
 template<typename WorldT>
 struct Manager{
 	static std::unique_ptr<WorldT> pWorldInstance;
@@ -670,9 +677,10 @@ template<typename WorldT> std::unique_ptr<WorldT> Manager<WorldT>::pWorldInstanc
 using EntityManager = Manager<SIM>;
 
 ////////////////////////////////////////////////////////
-// ƒvƒƒgƒ^ƒCƒv
+// ãƒ—ãƒ­ãƒˆã‚¿ã‚¤ãƒE
 ////////////////////////////////////////////////////////
 static void restart();
 int exeCmd(int argc, char *argv[]);
+
 
 #endif

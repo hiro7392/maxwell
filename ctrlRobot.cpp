@@ -14,7 +14,9 @@ int ctrlHybrid(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, 
 	static Matrix	tauNC, tauVE, tauIN, tauPL, E;
 	auto entity = EntityManager::get();
 	// 初期化
+
 	if(entity->step == 0){
+
 		matInit(&S,2,2); matUnit(matInit(&I,2,2));
 		matInit(&Jinv,2,2);	matInit(&Jt,2,2);
 		matInit(&Tmp21,2,1); matInit(&Tmp21_1,2,1); matInit(&Tmp21_2,2,1); matInit(&Tmp22,2,2); matInit(&Tmp22_1,2,2); matInit(&Tmp22_2,2,2);
@@ -620,8 +622,10 @@ int ctrlMaxwellConvRK(cFinger *sim, Matrix *tau)
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
 
+
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
+
 		// 初期設定
 		matSetValDiag(&sim->imp.Gp, GpVal); matSetValDiag(&sim->imp.Gv, GvVal);	// ゲイン設定
 		sim->armCalcImpPeriod();		// 周期計算
@@ -676,8 +680,10 @@ int ctrlMaxwellConvRK2(cFinger *sim, Matrix *tau)
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
 
+
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
+
 		// 初期設定
 		matSetValDiag(&sim->imp.Gp, GpVal); matSetValDiag(&sim->imp.Gv, GvVal);	// ゲイン設定
 		sim->armCalcImpPeriod();		// 周期計算
