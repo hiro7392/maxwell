@@ -310,7 +310,7 @@ public:
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 
 	//{質量,初期位置(x,y,z),大きさ(x,y,z)}
-	cPartsBox	plate{ 10.0, Vec3(-1.2,-0.5, 0.0),Vec3(1.5,0.5,0.5) };
+	cPartsBox	plate{ 10.0, Vec3(-20,-20, 0.0),Vec3(1.5,0.5,0.5) };
 
 	dJointFeedback force, *p_force;
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
@@ -438,11 +438,6 @@ public:
 		//finger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
 		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
 
-		/*for(int jnt=0;jnt<ARM_JNT;jnt++)init_jnt_pos[jnt] = init_jnt_posOrigin[jnt];
-		for(int crd=0;crd<DIM3;crd++){
-			init_obj_pos[crd] = init_obj_pos[crd];
-			for(int axis=0;axis<DIM3;axis++)init_obj_att[axis][crd] = init_obj_att[axis][crd];
-		}*/
 
 		finger[0]->setPosition(x1,y1, 0.2);	// z:base->sides[CRD_Z]/2
 		finger[1]->setPosition(x1 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
@@ -467,6 +462,7 @@ public:
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
+	int ctrlMaxwell2(Matrix* tau);
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { for (auto &x : finger) { x->draw(); } }

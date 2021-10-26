@@ -28,8 +28,8 @@
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
-#define finger2_use 0
-
+#define finger2_use 1
+#define print_debug 0
 
 // クラス静的メンバの初期化
 dsFunctions DrawStuff::fn;
@@ -57,11 +57,9 @@ double	init_obj_att[DIM3][DIM3] = { {sqrt(2.0)/2, sqrt(2.0)/2, 0.0}, {0.0, 0.0, 
 // 戻り値：関節一般化力（直動関節では力，回転関節ではトルク）
 ////////////////////////////////////////////////////////
 void cFinger::control() {
-	//auto _this = EntityManager::get();
-	//auto _this = EntityManager::get()->getFinger();
 	auto entity = EntityManager::get();
 
-	static Matrix	tau;
+	Matrix	tau;
 	// 初期化
 
 	if (entity->step == 0) {
@@ -70,18 +68,13 @@ void cFinger::control() {
 		ctrlInitErr();		// パラメータ誤差を追加
 		// 初期値保存
 		for (int crd = 0; crd < DIM2; crd++) {
-			//			_this->var_init.q.el[crd][0] = _this->jnt_pos[crd]; _this->var_init.dq.el[crd][0] = _this->jnt_vel[crd];
-			//			_this->var_init.r.el[crd][0] = _this->eff_pos[crd]; _this->var_init.dr.el[crd][0] = _this->eff_vel[crd];
-			//			_this->var_init.F.el[crd][0] = _this->eff_force[crd];
 			var_init.q.el[crd][0] = jnt_pos[crd]; var_init.dq.el[crd][0] = jnt_vel[crd] = 0.0;
 			var_init.r.el[crd][0] = eff_pos[crd]; var_init.dr.el[crd][0] = eff_vel[crd] = 0.0;
 			var_init.F.el[crd][0] = eff_force[crd] = 0.0;
-
 		}
 	}
 
 	// 手先変数代入
-
 	for (int crd = 0; crd < DIM2; crd++) {
 		var.r.el[crd][0] = eff_pos[crd]; var.dr.el[crd][0] = eff_vel[crd];
 		var.F.el[crd][0] = eff_force[crd];
@@ -89,28 +82,25 @@ void cFinger::control() {
 	// 関節変数代入
 	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 		var.q.el[jnt][0] = jnt_pos[jnt]; var.dq.el[jnt][0] = jnt_vel[jnt];
-
 	}
 
 	// パラメータセット
-
 	armDynPara();
-
 
 	// インピーダンス設定
 	// 制御指令計算
 #if SIM_CTRL_MODE_MAXWELL & SIM_ADD_EXT_FORCE
 	double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };
-	//		double	impM[] = {2.0, 2.0}, impC[] = {4.0, 4.0}, impK[] = {1000.0, 1000.0}, impK0[] = {10.0, 10.0};
-	//		double	impM[] = {2.0, 2.0}, impC[] = {4.0, 4.0}, impK[] = {100.0, 100.0}, impK0[] = {10.0, 10.0};
-	//		double	impM[] = {1.0, 1.0}, impC[] = {10.0, 10.0}, impK[] = {10.0, 10.0}, impK0[] = {10.0, 10.0};
 
 	matSetValDiag(&imp.M, impM); matSetValDiag(&imp.C, impC); matSetValDiag(&imp.K, impK); matSetValDiag(&imp.K0, impK0);	// ゲイン設定
 	ctrlPreProcessing();
 
 
 #if 1
-	ctrlMaxwell(&tau);
+	if(fingerID==1)ctrlMaxwell(&tau);
+	else {
+		ctrlMaxwell2(&tau);
+	}
 	
 
 //	ctrlMaxwellWithoutInertiaShaping(_this, &tau);
@@ -533,18 +523,22 @@ void DrawStuff::simLoop(int pause)
 {
 	
 	auto _this = EntityManager::get()->getFinger();
-	_this->printInfo();
+	//_this->printInfo();
+
 #if finger2_use
 	//二本目の指用　kawahara
-	//auto _this2 = EntityManager::get()->getFinger2().get();//kawahara二本目の指
-	//auto sensor2 = _this2->getParts()[3];
-	//auto obj2 = EntityManager::get()->getObj2();
+	auto _this2 = EntityManager::get()->getFinger2();//kawahara二本目の指
+	auto sensor2 = _this2->getParts()[3];
+	auto obj2 = EntityManager::get()->getObj2();
+#endif
+#if print_debug
+	_this->printInfo();
+	_this2->printInfo();
 #endif
 	auto sim = EntityManager::get();
 
 	if (!pause) {
 		auto sensor =_this->getParts()[3];
-		//auto sensor = _this->sensor;
 		auto obj = EntityManager::get()->getObj();
 		
 		// 初期設定
@@ -554,7 +548,7 @@ void DrawStuff::simLoop(int pause)
 #elif SIM_ADD_EXT_FORCE
 		if (sim->step == 0) {
 			dBodyDisable(obj->getBody());		// 対象無効化			
-			//dBodyDisable(obj2->getBody());		// 対象無効化
+			dBodyDisable(obj2->getBody());		// 対象無効化
 		}
 #endif
 		// 状態取得
@@ -563,8 +557,8 @@ void DrawStuff::simLoop(int pause)
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
 #if finger2_use
 			//追加 kawahara
-			//_this2->jnt_pos[jnt] = dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
-			//_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
+			_this2->jnt_pos[jnt] = dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
+			_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
 #endif
 		}
 		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
@@ -585,13 +579,11 @@ void DrawStuff::simLoop(int pause)
 			_this->obj_pos[crd] = (dBodyGetPosition(obj->getBody()))[crd];		// 対象位置
 			_this->obj_vel[crd] = (dBodyGetLinearVel(obj->getBody()))[crd];		// 対象速度
 #if finger2_use
-			//_this2->eff_force[crd] = -_this2->p_force->f1[crd];
-			//kawahara
-			//_this2->obj_pos[crd] = (dBodyGetPosition(obj2->getBody()))[crd];		// 対象位置
-			//_this2->obj_vel[crd] = (dBodyGetLinearVel(obj2->getBody()))[crd];		// 対象速度
+			_this2->eff_force[crd] = -_this2->p_force->f1[crd];
+			_this2->obj_pos[crd] = (dBodyGetPosition(obj2->getBody()))[crd];		// 対象位置
+			_this2->obj_vel[crd] = (dBodyGetLinearVel(obj2->getBody()))[crd];		// 対象速度
 #endif
 		}
-		
 		auto entity = EntityManager::get();
 		// 距離計算
 		_this->calcDist();
@@ -612,7 +604,7 @@ void DrawStuff::simLoop(int pause)
 		_this2->setJntFric();
 #endif
 		// 力計算
-		//_this->control();
+		_this->control();
 #if finger2_use
 		_this2->control();
 #endif
@@ -629,7 +621,8 @@ void DrawStuff::simLoop(int pause)
 		matCopy(&_this2->var_prev.r, &_this2->var.r); matCopy(&_this2->var_prev.dr, &_this2->var.dr);
 #endif
 		// 現在値を保存領域へコピー
-		copyData(_this.get());;
+		copyData(_this.get());
+		copyData(_this2.get());
 		_this->state_contact = 0;
 #if finger2_use
 		_this2->state_contact = 0;
@@ -649,7 +642,7 @@ void DrawStuff::simLoop(int pause)
 	//	drawRobot(); // ロボットの描画
 	_this->draw();
 #if finger2_use
-	_this2->draw()
+	_this2->draw();
 #endif;
 	//finger2->plate.draw();
 
