@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
 	auto sim = EntityManager::init();
 #if FLAG_DRAW_SIM
 	// 描画設定
-//	setDrawStuff();		// ドロースタッフ
+//	setDrawStuff();		//ドロースタッフ
 #endif
 	// 環境設定
 	sim->setEnv();
