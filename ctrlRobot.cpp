@@ -14,7 +14,9 @@ int ctrlHybrid(Matrix *tau, const Matrix *Mq, const Matrix *h, const Matrix *J, 
 	static Matrix	tauNC, tauVE, tauIN, tauPL, E;
 	auto entity = EntityManager::get();
 	// 初期化
+
 	if(entity->step == 0){
+
 		matInit(&S,2,2); matUnit(matInit(&I,2,2));
 		matInit(&Jinv,2,2);	matInit(&Jt,2,2);
 		matInit(&Tmp21,2,1); matInit(&Tmp21_1,2,1); matInit(&Tmp21_2,2,1); matInit(&Tmp22,2,2); matInit(&Tmp22_1,2,2); matInit(&Tmp22_2,2,2);
@@ -384,7 +386,7 @@ int ctrlMaxwellConv(cFinger *sim, Matrix *tau)
 	}
 #if 1
 	// inertia shapingなしの場合
-	sim->armWithoutInertiaShaping();		// 慣性行列Mの計算
+	sim->Fparams.armWithoutInertiaShaping();		// 慣性行列Mの計算
 #endif
 	// 前処理
 	matSub(&re, &sim->var.r, &sim->var_init.r);		// 手先位置変位
@@ -578,28 +580,28 @@ int ctrlMaxwellConvInnerLoop(cFinger *sim, Matrix *tau)
 	}
 #if 1
 	// inertia shapingなしの場合
-	sim->armWithoutInertiaShaping();		// 慣性行列Mの計算
+	sim->Fparams.armWithoutInertiaShaping();		// 慣性行列Mの計算
 #endif
 	// 前処理
-	matSub(&re, &sim->var.r, &sim->var_init.r);		// 手先位置変位
-	matSub(&dre, &sim->var.dr, &sim->var_init.dr);		// 手先速度変位
+	matSub(&re, &sim->Fparams.var.r, &sim->Fparams.var_init.r);		// 手先位置変位
+	matSub(&dre, &sim->Fparams.var.dr, &sim->Fparams.var_init.dr);		// 手先速度変位
 	// インナーループ目標値計算
-	matAssign(&A, matSignInv(matMul(&Tmp22, &sim->imp.Minv, &sim->imp.dM)), 2, 2);		// -M^{-1}*dM
-	matAssign(&A, matMulScl(&Tmp22, -1.0, &sim->imp.Minv), 2, 4);		// -M^{-1}
-	matAssign(&A, &sim->imp.K, 4, 2);		// K
-	matAssign(&A, matSignInv(matMul(&Tmp22, &sim->imp.K, &sim->imp.Cinv)), 4, 4);		// -K*C^{-1}
-	matAssign(&B, &sim->imp.Minv, 2, 0);		// M^{-1}
+	matAssign(&A, matSignInv(matMul(&Tmp22, &sim->Fparams.imp.Minv, &sim->Fparams.imp.dM)), 2, 2);		// -M^{-1}*dM
+	matAssign(&A, matMulScl(&Tmp22, -1.0, &sim->Fparams.imp.Minv), 2, 4);		// -M^{-1}
+	matAssign(&A, &sim->Fparams.imp.K, 4, 2);		// K
+	matAssign(&A, matSignInv(matMul(&Tmp22, &sim->Fparams.imp.K, &sim->Fparams.imp.Cinv)), 4, 4);		// -K*C^{-1}
+	matAssign(&B, &sim->Fparams.imp.Minv, 2, 0);		// M^{-1}
 	matCopy(&X, &Xnext);	// 1サイクル前の計算値を初期値として代入
-	rk4Acc(sim, &Xnext, &dX, &X, &A, &B, &sim->var.F, SIM_CYCLE_TIME);		// Xを次のサイクルの値で更新
-	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_pos[crd] = rc.el[crd][0];		// 変数保存
-	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_vel[crd] = drc.el[crd][0];		// 変数保存
+	rk4Acc(sim, &Xnext, &dX, &X, &A, &B, &sim->Fparams.var.F, SIM_CYCLE_TIME);		// Xを次のサイクルの値で更新
+	for (int crd = 0; crd<DIM2; crd++)	sim->Fparams.ref_eff_pos[crd] = rc.el[crd][0];		// 変数保存
+	for (int crd = 0; crd<DIM2; crd++)	sim->Fparams.ref_eff_vel[crd] = drc.el[crd][0];		// 変数保存
 //	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_vel[crd] = X.el[crd+4][0];		// wの値を保存
 //	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_acc[crd] = ddrc.el[crd][0];		// 変数保存
 	// 制御則
-	matAdd3(&Tmp21, &ddrc, matMulSub(&Tmp21, &sim->imp.Gv, &drc, &dre), matMulSub(&Tmp21_2, &sim->imp.Gp, &rc, &re));		// ddrc+Gv*(drc-dre)+Gp*(rc-re)
-	matSub(&Tmp21, &Tmp21, matMul(&Tmp21_2, &sim->kine.dJ, &sim->var.dq));		// ddrc+Gv*(drc-dre)+Gp*(rc-re)-dJ*dq
-	matAdd(&tauNC, &sim->dyn.h, matMul3(&Tmp21_2, &sim->dyn.Mq, &sim->kine.Jinv, &Tmp21));	// tauNC = h+Mq*J^{-1}*(ddrc+Gv*(drc-dre)+Gp*(rc-re)-dJ*dq)
-	matSignInv(matMul(&tauIN, &sim->kine.Jt, &sim->var.F));		// tauIN = -J^T*F
+	matAdd3(&Tmp21, &ddrc, matMulSub(&Tmp21, &sim->Fparams.imp.Gv, &drc, &dre), matMulSub(&Tmp21_2, &sim->imp.Gp, &rc, &re));		// ddrc+Gv*(drc-dre)+Gp*(rc-re)
+	matSub(&Tmp21, &Tmp21, matMul(&Tmp21_2, &sim->Fparams.kine.dJ, &sim->Fparams.var.dq));		// ddrc+Gv*(drc-dre)+Gp*(rc-re)-dJ*dq
+	matAdd(&tauNC, &sim->Fparams.dyn.h, matMul3(&Tmp21_2, &sim->Fparams.dyn.Mq, &sim->Fparams.kine.Jinv, &Tmp21));	// tauNC = h+Mq*J^{-1}*(ddrc+Gv*(drc-dre)+Gp*(rc-re)-dJ*dq)
+	matSignInv(matMul(&tauIN, &sim->Fparams.kine.Jt, &sim->Fparams.var.F));		// tauIN = -J^T*F
 	matAdd(tau, &tauNC, &tauIN);		// tau = tauNC+tauIN
 	return	0;
 }
@@ -620,30 +622,32 @@ int ctrlMaxwellConvRK(cFinger *sim, Matrix *tau)
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
 
+
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
+
 		// 初期設定
-		matSetValDiag(&sim->imp.Gp, GpVal); matSetValDiag(&sim->imp.Gv, GvVal);	// ゲイン設定
-		sim->armCalcImpPeriod();		// 周期計算
+		matSetValDiag(&sim->Fparams.imp.Gp, GpVal); matSetValDiag(&sim->Fparams.imp.Gv, GvVal);	// ゲイン設定
+		sim->Fparams.armCalcImpPeriod();		// 周期計算
 	}
 	// 前処理
 #if 1
 	// inertia shapingなしの場合
-	sim->armWithoutInertiaShaping();		// 慣性行列Mの計算
+	sim->Fparams.armWithoutInertiaShaping();		// 慣性行列Mの計算
 #endif
-	matSub(&re, &sim->var.r, &sim->var_init.r);		// 手先位置変位
-	matSub(&dre, &sim->var.dr, &sim->var_init.dr);		// 手先速度変位
+	matSub(&re, &sim->Fparams.var.r, &sim->Fparams.var_init.r);		// 手先位置変位
+	matSub(&dre, &sim->Fparams.var.dr, &sim->Fparams.var_init.dr);		// 手先速度変位
 	// サブインナーループ目標値計算
-	matSignInv(matMul(&A, &sim->imp.K, &sim->imp.Cinv));		// A = -K*C^{-1}
+	matSignInv(matMul(&A, &sim->Fparams.imp.K, &sim->Fparams.imp.Cinv));		// A = -K*C^{-1}
 	matCopy(&W, &Wnext);	// 1サイクル前の計算値を初期値として代入
-	rk4Acc(sim, &Wnext, &dW, &W, &A, &sim->imp.K, &dre, SIM_CYCLE_TIME);		// Xを次のサイクルの値で更新
+	rk4Acc(sim, &Wnext, &dW, &W, &A, &sim->Fparams.imp.K, &dre, SIM_CYCLE_TIME);		// Xを次のサイクルの値で更新
 //	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_pos[crd] = W.el[crd][0];		// 変数保存
-	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_vel[crd] = W.el[crd][0];		// 変数保存
+	for (int crd = 0; crd<DIM2; crd++)	sim->Fparams.ref_eff_vel[crd] = W.el[crd][0];		// 変数保存
 //	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_acc[crd] = ddrc.el[crd][0];		// 変数保存
 	// 制御則
-	matMul3(&E, &sim->dyn.Mq, &sim->kine.Jinv, &sim->imp.Minv);	// E = Mq*J^{-1}*M^{-1}
+	matMul3(&E, &sim->Fparams.dyn.Mq, &sim->Fparams.kine.Jinv, &sim->Fparams.imp.Minv);	// E = Mq*J^{-1}*M^{-1}
 //	matSub(&tauNC, &sim->dyn.h, matMul4(&Tmp21, &sim->dyn.Mq, &sim->kine.Jinv, &sim->kine.dJ, &sim->var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
-	matAdd3(&tauNC, &sim->dyn.h, matSignInv(matMul4(&Tmp21, &sim->dyn.Mq, &sim->kine.Jinv, &sim->kine.dJ, &sim->var.dq)), matSignInv(matMul3(&Tmp21_2, &E, &sim->imp.dM, &dre)));	// tauNC = h-Mq*J^{-1}*dJ*dq-E*dM*dr
+	matAdd3(&tauNC, &sim->Fparams.dyn.h, matSignInv(matMul4(&Tmp21, &sim->Fparams.dyn.Mq, &sim->Fparams.kine.Jinv, &sim->Fparams.kine.dJ, &sim->Fparams.var.dq)), matSignInv(matMul3(&Tmp21_2, &E, &sim->Fparams.imp.dM, &dre)));	// tauNC = h-Mq*J^{-1}*dJ*dq-E*dM*dr
 #if 1		// simpsonに対応
 	matSignInv(matMul(&tauVE, &E, &W));	// tauVE = -E*w
 #elif 1		// simpson2に対応
@@ -654,7 +658,7 @@ int ctrlMaxwellConvRK(cFinger *sim, Matrix *tau)
 	matSetValDiag(&Expt, GpVal);		// Expt = e^{-t*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 	matMul(&tauVE, &E, matSub(&Tmp21, matMul(&Tmp21_2, &Expt, &sim->var_init.F), &Integ));	// tauVE = E*(Expt*F0-Integ)
 #endif
-	matMul(&tauIN, matSub(&Tmp22, &E, &sim->kine.Jt), &sim->var.F);		// tauIN = (E-J^T)F
+	matMul(&tauIN, matSub(&Tmp22, &E, &sim->Fparams.kine.Jt), &sim->Fparams.var.F);		// tauIN = (E-J^T)F
 	matAdd3(tau, &tauNC, &tauVE, &tauIN);		// tau = tauNC+tauVE+tauIN
 //	matPrint(&tauIN);		// 0であればOK
 	return	0;
@@ -676,32 +680,34 @@ int ctrlMaxwellConvRK2(cFinger *sim, Matrix *tau)
 	double	GpVal[] = { GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0, GAIN_INNERLOOP*GAIN_INNERLOOP / 4.0 };	// 臨界減衰
 	double	GvVal[] = { GAIN_INNERLOOP, GAIN_INNERLOOP };
 
+
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
+
 		// 初期設定
-		matSetValDiag(&sim->imp.Gp, GpVal); matSetValDiag(&sim->imp.Gv, GvVal);	// ゲイン設定
+		matSetValDiag(&sim->Fparams.imp.Gp, GpVal); matSetValDiag(&sim->Fparams.imp.Gv, GvVal);	// ゲイン設定
 		sim->armCalcImpPeriod();		// 周期計算
 	}
 #if 1
 	// inertia shapingなしの場合
-	sim->armWithoutInertiaShaping();		// 慣性行列Mの計算
+	sim->Fparams.armWithoutInertiaShaping();		// 慣性行列Mの計算
 #endif
 	// 前処理
-	matSub(&re, &sim->var.r, &sim->var_init.r);		// 手先位置変位
-	matSub(&dre, &sim->var.dr, &sim->var_init.dr);		// 手先速度変位
+	matSub(&re, &sim->Fparams.var.r, &sim->Fparams.var_init.r);		// 手先位置変位
+	matSub(&dre, &sim->Fparams.var.dr, &sim->Fparams.var_init.dr);		// 手先速度変位
 	// サブインナーループ目標値計算
-	matSignInv(matMul(&A, &sim->imp.K, &sim->imp.Cinv));		// A = -K*C^{-1}
-	matMul3(&B, &sim->imp.K, &sim->imp.Cinv, &sim->imp.K);		// B = K*C^{-1}*K
+	matSignInv(matMul(&A, &sim->Fparams.imp.K, &sim->Fparams.imp.Cinv));		// A = -K*C^{-1}
+	matMul3(&B, &sim->Fparams.imp.K, &sim->Fparams.imp.Cinv, &sim->Fparams.imp.K);		// B = K*C^{-1}*K
 	matCopy(&W, &Wnext);	// 1サイクル前の計算値を初期値として代入
 	rk4Acc(sim, &Wnext, &dW, &W, &A, &B, &re, SIM_CYCLE_TIME);		// Xを次のサイクルの値で更新
 //	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_pos[crd] = W.el[crd][0];		// 変数保存
-	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_vel[crd] = W.el[crd][0];		// 変数保存
+	for (int crd = 0; crd<DIM2; crd++)	sim->Fparams.ref_eff_vel[crd] = W.el[crd][0];		// 変数保存
 //	for (int crd = 0; crd<DIM2; crd++)	sim->ref_eff_acc[crd] = ddrc.el[crd][0];		// 変数保存
 	// 制御則
-	matMul3(&E, &sim->dyn.Mq, &sim->kine.Jinv, &sim->imp.Minv);	// E = Mq*J^{-1}*M^{-1}
-	matSub(&tauNC, &sim->dyn.h, matMul4(&Tmp21, &sim->dyn.Mq, &sim->kine.Jinv, &sim->kine.dJ, &sim->var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
-	matMul(&tauVE, &E, matSub(&Tmp21, &W, matMul(&Tmp21_2, &sim->imp.K, &re)));	// tauVE = E*(w-K*re)
-	matMul(&tauIN, matSub(&Tmp22, &E, &sim->kine.Jt), &sim->var.F);		// tauIN = (E-J^T)F
+	matMul3(&E, &sim->Fparams.dyn.Mq, &sim->Fparams.kine.Jinv, &sim->Fparams.imp.Minv);	// E = Mq*J^{-1}*M^{-1}
+	matSub(&tauNC, &sim->Fparams.dyn.h, matMul4(&Tmp21, &sim->Fparams.dyn.Mq, &sim->Fparams.kine.Jinv, &sim->Fparams.kine.dJ, &sim->Fparams.var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
+	matMul(&tauVE, &E, matSub(&Tmp21, &W, matMul(&Tmp21_2, &sim->Fparams.imp.K, &re)));	// tauVE = E*(w-K*re)
+	matMul(&tauIN, matSub(&Tmp22, &E, &sim->Fparams.kine.Jt), &sim->Fparams.var.F);		// tauIN = (E-J^T)F
 	matAdd3(tau, &tauNC, &tauVE, &tauIN);		// tau = tauNC+tauVE+tauIN
 	return	0;
 }
@@ -808,7 +814,7 @@ int ctrlMaxwellWithoutInertiaShaping(cFinger *sim, Matrix *tau)
 	}
 
 	// 前処理
-	sim->armWithoutInertiaShaping();		// 慣性行列Mの計算
+	sim->Fparams.armWithoutInertiaShaping();		// 慣性行列Mの計算
 	matSub(&re, &sim->var.r, &sim->var_init.r);		// 手先位置変位
 	matSub(&dre, &sim->var.dr, &sim->var_init.dr);		// 手先速度変位
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt	長方形近似
