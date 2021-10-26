@@ -350,11 +350,6 @@ public:
 	Kinematics	kine;
 	// 動力学変数
 	Dynamics	dyn;
-
-	// インピ�Eダンス変数
-	Impedance	imp;
-
-
 	// インピーダンス変数
 	Impedance	imp;
 	// 保存用データ変数
