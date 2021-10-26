@@ -1,4 +1,4 @@
-#ifndef _INC_SIMMAIN
+﻿#ifndef _INC_SIMMAIN
 #define _INC_SIMMAIN
 
 #include <vector>
@@ -21,6 +21,7 @@
 #endif
 
 ////////////////////////////////////////////////////////
+
 // 行列計算Eigen(マクロ定義はインクルードより前に必要)
 #define EIGEN_NO_DEBUG // コード内のassertを無効化．
 #define EIGEN_DONT_VECTORIZE // SIMDを無効化．
@@ -29,6 +30,7 @@
 //#include "eigen-3.3.7/Eigen/Core"
 //#include "eigen-3.3.7/Eigen/LU"		// 逆行列や行列式の計算に必要
 //#include "c:/software/eigen-3.3.7/Eigen/Dense"		// 上2つの代わりにこれ1つでもOK
+
 #include "c:/eigen-3.4.0/Eigen/Dense"
 ////////////////////////////////////////////////////////
 // バイナリフラグ
@@ -36,8 +38,10 @@
 ////////////////////////////////////////////////////////
 #define	GLAPHIC_OPENGL		0		// OpenGLで描画
 #define	FLAG_DRAW_SIM		1		// ODEの標準描画
+
 #define	FLAG_SAVE_IMAGE		0		// 画像保存
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
+
 
 ////////////////////////////////////////////////////////
 // define定義
@@ -48,15 +52,18 @@
 // 画面表示定義
 #define	DISPLAY_WIDTH	640
 #define	DISPLAY_HEIGHT	480
+
 // 次元・座標識別定義
 #define DIM2	2
 #define	DIM3	3	// 3次元の位置や姿勢
+
 #define	CRD_X	0
 #define	CRD_Y	1
 #define	CRD_Z	2
 #define	AXIS_X	0
 #define	AXIS_Y	1
 #define	AXIS_Z	2
+
 #define DIR_LONG_AXIS_Z	3	// 長軸方向(dMassSetCylinderTotalなどに利用)
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
@@ -76,22 +83,26 @@
 #define FILENAME_GRAPH4	FILE_SAVE_DIR "img_eff_force.png"
 #define FILENAME_GRAPH5	FILE_SAVE_DIR "img_err.png"
 #define	DATA_FILE_NAME_MAXLEN	20
+
 #define FILENAME_VIDEO	FILE_SAVE_DIR "cap.mp4"		// ビデオ名
 
 // アーム定義
 // 2自由度アーム　各リンクは円柱で構成
+
 #if 0
 #define	ARM_JNT	2
 #define	ARM_M1	0
 #define	ARM_M2	1
 #define	ARM_LINK1_LEN	0.75		// リンク長
 #define	ARM_LINK2_LEN	0.75		// リンク長
+
 #define	ARM_LINK1_COG_LEN	(ARM_LINK1_LEN/2.0)		// 質量中心
 #define	ARM_LINK2_COG_LEN	(ARM_LINK2_LEN/2.0)		// 質量中心
 #define	ARM_LINK1_RAD	0.125		// リンク半径
 #define	ARM_LINK2_RAD	0.10		// リンク半径
 #define	ARM_LINK1_MASS	1.0		// 質量
 #define	ARM_LINK2_MASS	0.8		// 質量
+
 #define	ARM_JNT1_VISCOUS	1.0		// 粘性係数
 #define	ARM_JNT2_VISCOUS	1.0		// 粘性係数
 #elif 1
@@ -104,12 +115,14 @@ constexpr int	ARM_M1 = 0;	// アーム関節番号
 constexpr int	ARM_M2 = 1;	// アーム関節番号
 constexpr double	ARM_LINK1_LEN = 0.75;		// リンク長
 constexpr double	ARM_LINK2_LEN = 0.75;		// リンク長
+
 constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// 質量中心
 constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// 質量中心
 constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
 constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
 constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
+
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
 
@@ -118,6 +131,7 @@ constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
 ////////////////////////////////////////////////////////
 // 構造体定義
 ////////////////////////////////////////////////////////
+
 // 変数構造体
 struct Variable {
 	Matrix	q, dq, ddq;	// 関節角度，関節速度，関節加速度
@@ -142,6 +156,7 @@ struct Variable {
 	}
 };
 
+
 // 運動学構造体
 struct Kinematics {       //
 	double	l[ARM_JNT];		// リンク長
@@ -150,6 +165,7 @@ struct Kinematics {       //
 	Matrix	J;	// ヤコビアン
 	Matrix	dJ;	// ヤコビアン微分
 	Matrix	Jt, Jinv;	// 転置行列，逆行列
+
 	Kinematics(){
 		this->l[ARM_M1] = ARM_LINK1_LEN;	this->l[ARM_M2] = ARM_LINK2_LEN;
 		this->lg[ARM_M1] = ARM_LINK1_COG_LEN;	this->lg[ARM_M2] = ARM_LINK2_COG_LEN;
@@ -158,6 +174,7 @@ struct Kinematics {       //
 		matInit(&Jt, ARM_JNT, ARM_JNT); matInit(&Jinv, ARM_JNT, ARM_JNT);
 	}
 };
+
 
 // 動力学構造体
 // Mq*ddq + h + V*dq = tau + Jt*F
@@ -168,6 +185,7 @@ struct Dynamics {       //
 	double	V[ARM_JNT];	// 粘性摩擦係数
 	// 補足変数
 	Matrix	dMq;		// 慣性項微分
+
 	Dynamics() {
 		this->m[ARM_M1] = ARM_LINK1_MASS;	this->m[ARM_M2] = ARM_LINK2_MASS;
 		this->V[ARM_M1] = ARM_JNT1_VISCOUS;	this->V[ARM_M2] = ARM_JNT2_VISCOUS;
@@ -175,6 +193,7 @@ struct Dynamics {       //
 		matInit(&dMq, ARM_JNT, ARM_JNT);
 	}
 };
+
 
 // インピーダンス構造体
 struct  Impedance {
@@ -185,6 +204,7 @@ struct  Impedance {
 	// 補足変数
 	Matrix	dM, dC, dK;	// 目標インピーダンス微分（手先座標）
 	Matrix	Minv, Cinv, Kinv;	// 逆行列
+
 	Impedance() {
 		matInit(&M, DIM2, DIM2); matInit(&C, DIM2, DIM2); matInit(&K, DIM2, DIM2);
 		matInit(&Minv, DIM2, DIM2); matInit(&Cinv, DIM2, DIM2); matInit(&Kinv, DIM2, DIM2);
@@ -195,6 +215,7 @@ struct  Impedance {
 };
 
 ////////////////////////////////////////////////////////
+
 // プロトタイプ
 ////////////////////////////////////////////////////////
 struct Vec3 { double x, y, z; Vec3(double x, double y, double z) : x(x), y(y), z(z) {} };
@@ -204,6 +225,7 @@ class cParts {
 protected:
 	dBodyID body;        // ボディ(剛体)のID番号（動力学計算用）
 	dGeomID geom;        // ジオメトリのID番号(衝突検出計算用）
+
 	dReal  m;       // 質量[kg]
 	dMass mass;
 	std::vector<float> color{1,1,1};
@@ -276,6 +298,7 @@ class cFinger {
 //	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	std::vector<cParts*> finger;
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
+
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
 	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
 
@@ -283,6 +306,7 @@ class cFinger {
 	//double jnt_pos[ARM_JNT];
 public:
 	
+
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 
 	//{質量,初期位置(x,y,z),大きさ(x,y,z)}
@@ -295,6 +319,7 @@ public:
 	// 指の制御用変数
 	int fingerID;
 	int state_contact;			// 接触状態(0:OFF, 1:ON)
+
 	double	dist;				// アームと対象の距離
 	double	jnt_pos[ARM_JNT] = {};
 	double	jnt_vel[ARM_JNT] = {};
@@ -313,19 +338,27 @@ public:
 	// 初期変数
 	double	init_jnt_pos[ARM_JNT] = {};
 	double	init_obj_pos[DIM3] = {};
+
 	double	init_obj_att[DIM3][DIM3] = {};	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
 	// 変数構造体
 	Variable	var;			// 現在値
 	Variable	var_prev;		// 過去値（1サイクル前）
 	Variable	var_prev2;		// 過去値（2サイクル前）
+
 	Variable	var_init;		// 初期値
 	// 運動学変数
 	Kinematics	kine;
 	// 動力学変数
 	Dynamics	dyn;
+
+	// インピ�Eダンス変数
+	Impedance	imp;
+
+
 	// インピーダンス変数
 	Impedance	imp;
 	// 保存用データ変数
+
 	int save_state_contact[DATA_CNT_NUM] = {};
 	double	save_dist[DATA_CNT_NUM] = {};
 	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT] = {};
@@ -353,6 +386,7 @@ public:
 	int armJacob(Kinematics* kine, Variable* var);
 	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
 	
+
 	//kawaharaの変更以前からコメントアウト
 	////	int armInitMatVar(Variable *var);
 	////	int armInitMatKine(Kinematics *kine);
@@ -365,17 +399,28 @@ public:
 
 	//debug用　kawaharaが追加
 	void printInfo();
-	////Finger classの中に移動
+
+	////Finger classの中に移勁E
 	//int ctrlMaxwell(Matrix* tau);
 
-	//	cFinger(double* init_jnt_pos) : jnt_pos{init_jnt_pos[0], init_jnt_pos[1]} { finger[0] = &base; finger[1] = &link1; finger[2] = &link2; finger[3] = &sensor; }
-	//コンストラクタ
-	cFinger(double* init_jnt_pos) : jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, finger{&base, &link1, &link2, &sensor} {}
-	~cFinger() {		// ジョイント破壊
+	
+	cFinger(double* init_jnt_pos) 
+		: jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, 
+		finger{&base, &link1, &link2, &sensor} {
+		this->kine = Kinematics();
+		this->dyn = Dynamics();
+		this->imp = Impedance();
+		this->var = Variable();
+		this->var_prev = Variable();
+		this->var_prev2 = Variable();
+		this->var_init = Variable();
+	}
+~cFinger() {		// ジョイント破壊
 		dJointDestroy(f_joint);   // 土台固定
 		dJointDestroy(r_joint[ARM_M1]);   // アーム
 		dJointDestroy(r_joint[ARM_M2]);   // アーム
 		dJointDestroy(f2_joint);   // センサ固定
+
 	}
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
@@ -392,6 +437,7 @@ public:
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 	}
+
 	//kawaharaが追加　二本目の指用
 	void setPosition2() {
 		//finger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
@@ -416,14 +462,13 @@ public:
 		auto i = color.begin();
 		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) 	(*j)->setColor((*i).x, (*i).y, (*i).z);
 	}
+
 	void setJoint();	// 関節設定
 	void setJoint2();	// 関節設定 2本目の指
 	void setJntFric();	// 摩擦設定
 	void addExtForce();		// 外力
 
 	void addExtForce2();	// 外力
-
-
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
@@ -439,6 +484,7 @@ class DrawStuff {
 	static dsFunctions fn;	// 描画変数
 	// 視点変数
 	static float xyz[3];
+
 	static float hpr[3];	// 単位はdeg
 public:
 	DrawStuff()	{	// 描画関数の設定
@@ -447,6 +493,7 @@ public:
 		fn.step = &simLoop;			// simLoop関数のポインタ
 		fn.command = &command;      // キー入力関数へのポインタ
 		fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH; // テクスチャ
+
 	}
 	static void start();
 	static void simLoop(int pause);
@@ -459,27 +506,33 @@ public:
 ////////////////////////////////////////////////////////
 class ODE {
 	// ODE
+
 	dWorldID world;  // 動力学計算用ワールド
 	dSpaceID space;  // 衝突検出用スペース
 public:
 	dGeomID  ground; // 地面
 	dJointGroupID contactgroup; // コンタクトグループ
 	ODE() {		// デフォルトコンストラクタ
+
 		dInitODE();
 		this->world = dWorldCreate();
 		this->space = dHashSpaceCreate(0);
 		this->contactgroup = dJointGroupCreate(0);
 	}
+
 	~ODE() {		// デストラクタ
 		dJointGroupDestroy(this->contactgroup);     // ジョイントグループの破壊
+
 		dSpaceDestroy(this->space);
 		dWorldDestroy(this->world);
 		dCloseODE();
 	}
+
 	void setEnv() {		// 環境設定
 		dWorldSetGravity(this->world, 0, 0, -9.8);	// 重力設定
 		dWorldSetERP(this->world, 0.9);          // ERPの設定
 		dWorldSetCFM(this->world, 1e-4);         // CFMの設定
+
 	}
 	auto getWorld() const -> decltype(world) { return this->world; }
 	auto getSpace() const -> decltype(space) { return this->space; }
@@ -493,7 +546,9 @@ class EntityODE : public ODE {
 	std::shared_ptr<cFinger> pFinger;
 	//std::shared_ptr<cFinger> pFinger;
 
+
 	std::shared_ptr<cFinger> pFinger2;	//二本目の指　kawahara
+
 
 	std::shared_ptr<cPartsCylinder> pObj;
 
@@ -507,12 +562,10 @@ public:
 		//各関節の初期姿勢(角度)
 
 		double init_jnt_pos[2] = { 4 * PI / 4.0, PI/4.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0,0 };//二本目の指
-
-
-
+		double init_jnt_posF2[2] = { 4 * PI / 4.0,PI / 4.0  };//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
+
 		//1本目の指
 		this->pFinger = std::make_shared<cFinger>(init_jnt_pos);
 		this->pFinger->fingerID = ++FingerNum;
@@ -528,6 +581,7 @@ public:
 		std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5, 0.5), Vec3(0, 0.5, 0.5) };
 		
 		this->pFinger->setColor(color);
+
 		this->pFinger2->setColor(color);	//二本目の指　kawaharaが追加
 
 
@@ -543,6 +597,7 @@ public:
 	void update() {		// シミュレーションを１ステップ進行
 		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// 衝突判定
 		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ステップ進める
+
 		dJointGroupEmpty(this->contactgroup); // ジョイントグループを空にする
 	}
 	auto getFinger() { return pFinger; }
@@ -555,19 +610,19 @@ public:
 };
 
 ////////////////////////////////////////////////////////
+
 // シミュレーション構造体
+
 ////////////////////////////////////////////////////////
 class SIM: public EntityODE {
 
 public:
-
-//	
 	int	step;					//経過ステップ数
-
 //	// 1本目の指用
 //	// 制御用変数
 //	int	step;					//経過ステップ数
 //	int state_contact;			// 接触状態(0:OFF, 1:ON)
+
 //	double	dist;				// アームと対象の距離
 
 //	double	jnt_pos[ARM_JNT];
@@ -587,6 +642,7 @@ public:
 //	// 初期変数
 //	double	init_jnt_pos[ARM_JNT];
 //	double	init_obj_pos[DIM3];
+
 //	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
 //	// 変数構造体
 
@@ -602,6 +658,7 @@ public:
 //	// インピーダンス変数
 //	Impedance	imp;
 //	// 保存用データ変数
+
 //	int save_state_contact[DATA_CNT_NUM];
 //	double	save_dist[DATA_CNT_NUM];
 //	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
@@ -645,6 +702,7 @@ public:
 
 
 
+
 // 単一インスタンス管理
 template<typename WorldT>
 struct Manager{
@@ -661,6 +719,7 @@ template<typename WorldT> std::unique_ptr<WorldT> Manager<WorldT>::pWorldInstanc
 using EntityManager = Manager<SIM>;
 
 ////////////////////////////////////////////////////////
+
 // プロトタイプ
 ////////////////////////////////////////////////////////
 static void restart();
