@@ -141,17 +141,19 @@ int cFinger::armWithoutInertiaShaping()
 int cFinger::armDynPara()
 {
 	int	jnt;
-	static double	m1, m2, l1, l2, lg1, lg2, I1, I2;
+	//static double	m1, m2, l1, l2, lg1, lg2, I1, I2;
+	double	m1, m2, l1, l2, lg1, lg2, I1, I2;
+
 	double	C1, C2, S1, S2, C12, S12;
 	auto entity = EntityManager::get();
 	// パラメータ設定
-	if(entity->step == 0){
+	//if(entity->step == 0){
 		m1 = this->dyn.m[ARM_M1]; m2 = this->dyn.m[ARM_M2];
 		l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2];
 		lg1 = this->kine.lg[ARM_M1]; lg2 = this->kine.lg[ARM_M2];
 		I1 = (this->kine.r[ARM_M1]*this->kine.r[ARM_M1]/4+l1*l1/12)*m1;
 		I2 = (this->kine.r[ARM_M2]*this->kine.r[ARM_M2]/4+l2*l2/12)*m2;
-	}
+	//}
 	// 三角関数
 	C1 = cos(this->var.q.el[0][0]); C2 = cos(this->var.q.el[1][0]); S1 = sin(this->var.q.el[0][0]); S2 = sin(this->var.q.el[1][0]);
 	C12 = cos(this->var.q.el[0][0]+this->var.q.el[1][0]); S12 = sin(this->var.q.el[0][0]+this->var.q.el[1][0]);

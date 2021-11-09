@@ -300,8 +300,9 @@ class cFinger {
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
 
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
-	dReal x1 = 0.5, y1 = -1.5, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
+	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
 
+	dReal px1 =-20, py1 = -20, pz1 = 0;
 	double Z_OFFSET = 0.08;
 	//double jnt_pos[ARM_JNT];
 public:
@@ -309,8 +310,8 @@ public:
 
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 
-	//{質量,初期位置(x,y,z),大きさ(x,y,z)}
-	cPartsBox	plate{ 10.0, Vec3(-2,-2,0),Vec3(1.5,0.5,0.5) };
+	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
+	cPartsBox	plate{ 10.0, Vec3(px1,py1,pz1),Vec3(1.5,0.5,0.5) };
 
 	dJointFeedback force, *p_force;
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
@@ -462,10 +463,11 @@ public:
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
-	//kawaharaが追記
-	int ctrlMaxwell2(Matrix* tau);
+	int ctrlMaxwell2(Matrix* tau);		//kawaharaが追記　二本目の指用
+
+	//制約条件つきMaxwellモデル
 	int RestrictedCtrlMaxwell(Matrix* tau);
-	
+	int RestrictedCtrlMaxwell2(Matrix* tau);	//kawaharaが追記　二本目の指用
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { for (auto &x : finger) { x->draw(); } }
@@ -555,8 +557,8 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 		//各関節の初期姿勢(角度)
 
-		double init_jnt_pos[2] = {  4* PI / 4.0, PI/4.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0,-PI / 4.0  };//二本目の指
+		double init_jnt_pos[2] = {  4* PI / 4.0, PI/5.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 5.0  };//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 

@@ -17,7 +17,7 @@ void rolling_function(SIM *sim, dGeomID o, dReal coef, dContact *c )//床摩擦�
 //	MyObject *obj = &sim->sys.obj;
 	auto obj = EntityManager::get()->getObj();
 	//	if (o && dGeomGetClass(o) == dSphereClass) {
-//	if (o && dGeomGetClass(o) == dCylinderClass) {
+	//	if (o && dGeomGetClass(o) == dCylinderClass) {
 	if (o == obj->getGeom()) {
 		dBodyID b = dGeomGetBody(o);
 		if (!b) return;
@@ -105,13 +105,13 @@ void cFinger::addExtForce(){
 	if(sim->step <= 1000){
 
 		if (fingerID == 1) {
-			ext_force[CRD_X] = 2.0;
-			ext_force[CRD_Y] = 2.0;
+			ext_force[CRD_X] = 1.0;
+			ext_force[CRD_Y] = 1.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
-			ext_force[CRD_X] = 0.0;
-			ext_force[CRD_Y] = -2.0;
+			ext_force[CRD_X] = 1.0;
+			ext_force[CRD_Y] = 1.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 	}else{
@@ -133,7 +133,10 @@ void cFinger::addExtForce(){
 		auto sensor = sim->getFinger2()->getParts()[3];
 		dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X],eff_pos[CRD_Y],eff_pos[CRD_Z]);
 	}
-	
+#if 1
+	printf("Finger %d extForce(fx,fy) = (%lf,%lf) \n",fingerID, ext_force[CRD_X], ext_force[CRD_Y]);
+#endif
+
 }
 
 void cFinger::printInfo() {

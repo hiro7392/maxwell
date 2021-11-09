@@ -29,7 +29,7 @@
 #endif
 
 #define finger2_use 1
-#define print_debug 1
+#define print_debug 0
 
 // クラス静的メンバの初期化
 dsFunctions DrawStuff::fn;
@@ -60,10 +60,10 @@ void cFinger::control() {
 	auto entity = EntityManager::get();
 
 	Matrix	tau;
-
+	matInit(&tau, 2, 1);
 	// 初期化
 	if (entity->step == 0) {
-		matInit(&tau, 2, 1);
+		
 		// 初期化
 		ctrlInitErr();		// パラメータ誤差を追加
 		// 初期値保存
@@ -97,10 +97,13 @@ void cFinger::control() {
 
 
 #if 1
-	if(fingerID==1)RestrictedCtrlMaxwell(&tau);
+	if (fingerID == 1){
+		ctrlMaxwell(&tau);
+		//RestrictedCtrlMaxwell(&tau);
+	}
 	else {
-		//ctrlMaxwell2(&tau);
-		RestrictedCtrlMaxwell(&tau);
+		ctrlMaxwell2(&tau);
+		//RestrictedCtrlMaxwell2(&tau);
 	}
 	
 
@@ -157,7 +160,10 @@ void cFinger::control() {
 #elif SIM_CTRL_MODE_VOIGT
 	ctrlVoigt(&tau, &Mq, &h, &J, &dJ, &q, &dq, &re, &dre, &F, &Md, &Cd, &Kd);
 #endif
-
+#if print_debug
+	std::cout << "tau fingerID :" << fingerID << std::endl;
+	matPrint(&tau);
+#endif
 	// 返り値に代入
 	jnt_force[ARM_M1] = tau.el[ARM_M1][0];
 	jnt_force[ARM_M2] = tau.el[ARM_M2][0];
@@ -373,6 +379,7 @@ int main(int argc, char *argv[])
 	// 物体生成
 	sim->ground = dCreatePlane(sim->getSpace(), 0, 0, 1, 0);		// 地面の設定
 	sim->setup();
+
 	// パラメータ設定 指1
 	auto Finger1 = EntityManager::get()->getFinger();
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)Finger1->init_jnt_pos[jnt] = init_jnt_pos[jnt];
@@ -435,6 +442,7 @@ cPartsBox::cPartsBox(dReal m, Vec3 l) : cParts(m), sides{ l.x, l.y, l.z } {
 
 cPartsBox::cPartsBox(dReal m, Vec3 init_pos, Vec3 l) : cPartsBox(m, l) {
 	dBodySetPosition(this->body, init_pos.x, init_pos.y, init_pos.z);
+	//this->geom = dCreateBox(EntityManager::get()->getSpace(), init_pos.x, init_pos.y, init_pos.z);
 }
 
 cPartsCylinder::cPartsCylinder(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) {
@@ -448,6 +456,8 @@ cPartsCylinder::cPartsCylinder(dReal m, Vec3 init_pos, dReal l, dReal r) : cPart
 	dBodySetPosition(this->body, init_pos.x, init_pos.y, init_pos.z);
 }
 
+//各関節を結合
+//HingeJoint:=稼働する関節
 void cFinger::setJoint() {
 
 	auto sim = EntityManager::get();
@@ -477,6 +487,7 @@ void cFinger::setJoint() {
 	// センサ設定（力とトルクのに必要）
 	dJointSetFeedback(f2_joint, &force);
 }
+
 //二本目の指の初期位置設定
 void cFinger::setJoint2() {
 	auto sim = EntityManager::get();
@@ -484,7 +495,7 @@ void cFinger::setJoint2() {
 	//把持する板を設置(位置は可変)
 	graspObj = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(graspObj, plate.getBody(), 0);
-	dJointSetHingeAnchor(graspObj,-5,-5,0.0);
+	dJointSetHingeAnchor(graspObj, px1, py1, pz1);
 
 
 	// 固定ジョイント
@@ -642,7 +653,7 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 	_this2->draw();
 #endif;
-	//finger2->plate.draw();
+	_this2->plate.draw();
 
 
 	std::cout << "step:" << sim->step << std::endl;
@@ -678,7 +689,7 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -0.5;	xyz[1] = 0.0;	xyz[2] = 2.5;
+	xyz[0] = -0.5;	xyz[1] = 0.0;	xyz[2] = 1.5;
 	hpr[0] = 0.0;	hpr[1] = -90.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
