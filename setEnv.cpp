@@ -110,8 +110,8 @@ void cFinger::addExtForce(){
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
-			ext_force[CRD_X] = 1.0;
-			ext_force[CRD_Y] = 1.0;
+			ext_force[CRD_X] = 0.0;
+			ext_force[CRD_Y] = 0.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 	}else{
@@ -140,6 +140,7 @@ void cFinger::addExtForce(){
 }
 
 void cFinger::printInfo() {
+
 
 
 	std::cout << "finger " << fingerID << std::endl;

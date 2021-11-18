@@ -523,6 +523,7 @@
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDoubleDLL|x64'">
@@ -743,6 +744,7 @@
     <ClCompile Include="command.cpp" />
     <ClCompile Include="ctrlRobot.cpp" />
     <ClCompile Include="ctrlRobot2.cpp" />
+    <ClCompile Include="finger.hpp" />
     <ClCompile Include="graphic.cpp" />
     <ClCompile Include="makeRobot.cpp" />
     <ClCompile Include="matBase.cpp" />
