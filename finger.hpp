@@ -33,10 +33,10 @@
 //カプセル用
 #define DENSITY (5.0)	// 密度
 // カプセル
-static dMass m;
+static dMass mass ;
 dReal radius = 0.25; // 半径
 dReal length = 1.0;  // 長さ
-const dReal* pos1, * R1, * pos2, * R2, * pos3, * R3;    //　球の描画
+const dReal* pos1=0, * R1, * pos2 , * R2, * pos3, * R3;    //　球の描画
 struct MyObject {
 	dBodyID body;		// ボディ（剛体）
 	dGeomID geomBody;

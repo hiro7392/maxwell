@@ -158,10 +158,33 @@ cPartsCylinder::cPartsCylinder(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r
 }
 
 cPartsCapsule::cPartsCapsule(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) {
+
+	//	ここからカプセル関連
+	dMassSetZero(&mass);
+
+	//	指先に取り付けるカプセルの生成
+	capsule.body = dBodyCreate(EntityManager::get()->getWorld());;
+	dMassSetCapsule(&mass, DENSITY, 3, ARM_LINK2_RAD, ARM_LINK2_LEN);	//
+	dBodySetMass(capsule.body, &mass);				//質量
+	dBodySetPosition(capsule.body, -0.8, -0.5, 1);	//位置
+
+	//	Cylinderの部分とほぼ同じ
+	this->body = dBodyCreate(EntityManager::get()->getWorld());
 	dMassSetCapsuleTotal(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
 	dBodySetMass(this->body, &mass);
+	//	ジオメトリモデルの生成
 	this->geom = dCreateCapsule(EntityManager::get()->getSpace(), this->r, this->l);
+	//ジオメトリとボディの対応付け
 	dGeomSetBody(this->geom, this->body);
+
+	auto geomBodySample = dCreateCapsule(EntityManager::get()->getSpace(), ARM_LINK2_RAD, ARM_LINK2_LEN);
+	//auto geomBody = dCreateCapsule(EntityManager::get()->getSpace(), ARM_LINK2_RAD, ARM_LINK2_LEN);
+
+	//	動力学モデルと対応付ける指の関節
+	//dGeomSetBody(geomBody, this->body);
+	//	サンプル用の動力学計算と衝突計算の両方を行うカプセル
+	dGeomSetBody(geomBodySample, capsule.body);
+
 }
 
 cPartsCylinder::cPartsCylinder(dReal m, Vec3 init_pos, dReal l, dReal r) : cPartsCylinder(m, l, r) {		// デフォルトコンストラクタ
@@ -233,22 +256,6 @@ void cFinger::setJoint2() {
 	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
 
-
-
-	//ここからカプセル関連
-	dMassSetZero(&m);
-
-	//指先に取り付けるカプセル質量パラメータの設定
-	capsule.body = dBodyCreate(sim->getWorld());
-	dMassSetCapsule(&m, DENSITY, 3, radius, length);
-	dBodySetMass(capsule.body, &m);
-	dBodySetPosition(capsule.body, 0, 4, 1);
-	//ジオメトリモデルの生成
-	capsule.geomBody = dCreateCapsule(EntityManager::get()->getSpace(), radius, length);
-
-	//動力学モデルと対応付ける
-	dGeomSetBody(capsule.geomBody, capsule.body);
-
 	// 固定ジョイント
 	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
@@ -258,7 +265,7 @@ void cFinger::setJoint2() {
 	dJointSetFeedback(f2_joint, &force);
 }
 ////////////////////////////////////////////////////////
-	// 描画設定
+// 描画設定
 // main関数
 ////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
@@ -341,7 +348,7 @@ void DrawStuff::simLoop(int pause)
 	dsSetColorAlpha(1, 1, 1, 1);
 	pos2 = dBodyGetPosition(capsule.body);
 	R2 = dBodyGetRotation(capsule.body);
-	dsDrawCapsule(pos2, R2, length, radius);  // カプセルの描画
+	dsDrawCapsule(pos2, R2, ARM_LINK2_LEN, ARM_LINK2_RAD);  // カプセルの描画
 
 
 	if (!pause) {

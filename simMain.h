@@ -440,14 +440,14 @@ public:
 	}
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
+	
+	//指１の初期位置と初期姿勢
 	void setPosition() {
-		//inger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
-		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
-
 		finger[0]->setPosition(x0, y0, 0.2);	// z:base->sides[CRD_Z]/2
 		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0*cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0*sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
@@ -456,9 +456,6 @@ public:
 
 	//kawaharaが追加　二本目の指用
 	void setPosition2() {
-		//finger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
-		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
-
 
 		finger[0]->setPosition(x1,y1, 0.2);	// z:base->sides[CRD_Z]/2
 		finger[1]->setPosition(x1 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
@@ -530,7 +527,6 @@ public:
 	dGeomID  ground; // 地面
 	dJointGroupID contactgroup; // コンタクトグループ
 	ODE() {		// デフォルトコンストラクタ
-
 		dInitODE();
 		this->world = dWorldCreate();
 		this->space = dHashSpaceCreate(0);
@@ -578,8 +574,8 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = {  4* PI / 4.0, PI/5.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0, PI / 5.0  };			//二本目の指
+		double init_jnt_pos[2] = {  4* PI / 4.0, PI/6.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 6.0  };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 
