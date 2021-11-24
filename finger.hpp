@@ -42,7 +42,7 @@ struct MyObject {
 	dGeomID geomBody;
 };
 static MyObject capsule;
-
+static MyObject plateToGrasp;	//把持する用のプレート
 
 // クラス静的メンバの初期化
 dsFunctions DrawStuff::fn;
@@ -187,4 +187,29 @@ void cFinger::control() {
 		// 駆動力入力をODEに設定
 
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+}
+//接触判定用　nearCallback
+static int flag = 0;
+dJointGroupID contactgroup = dJointGroupCreate(0);
+static void nearCallback(void* data, dGeomID o1, dGeomID o2)
+{
+	const int N = 10;
+	dContact contact[N];
+	auto sim = EntityManager::get();
+	int isGround = ((sim->ground == o1) || (sim->ground == o2));
+
+	int n = dCollide(o1, o2, N, &contact[0].geom, sizeof(dContact));
+
+	if (isGround) {
+		if (n >= 1) flag = 1;
+		else        flag = 0;
+		for (int i = 0; i < n; i++) {
+			contact[i].surface.mode = dContactBounce;
+			contact[i].surface.mu = dInfinity;
+			contact[i].surface.bounce = 0.0; // (0.0~1.0) restitution parameter
+			contact[i].surface.bounce_vel = 0.0; // minimum incoming velocity for bounce
+			dJointID c = dJointCreateContact(EntityManager::get()->getWorld() , contactgroup, &contact[i]);
+			dJointAttach(c, dGeomGetBody(contact[i].geom.g1), dGeomGetBody(contact[i].geom.g2));
+		}
+	}
 }

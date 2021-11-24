@@ -131,7 +131,10 @@ int exeCmd(int argc, char* argv[])
 ////////////////////////////////////////////////////////
 // 実体定義
 ////////////////////////////////////////////////////////
-cParts::cParts(dReal m) : m(m) { this->body = dBodyCreate(EntityManager::get()->getWorld()); dMassSetZero(&mass); }
+cParts::cParts(dReal m) : m(m) { 
+	this->body = dBodyCreate(EntityManager::get()->getWorld()); dMassSetZero(&mass);
+	//this->geom = dCreateBox(EntityManager::get()->getSpace(), 1.0, 1.0, 1.0);
+}
 
 
 cParts::cParts(dReal m, Vec3 init_pos) : cParts(m) {
@@ -161,29 +164,19 @@ cPartsCapsule::cPartsCapsule(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) 
 
 	//	ここからカプセル関連
 	dMassSetZero(&mass);
-
-	//	指先に取り付けるカプセルの生成
-	capsule.body = dBodyCreate(EntityManager::get()->getWorld());;
-	dMassSetCapsule(&mass, DENSITY, 3, ARM_LINK2_RAD, ARM_LINK2_LEN);	//
-	dBodySetMass(capsule.body, &mass);				//質量
-	dBodySetPosition(capsule.body, -0.8, -0.5, 1);	//位置
+	/*dReal newMass=5.0;
+	dMassAdjust(&mass,newMass);*/
 
 	//	Cylinderの部分とほぼ同じ
 	this->body = dBodyCreate(EntityManager::get()->getWorld());
-	dMassSetCapsuleTotal(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
+	dMassSetCapsule(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
 	dBodySetMass(this->body, &mass);
-	//	ジオメトリモデルの生成
+
+	//	ジオメトリの生成
 	this->geom = dCreateCapsule(EntityManager::get()->getSpace(), this->r, this->l);
+	
 	//ジオメトリとボディの対応付け
 	dGeomSetBody(this->geom, this->body);
-
-	auto geomBodySample = dCreateCapsule(EntityManager::get()->getSpace(), ARM_LINK2_RAD, ARM_LINK2_LEN);
-	//auto geomBody = dCreateCapsule(EntityManager::get()->getSpace(), ARM_LINK2_RAD, ARM_LINK2_LEN);
-
-	//	動力学モデルと対応付ける指の関節
-	//dGeomSetBody(geomBody, this->body);
-	//	サンプル用の動力学計算と衝突計算の両方を行うカプセル
-	dGeomSetBody(geomBodySample, capsule.body);
 
 }
 
@@ -224,9 +217,38 @@ void cFinger::setJoint() {
 	// センサ設定（力とトルクのに必要）
 	dJointSetFeedback(f2_joint, &force);
 }
-
+dReal capX = -3.0, capY = -0.5, capZ = 0.3;
+const dReal plateX = 1.5, plateY = 0.2, plateZ = 0.2;
 //二本目の指の初期位置設定
 void cFinger::setJoint2() {
+
+	////	接触判定をするためのカプセルの生成
+	capsule.body = dBodyCreate(EntityManager::get()->getWorld());
+	dMassSetCapsule(&mass, DENSITY, 3, ARM_LINK2_RAD, ARM_LINK2_LEN);
+	dMass massPlate;
+	dReal newMass = 0.5;
+	dMassSetZero(&massPlate);
+	dMassSetCapsuleTotal(&massPlate,newMass,3,ARM_LINK2_RAD, ARM_LINK2_LEN);				//質量
+	dBodySetPosition(capsule.body, capX, capY, capZ);	//位置
+	auto geomBodySample = dCreateCapsule(EntityManager::get()->getSpace(), ARM_LINK2_RAD, ARM_LINK2_LEN);
+	//	動力学Bodyと衝突計算ジオメトリの対応
+	dGeomSetBody(geomBodySample, capsule.body);
+
+	//実際に把持する用のプレートの生成
+	
+	plateToGrasp.body= dBodyCreate(EntityManager::get()->getWorld());
+	dMassSetBox(&mass, DENSITY, plateX, plateY, plateZ);
+	//Bodyで位置と質量の設定
+	dMassSetZero(&massPlate);
+	dMassSetBoxTotal(&massPlate, newMass, plateX,plateY, plateZ);
+	dBodySetPosition(plateToGrasp.body, -1.1, capY, capZ);	//位置 //x=-1.1
+	//ジオメトリの生成
+	auto geomBodyPlate = dCreateBox(EntityManager::get()->getSpace(), plateX, plateY, plateZ);
+	//	動力学Bodyと衝突計算ジオメトリの対応
+	dGeomSetBody(geomBodyPlate, plateToGrasp.body);
+
+
+
 	auto sim = EntityManager::get();
 
 	//把持する板を設置(位置は可変)
@@ -351,6 +373,14 @@ void DrawStuff::simLoop(int pause)
 	dsDrawCapsule(pos2, R2, ARM_LINK2_LEN, ARM_LINK2_RAD);  // カプセルの描画
 
 
+	// カプセルの描画
+	dsSetColorAlpha(1, 1, 1, 1);
+	pos2 = dBodyGetPosition(plateToGrasp.body);
+	R2 = dBodyGetRotation(plateToGrasp.body);
+	dReal sides[3] = { plateX,plateY,plateZ };
+	dsDrawBox(pos2, R2, sides);  // plateの描画
+
+	dSpaceCollide(EntityManager::get()->getSpace(), 0, &nearCallback);
 	if (!pause) {
 		auto sensor =_this->getParts()[3];
 		auto obj = EntityManager::get()->getObj();
@@ -421,6 +451,13 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 		_this2->control();
 #endif
+		//カプセルに外力を加える
+		//dBodyAddForceAtPos(capsule.body, 0,3.0*sin(sim->step/10.0),0.0, capX, capY, capZ-0.5);
+		//plateの端に外力を加える
+		if (sim->step > 500) {
+			//外力ベクトル(x,y,z),加える位置(x,y,z)
+			dBodyAddForceAtPos(plateToGrasp.body, 0, 10.0, 0.0, -0.20, capY, plateZ-0.1);
+		}
 
 		// 過去データとして代入
 		for (int jnt = 0; jnt<ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];
@@ -436,9 +473,9 @@ void DrawStuff::simLoop(int pause)
 		// 現在値を保存領域へコピー
 		copyData(_this.get());
 		copyData(_this2.get());
-		_this->state_contact = 0;
+		//_this->state_contact = 0;
 #if finger2_use
-		_this2->state_contact = 0;
+		//_this2->state_contact = 0;
 #endif	
 		
 		// シミュレーションを１ステップ進行
@@ -480,6 +517,8 @@ void DrawStuff::simLoop(int pause)
 #if	FLAG_SAVE_VIDEO
 	if (_this->step % SAVE_VIDEO_RATE == 0)	save_video();
 #endif
+	//衝突している物体の集合を空にする
+	dJointGroupEmpty(contactgroup);
 }
 
 ////////////////////////////////////////////////////////
