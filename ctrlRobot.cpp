@@ -506,6 +506,7 @@ int simpson(cFinger *sim, Matrix *Integ, double dt)
 		matSetValDiag(&Exp2, GpVal);		// Exp = e^{-2Δt*K*C^{-1}} ただし，現在はK,Cが対角行列の時のみ対応
 	}
 	if(entity->step % 2 == 0){
+		//
 		matSub(&dre, &sim->var.dr, &sim->var_init.dr);		// 手先速度変位
 		matSub(&dre_prev, &sim->var_prev.dr, &sim->var_init.dr);		// 手先速度変位(1フレーム前)
 		matSub(&dre_prev2, &sim->var_prev2.dr, &sim->var_init.dr);		// 手先速度変位(2フレーム前)

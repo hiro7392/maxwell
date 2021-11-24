@@ -316,7 +316,6 @@ class cFinger {
 	cPartsCapsule	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 
 //	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
-	std::vector<cParts*> finger;
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
 
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
@@ -326,7 +325,8 @@ class cFinger {
 	double Z_OFFSET = 0.08;
 	//double jnt_pos[ARM_JNT];
 public:
-	
+	std::vector<cParts*> finger;
+
 
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 
@@ -448,6 +448,7 @@ public:
 		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		
+
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
@@ -574,8 +575,8 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = {  4* PI / 4.0, PI/6.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 6.0  };			//二本目の指
+		double init_jnt_pos[2] = {  4* PI / 4.0, PI/8.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI/8.0 };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 
@@ -587,7 +588,7 @@ public:
 		this->pFinger2 = std::make_shared<cFinger>(init_jnt_posF2);	
 		this->pFinger2->fingerID = ++FingerNum;
 
-
+	
 		this->pObj = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
 		this->pObj2 = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
 
@@ -595,8 +596,6 @@ public:
 		
 		this->pFinger->setColor(color);
 		this->pFinger2->setColor(color);	//二本目の指　kawaharaが追加
-
-
 	}
 	void createRobot();		// ロボット生成（ボディ・ジオメトリ・ジョイント）
 	void createObject();	// 対象生成（ボディ・ジオメトリ）
@@ -630,8 +629,6 @@ class SIM: public EntityODE {
 public:
 	int	step;					//経過ステップ数
 };
-
-
 
 
 // 単一インスタンス管理

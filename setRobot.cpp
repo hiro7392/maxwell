@@ -204,7 +204,7 @@ int cFinger::armJacob(Kinematics *kine, Variable *var)
 	kine->J.el[1][0] = l1 * C1 + l2 * C12;	kine->J.el[1][1] = l2 * C12;
 	// ヤコビアン転置，ヤコビアン逆行列
 	matTrans(&kine->Jt, &kine->J);		// J^{T}
-	matInv(&kine->Jinv, NULL, &kine->J);		// J^{-1}（正則の場合のみ対応）
+	matInv(&kine->Jinv, NULL, &kine->J);		// J^{-1}（正則の場合のみ対応
 #if 1
 	matMul(&var->dq, &kine->Jinv, &var->dr);		// dq = J^{-1}*dr
 	// ヤコビアン微分
