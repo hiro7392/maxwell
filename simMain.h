@@ -287,6 +287,21 @@ public:
 		dsDrawCylinder(dBodyGetPosition(getBody()), dBodyGetRotation(getBody()), this->l, this->r);
 	}
 };
+//指先部分はカプセルに変更
+class cPartsCapsule : public cParts {
+	dReal l, r;			// 長さ[m], 半径[m]
+public:
+	cPartsCapsule(dReal m, dReal l, dReal r);
+	cPartsCapsule(dReal m, Vec3 init_pos,dReal l, dReal r);
+	~cPartsCapsule() {}		// デストラクタ
+	dReal getl() { return l; }
+	dReal getr() { return r; }
+	
+	void draw() {
+		dsSetColor(color[0], color[1], color[2]);
+		dsDrawCapsule(dBodyGetPosition(getBody()), dBodyGetRotation(getBody()), this->l, this->r);
+	}
+};
 
 // 指
 class cFinger {
@@ -294,7 +309,12 @@ class cFinger {
 	cPartsBox	base{ 14.0, Vec3(0.3, 0.5, 0.4)};
 
 	cPartsCylinder	link1{ ARM_LINK1_MASS, ARM_LINK1_LEN, ARM_LINK1_RAD };
-	cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
+	//以前の方法　指先が円柱になっているとき
+	//cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
+	//指先が円柱の時
+	//二つ目の指先をカプセルにする
+	cPartsCapsule	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
+
 //	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	std::vector<cParts*> finger;
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
@@ -302,6 +322,7 @@ class cFinger {
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
 	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
 
+	dReal px1 =-20, py1 = -20, pz1 = 0;
 	double Z_OFFSET = 0.08;
 	//double jnt_pos[ARM_JNT];
 public:
@@ -309,8 +330,8 @@ public:
 
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
 
-	//{質量,初期位置(x,y,z),大きさ(x,y,z)}
-	cPartsBox	plate{ 10.0, Vec3(-1.2,-0.5, 0.0),Vec3(1.5,0.5,0.5) };
+	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
+	cPartsBox	plate{ 10.0, Vec3(px1,py1,pz1),Vec3(1.5,0.5,0.5) };
 
 	dJointFeedback force, *p_force;
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
@@ -350,11 +371,6 @@ public:
 	Kinematics	kine;
 	// 動力学変数
 	Dynamics	dyn;
-
-	// インピ�Eダンス変数
-	Impedance	imp;
-
-
 	// インピーダンス変数
 	Impedance	imp;
 	// 保存用データ変数
@@ -403,7 +419,7 @@ public:
 	////Finger classの中に移勁E
 	//int ctrlMaxwell(Matrix* tau);
 
-	
+	//コンストラクタ
 	cFinger(double* init_jnt_pos) 
 		: jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, 
 		finger{&base, &link1, &link2, &sensor} {
@@ -416,22 +432,22 @@ public:
 		this->var_init = Variable();
 	}
 ~cFinger() {		// ジョイント破壊
-		dJointDestroy(f_joint);   // 土台固定
-		dJointDestroy(r_joint[ARM_M1]);   // アーム
-		dJointDestroy(r_joint[ARM_M2]);   // アーム
+		dJointDestroy(f_joint);				// 土台固定
+		dJointDestroy(r_joint[ARM_M1]);		// アーム
+		dJointDestroy(r_joint[ARM_M2]);		// アーム
 		dJointDestroy(f2_joint);   // センサ固定
 
 	}
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
+	
+	//指１の初期位置と初期姿勢
 	void setPosition() {
-		//inger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
-		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
-
 		finger[0]->setPosition(x0, y0, 0.2);	// z:base->sides[CRD_Z]/2
 		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0*cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0*sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
@@ -440,19 +456,12 @@ public:
 
 	//kawaharaが追加　二本目の指用
 	void setPosition2() {
-		//finger[0]->setPosition(x0, y0, 0.4 / 2);	// z:base->sides[CRD_Z]/2
-		//finger[0]->setPosition(x0, y0, 0.4);	// z:base->sides[CRD_Z]/2
-
-		/*for(int jnt=0;jnt<ARM_JNT;jnt++)init_jnt_pos[jnt] = init_jnt_posOrigin[jnt];
-		for(int crd=0;crd<DIM3;crd++){
-			init_obj_pos[crd] = init_obj_pos[crd];
-			for(int axis=0;axis<DIM3;axis++)init_obj_att[axis][crd] = init_obj_att[axis][crd];
-		}*/
 
 		finger[0]->setPosition(x1,y1, 0.2);	// z:base->sides[CRD_Z]/2
 		finger[1]->setPosition(x1 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		finger[3]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
@@ -472,6 +481,11 @@ public:
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
+	int ctrlMaxwell2(Matrix* tau);		//kawaharaが追記　二本目の指用
+
+	//制約条件つきMaxwellモデル
+	int RestrictedCtrlMaxwell(Matrix* tau);
+	int RestrictedCtrlMaxwell2(Matrix* tau);	//kawaharaが追記　二本目の指用
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { for (auto &x : finger) { x->draw(); } }
@@ -513,7 +527,6 @@ public:
 	dGeomID  ground; // 地面
 	dJointGroupID contactgroup; // コンタクトグループ
 	ODE() {		// デフォルトコンストラクタ
-
 		dInitODE();
 		this->world = dWorldCreate();
 		this->space = dHashSpaceCreate(0);
@@ -559,10 +572,10 @@ public:
 	void setup() {
 		constexpr auto OBJ_RADIUS = 0.10;
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
-		//各関節の初期姿勢(角度)
 
-		double init_jnt_pos[2] = { 4 * PI / 4.0, PI/4.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0,PI / 4.0  };//二本目の指
+		//各関節の初期姿勢(角度)
+		double init_jnt_pos[2] = {  4* PI / 4.0, PI/6.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI / 6.0  };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 
@@ -581,7 +594,6 @@ public:
 		std::vector<Vec3> color{ Vec3(1, 0, 0), Vec3(0, 0, 1), Vec3(0, 0.5, 0.5), Vec3(0, 0.5, 0.5) };
 		
 		this->pFinger->setColor(color);
-
 		this->pFinger2->setColor(color);	//二本目の指　kawaharaが追加
 
 
@@ -597,7 +609,6 @@ public:
 	void update() {		// シミュレーションを１ステップ進行
 		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// 衝突判定
 		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ステップ進める
-
 		dJointGroupEmpty(this->contactgroup); // ジョイントグループを空にする
 	}
 	auto getFinger() { return pFinger; }
@@ -618,86 +629,6 @@ class SIM: public EntityODE {
 
 public:
 	int	step;					//経過ステップ数
-//	// 1本目の指用
-//	// 制御用変数
-//	int	step;					//経過ステップ数
-//	int state_contact;			// 接触状態(0:OFF, 1:ON)
-
-//	double	dist;				// アームと対象の距離
-
-//	double	jnt_pos[ARM_JNT];
-//	double	jnt_vel[ARM_JNT];
-//	double	jnt_force[ARM_JNT];
-//	double	past_jnt_pos[ARM_JNT];
-//	double	eff_pos[DIM3];
-//	double	eff_vel[DIM3];
-//	double	eff_force[DIM3];
-//	double	obj_pos[DIM3];
-//	double	obj_vel[DIM3];
-//	// 目標変数
-//	double	ref_jnt_pos[ARM_JNT];
-//	double	ref_jnt_vel[ARM_JNT];
-//	double	ref_eff_pos[DIM3];
-//	double	ref_eff_vel[DIM3];
-//	// 初期変数
-//	double	init_jnt_pos[ARM_JNT];
-//	double	init_obj_pos[DIM3];
-
-//	double	init_obj_att[DIM3][DIM3];	// 絶対座標における対象座標軸の姿勢（軸は正規直交基底）
-//	// 変数構造体
-
-//	Variable	var;			// 現在値
-
-//	Variable	var_prev;		// 過去値（1サイクル前）
-//	Variable	var_prev2;		// 過去値（2サイクル前）
-//	Variable	var_init;		// 初期値
-//	// 運動学変数
-//	Kinematics	kine;
-//	// 動力学変数
-//	Dynamics	dyn;
-//	// インピーダンス変数
-//	Impedance	imp;
-//	// 保存用データ変数
-
-//	int save_state_contact[DATA_CNT_NUM];
-//	double	save_dist[DATA_CNT_NUM];
-//	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT];
-//	double	save_ref_jnt_vel[DATA_CNT_NUM][ARM_JNT];
-//	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT];
-//	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT];
-//	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT];
-//	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3];
-//	double	save_ref_eff_vel[DATA_CNT_NUM][DIM3];
-//	double	save_eff_pos[DATA_CNT_NUM][DIM3];
-//	double	save_eff_vel[DATA_CNT_NUM][DIM3];
-//	double	save_eff_force[DATA_CNT_NUM][DIM3];
-//	double	save_obj_pos[DATA_CNT_NUM][DIM3];
-//	double	save_obj_vel[DATA_CNT_NUM][DIM3];
-//	// 保存用ファイル名変数
-//	char	data_file_name[DATA_FILE_NAME_MAXLEN];
-//	char	filename_info[DATA_FILE_NAME_MAXLEN];
-//	char	filename_graph[DATA_FILE_NAME_MAXLEN];
-//	// メンバ関数
-//	void initJntPos(double *init_jnt_pos) {}
-//	int armWithoutInertiaShaping();
-//	int ctrlPreProcessing();
-//	int armDynPara();
-//	int armInvKine(Kinematics *kine, Variable *var);
-//	int armJacob(Kinematics *kine, Variable *var);
-//	int armInitMat(Variable *var, Kinematics *kine, Dynamics *dyn, Impedance *imp);
-
-//////	int armInitMatVar(Variable *var);
-//////	int armInitMatKine(Kinematics *kine);
-//int ctrlInitErr();	
-
-//	int armCalcImpPeriod();
-//	void saveData();
-//	void saveInfo();
-//	void saveGraph();
-
-
-
-
 };
 
 

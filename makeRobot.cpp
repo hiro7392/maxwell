@@ -264,7 +264,7 @@ int drawExtForce(){
 #endif
 	return	0;
 }
-
+//二本目の指の外力を描画
 int drawExtForce2() {
 	int width;
 	dJointFeedback* fb;
@@ -288,6 +288,7 @@ int drawExtForce2() {
 //		endP[0] = pos[0] + k1*sensor[jnt].f1[0];
 //		endP[1] = pos[1] + k1*sensor[jnt].f1[1];
 //		endP[2] = pos[2] + k1*sensor[jnt].f1[2];
+
 	p_force = dJointGetFeedback(_this->getFinger2()->f2_joint);
 	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 	p_s[CRD_Z] += sensor->getr(); //腕の上に表示

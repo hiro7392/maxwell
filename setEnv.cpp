@@ -17,7 +17,7 @@ void rolling_function(SIM *sim, dGeomID o, dReal coef, dContact *c )//床摩擦�
 //	MyObject *obj = &sim->sys.obj;
 	auto obj = EntityManager::get()->getObj();
 	//	if (o && dGeomGetClass(o) == dSphereClass) {
-//	if (o && dGeomGetClass(o) == dCylinderClass) {
+	//	if (o && dGeomGetClass(o) == dCylinderClass) {
 	if (o == obj->getGeom()) {
 		dBodyID b = dGeomGetBody(o);
 		if (!b) return;
@@ -118,21 +118,29 @@ void cFinger::addExtForce(){
 		ext_force[CRD_X] = 0.0;
 		ext_force[CRD_Y] = 0.0;
 		ext_force[CRD_Z] = 0.0;
-
 	}
 #endif
 
 	// 手先リンク表面の中心に外力入力
 //	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
-	auto sensor =getParts()[3];
+	
+	if (fingerID == 1) {
+		auto sensor = sim->getFinger()->getParts()[3];
+		dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y],eff_pos[CRD_Z]);
+	}
+	else {
+		auto sensor = sim->getFinger2()->getParts()[3];
+		dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X],eff_pos[CRD_Y],eff_pos[CRD_Z]);
+	}
+#if 1
+	printf("Finger %d extForce(fx,fy) = (%lf,%lf) \n",fingerID, ext_force[CRD_X], ext_force[CRD_Y]);
+#endif
 
-	dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y], eff_pos[CRD_Z]);
-	
-	
 }
 
 void cFinger::printInfo() {
+
 
 
 	std::cout << "finger " << fingerID << std::endl;
