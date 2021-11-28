@@ -451,13 +451,40 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 		_this2->control();
 #endif
+		
+		//plateを二次元平面に拘束する=>z==0に毎回戻す
+		//plateの角速度
+		const dReal* rot = dBodyGetAngularVel(plateToGrasp.body);
+		
+
+		const dReal* quat_ptr;
+		dReal quat[4],quat_len;
+
+		quat_ptr = dBodyGetQuaternion(plateToGrasp.body);
+		quat[0] = quat_ptr[0];
+		quat[1] = 0;
+		quat[2] = 0.0;
+		quat[3] = quat_ptr[3];
+		//正規化
+		/*quat_len = sqrt(quat[0] * quat[0] + quat[3] * quat[3]);
+		quat[0] /= quat_len;
+		quat[3] /= quat_len;*/
+
+		//現在の位置
+		const dReal* nowPos = dBodyGetPosition(plateToGrasp.body);
+
+		dBodySetQuaternion(plateToGrasp.body,quat);
+		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
+		dBodySetPosition(plateToGrasp.body, nowPos[0], nowPos[1], 0.1);
+
 		//カプセルに外力を加える
 		//dBodyAddForceAtPos(capsule.body, 0,3.0*sin(sim->step/10.0),0.0, capX, capY, capZ-0.5);
 		//plateの端に外力を加える
 		if (sim->step > 500) {
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
-			dBodyAddForceAtPos(plateToGrasp.body, 0, 10.0, 0.0, -0.20, capY, plateZ-0.1);
+			dBodyAddForceAtPos(plateToGrasp.body, 0, 100.0, 0.0, nowPos[0]-0.5,nowPos[1], nowPos[2]);
 		}
+		
 
 		// 過去データとして代入
 		for (int jnt = 0; jnt<ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];
