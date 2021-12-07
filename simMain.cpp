@@ -90,7 +90,8 @@ int exeCmd(int argc, char* argv[])
 		// シミュレーションループ
 #if FLAG_DRAW_SIM
 		DrawStuff DS;
-		dsSimulationLoop(argc, argv, DISPLAY_WIDTH, DISPLAY_HEIGHT, DS.getFn());
+		//dsSimulationLoop(argc, argv, DISPLAY_WIDTH, DISPLAY_HEIGHT, DS.getFn());
+		dsSimulationLoop(argc, argv,1280, 960, DS.getFn());
 #else
 		while (1) {
 			simLoop(0);
@@ -154,6 +155,7 @@ cPartsBox::cPartsBox(dReal m, Vec3 init_pos, Vec3 l) : cPartsBox(m, l) {
 }
 
 cPartsCylinder::cPartsCylinder(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) {
+
 	dMassSetCylinderTotal(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
 	dBodySetMass(this->body, &mass);
 	this->geom = dCreateCylinder(EntityManager::get()->getSpace(), this->r, this->l);
@@ -164,17 +166,15 @@ cPartsCapsule::cPartsCapsule(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) 
 
 	//	ここからカプセル関連
 	dMassSetZero(&mass);
-	/*dReal newMass=5.0;
-	dMassAdjust(&mass,newMass);*/
-
+	
 	//	Cylinderの部分とほぼ同じ
-	this->body = dBodyCreate(EntityManager::get()->getWorld());
-	dMassSetCapsule(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
+	//this->body = dBodyCreate(EntityManager::get()->getWorld());
+	dMassSetCapsuleTotal(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
 	dBodySetMass(this->body, &mass);
 
 	//	ジオメトリの生成
 	this->geom = dCreateCapsule(EntityManager::get()->getSpace(), this->r, this->l);
-	
+	dGeomCapsuleSetParams(this->geom, this->r, this->l);
 	//ジオメトリとボディの対応付け
 	dGeomSetBody(this->geom, this->body);
 
@@ -208,6 +208,7 @@ void cFinger::setJoint() {
 	dJointSetHingeAxis(r_joint[ARM_M2], 0, 0, 1);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
+
 	// 固定ジョイント
 	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
@@ -217,12 +218,14 @@ void cFinger::setJoint() {
 	// センサ設定（力とトルクのに必要）
 	dJointSetFeedback(f2_joint, &force);
 }
-dReal capX = -3.0, capY = -0.5, capZ = 0.3;
-const dReal plateX = 1.5, plateY = 0.2, plateZ = 0.2;
+//把持物体の初期位置
+dReal capX = -2.0, capY = -0.5, capZ = 0.3;
+//
+const dReal plateX = 1.5, plateY = 0.58, plateZ = 0.4;
 //二本目の指の初期位置設定
 void cFinger::setJoint2() {
 
-	////	接触判定をするためのカプセルの生成
+	//	接触判定をするためのカプセルの生成
 	capsule.body = dBodyCreate(EntityManager::get()->getWorld());
 	dMassSetCapsule(&mass, DENSITY, 3, ARM_LINK2_RAD, ARM_LINK2_LEN);
 	dMass massPlate;
@@ -235,13 +238,13 @@ void cFinger::setJoint2() {
 	dGeomSetBody(geomBodySample, capsule.body);
 
 	//実際に把持する用のプレートの生成
-	
 	plateToGrasp.body= dBodyCreate(EntityManager::get()->getWorld());
 	dMassSetBox(&mass, DENSITY, plateX, plateY, plateZ);
+
 	//Bodyで位置と質量の設定
 	dMassSetZero(&massPlate);
 	dMassSetBoxTotal(&massPlate, newMass, plateX,plateY, plateZ);
-	dBodySetPosition(plateToGrasp.body, -1.1, capY, capZ);	//位置 //x=-1.1
+	dBodySetPosition(plateToGrasp.body, -0.8, capY, capZ);	//位置 //x=-1.1
 	//ジオメトリの生成
 	auto geomBodyPlate = dCreateBox(EntityManager::get()->getSpace(), plateX, plateY, plateZ);
 	//	動力学Bodyと衝突計算ジオメトリの対応
@@ -373,14 +376,14 @@ void DrawStuff::simLoop(int pause)
 	dsDrawCapsule(pos2, R2, ARM_LINK2_LEN, ARM_LINK2_RAD);  // カプセルの描画
 
 
-	// カプセルの描画
+	// 把持対象のプレートの描画
 	dsSetColorAlpha(1, 1, 1, 1);
 	pos2 = dBodyGetPosition(plateToGrasp.body);
 	R2 = dBodyGetRotation(plateToGrasp.body);
 	dReal sides[3] = { plateX,plateY,plateZ };
 	dsDrawBox(pos2, R2, sides);  // plateの描画
 
-	dSpaceCollide(EntityManager::get()->getSpace(), 0, &nearCallback);
+	//dSpaceCollide(EntityManager::get()->getSpace(), 0, &nearCallback);
 	if (!pause) {
 		auto sensor =_this->getParts()[3];
 		auto obj = EntityManager::get()->getObj();
@@ -455,14 +458,12 @@ void DrawStuff::simLoop(int pause)
 		//plateを二次元平面に拘束する=>z==0に毎回戻す
 		//plateの角速度
 		const dReal* rot = dBodyGetAngularVel(plateToGrasp.body);
-		
-
 		const dReal* quat_ptr;
 		dReal quat[4],quat_len;
 
 		quat_ptr = dBodyGetQuaternion(plateToGrasp.body);
 		quat[0] = quat_ptr[0];
-		quat[1] = 0;
+		quat[1] = 0.0;
 		quat[2] = 0.0;
 		quat[3] = quat_ptr[3];
 		//正規化
@@ -472,17 +473,16 @@ void DrawStuff::simLoop(int pause)
 
 		//現在の位置
 		const dReal* nowPos = dBodyGetPosition(plateToGrasp.body);
-
+		//速度,角度
 		dBodySetQuaternion(plateToGrasp.body,quat);
 		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
-		dBodySetPosition(plateToGrasp.body, nowPos[0], nowPos[1], 0.1);
+		dBodySetPosition(plateToGrasp.body, nowPos[0], nowPos[1], capZ);
 
-		//カプセルに外力を加える
-		//dBodyAddForceAtPos(capsule.body, 0,3.0*sin(sim->step/10.0),0.0, capX, capY, capZ-0.5);
 		//plateの端に外力を加える
-		if (sim->step > 500) {
+		if (sim->step > 10) {
+			int forceDir = (sim->step % 500 == 0) ? -1 : 1;
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
-			dBodyAddForceAtPos(plateToGrasp.body, 0, 100.0, 0.0, nowPos[0]-0.5,nowPos[1], nowPos[2]);
+			dBodyAddForceAtPos(plateToGrasp.body, 0, 2.0*forceDir, 0.0, nowPos[0]-0.5,nowPos[1], nowPos[2]);
 		}
 		
 
@@ -512,7 +512,8 @@ void DrawStuff::simLoop(int pause)
 
 #if FLAG_DRAW_SIM
 	// 終了設定
-		if (sim->step == DATA_CNT_NUM)	dsStop();
+		//if (sim->step == DATA_CNT_NUM)	dsStop();
+		if (sim->step == 10000)	dsStop();
 #endif
 	}
 #if FLAG_DRAW_SIM
@@ -530,9 +531,9 @@ void DrawStuff::simLoop(int pause)
 	//	drawObject(); // 衝突対象の描画
 	_this->getObj()->draw();
 #elif SIM_ADD_EXT_FORCE
-	drawExtForce();		// 外力の描画
-	drawExtForce2();	// 外力の描画
-
+	drawExtForce();		// 外力の描画(指1)
+	drawExtForce2();	// 外力の描画(指2)
+	//drawExtForcePlate(); // 外力の描画(把持物体)
 #endif
 #endif
 #if FLAG_DRAW_SIM & FLAG_SAVE_IMAGE
@@ -545,7 +546,7 @@ void DrawStuff::simLoop(int pause)
 	if (_this->step % SAVE_VIDEO_RATE == 0)	save_video();
 #endif
 	//衝突している物体の集合を空にする
-	dJointGroupEmpty(contactgroup);
+	//dJointGroupEmpty(contactgroup);
 }
 
 ////////////////////////////////////////////////////////

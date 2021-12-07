@@ -328,7 +328,7 @@ public:
 	std::vector<cParts*> finger;
 
 
-	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD };	// アームと密度をそろえる
+	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD};	// アームと密度をそろえる
 
 	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
 	cPartsBox	plate{ 10.0, Vec3(px1,py1,pz1),Vec3(1.5,0.5,0.5) };
@@ -552,6 +552,8 @@ public:
 	auto getSpace() const -> decltype(space) { return this->space; }
 //	void step(dReal time) { dWorldStep(this->world, time); }
 	static void nearCallback(void *data, dGeomID o1, dGeomID o2);
+	static void nearCallbackF2(void* data, dGeomID o1, dGeomID o2);
+
 };
 
 class EntityODE : public ODE {
@@ -575,8 +577,8 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = {  4* PI / 4.0, PI/8.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0, -PI/8.0 };			//二本目の指
+		double init_jnt_pos[2] = {  4* PI / 4.0-PI/7.0, PI/3.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0 + PI / 7.0, -PI/3.0 };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 
@@ -607,6 +609,8 @@ public:
 	void destroyObject() {	pObj.reset(); } // インスタンスの破壊	// 対象破壊（ボディ・ジオメトリ）
 	void update() {		// シミュレーションを１ステップ進行
 		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// 衝突判定
+		dSpaceCollide(this->getSpace(), 0, &this->nearCallbackF2);		// 衝突判定
+
 		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ステップ進める
 		dJointGroupEmpty(this->contactgroup); // ジョイントグループを空にする
 	}
