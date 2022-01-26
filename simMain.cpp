@@ -214,13 +214,27 @@ void cFinger::setJoint() {
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
 	dJointSetFixed(f2_joint);
 
+	// センサ用の固定ジョイント
+	//f3_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	//dJointAttach(f3_joint, finger[4]->getBody(), finger[3]->getBody());
+	//dJointSetFixed(f3_joint);
+#if 1
+	// 固定ジョイント	センサと指先の円柱	
+	sensor2FingerTop = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(sensor2FingerTop, fingerTopCapsule.getBody(), finger[3]->getBody());
+	dJointSetFixed(sensor2FingerTop);
 
+	// センサ設定（力とトルクの取得に必要）
+	//dJointSetFeedback(sensor2FingerTop, &force);
+#endif
 	// センサ設定（力とトルクのに必要）
 	dJointSetFeedback(f2_joint, &force);
+
+	
 }
 //把持物体の初期位置
 dReal capX = -2.0, capY = -0.5, capZ = 0.3;
-//
+//把持物体の大きさ
 const dReal plateX = 1.5, plateY = 0.58, plateZ = 0.4;
 //二本目の指の初期位置設定
 void cFinger::setJoint2() {
@@ -232,7 +246,7 @@ void cFinger::setJoint2() {
 	dReal newMass = 0.5;
 	dMassSetZero(&massPlate);
 	dMassSetCapsuleTotal(&massPlate,newMass,3,ARM_LINK2_RAD, ARM_LINK2_LEN);				//質量
-	dBodySetPosition(capsule.body, capX, capY, capZ);	//位置
+	dBodySetPosition(capsule.body, capX-10, capY-10, capZ);	//位置
 	auto geomBodySample = dCreateCapsule(EntityManager::get()->getSpace(), ARM_LINK2_RAD, ARM_LINK2_LEN);
 	//	動力学Bodyと衝突計算ジオメトリの対応
 	dGeomSetBody(geomBodySample, capsule.body);
@@ -259,7 +273,6 @@ void cFinger::setJoint2() {
 	dJointAttach(graspObj, plate.getBody(), 0);
 	dJointSetHingeAnchor(graspObj, px1, py1, pz1);
 
-
 	// 固定ジョイント
 	f_joint = dJointCreateFixed(sim->getWorld(), 0);
 	dJointAttach(f_joint, finger[0]->getBody(), 0);
@@ -270,24 +283,36 @@ void cFinger::setJoint2() {
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M1], x1, y1, 0.4 / 2);
 	dJointSetHingeAxis(r_joint[ARM_M1], 0, 0, 1);
-	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
-	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, 0);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI*2);
 
 	// ヒンジジョイント2
 	r_joint[ARM_M2] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M2], finger[2]->getBody(), finger[1]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M2], x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]), 0.4 / 2);
 	dJointSetHingeAxis(r_joint[ARM_M2], 0, 0, 1);
-	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
-	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
+	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI*2);
+	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, 0);
 
-	// 固定ジョイント
+	// 固定ジョイント	
 	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
 	dJointSetFixed(f2_joint);
 
+#if 1
+	// 固定ジョイント	センサと指先の円柱	
+	sensor2FingerTop = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(sensor2FingerTop, fingerTopCapsule.getBody(),finger[3]->getBody());
+	dJointSetFixed(sensor2FingerTop);
+
+
+	// センサ設定（力とトルクの取得に必要）
+	//dJointSetFeedback(sensor2FingerTop, &force);
+#endif
+
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(f2_joint, &force);
+
 }
 ////////////////////////////////////////////////////////
 // 描画設定
@@ -416,7 +441,6 @@ void DrawStuff::simLoop(int pause)
 #endif
 		//関節のフィードバックを反映
 		_this->p_force = dJointGetFeedback(_this->f2_joint);
-		//追加
 #if finger2_use
 		_this2->p_force = dJointGetFeedback(_this2->f2_joint);
 #endif

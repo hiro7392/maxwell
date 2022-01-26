@@ -313,9 +313,15 @@ class cFinger {
 	//cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 	//指先が円柱の時
 	//二つ目の指先をカプセルにする
-	cPartsCapsule	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
+	//cPartsCapsule	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 
-//	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
+	//第二関節は円柱のままにする
+	cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
+
+	//センサの長さ等について設定
+	//double sensorLength = 0.01;
+
+	//	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
 
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
@@ -326,7 +332,8 @@ class cFinger {
 	//double jnt_pos[ARM_JNT];
 public:
 	std::vector<cParts*> finger;
-
+	//指先のカプセル
+	cPartsCapsule	fingerTopCapsule{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD};	// アームと密度をそろえる
 
@@ -335,6 +342,8 @@ public:
 
 	dJointFeedback force, *p_force;
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
+	dJointID sensor2FingerTop;						//センサの先端用　先端のカプセルとセンサの結合点
+	
 	dJointID graspObj; 							  //把持対象のプレート kawahara
 
 	// 指の制御用変数
@@ -374,7 +383,6 @@ public:
 	// インピーダンス変数
 	Impedance	imp;
 	// 保存用データ変数
-
 	int save_state_contact[DATA_CNT_NUM] = {};
 	double	save_dist[DATA_CNT_NUM] = {};
 	double	save_ref_jnt_pos[DATA_CNT_NUM][ARM_JNT] = {};
@@ -447,12 +455,25 @@ public:
 		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0*cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0*sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
-		
+
+#if 0
+		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]),
+			y0 + (ARM_LINK1_LEN) * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN+0.3) / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),//指先のカプセル
+#else
+		//指先のカプセル
+		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+
+#endif
+
+
+		//fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),
 
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+
+		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 	}
 
 	//kawaharaが追加　二本目の指用
@@ -462,14 +483,23 @@ public:
 		finger[1]->setPosition(x1 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		finger[3]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
-		
+#if 0
+		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),//指先のカプセル
+#else
+		//指先のカプセル
+		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+
+#endif
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+
+		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 	}
 	void setColor(std::vector<Vec3> color) {
 		auto i = color.begin();
+		//fingerTopCapsule->setColor((*i).x, (*i).y, (*i).z);	//指先のカプセル用
 		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) 	(*j)->setColor((*i).x, (*i).y, (*i).z);
 	}
 
@@ -489,7 +519,10 @@ public:
 	int RestrictedCtrlMaxwell2(Matrix* tau);	//kawaharaが追記　二本目の指用
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
-	void draw() { for (auto &x : finger) { x->draw(); } }
+	void draw() { 
+		fingerTopCapsule.draw();
+		for (auto &x : finger) { x->draw(); 
+		} }
 };
 
 ////////////////////////////////////////////////////////
@@ -590,7 +623,6 @@ public:
 		this->pFinger2 = std::make_shared<cFinger>(init_jnt_posF2);	
 		this->pFinger2->fingerID = ++FingerNum;
 
-	
 		this->pObj = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
 		this->pObj2 = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
 

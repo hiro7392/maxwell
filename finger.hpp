@@ -9,7 +9,7 @@
 
 #include "texturepath.h"
 #include "simMain.h"
-#include "simMainF2.h"
+
 
 #include "simMode.h"
 #include "setEnv.h"
