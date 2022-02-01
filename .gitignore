@@ -338,3 +338,11 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/data/force1.csv
+*.csv
+/graphs
+/Finger2_F(Fx,Fy)=(1,0)_接触なし.xlsm
+/Finger2_F(Fx,Fy)=(0,1)_接触なし.xlsm
+/force2_2_接触なし.xlsm
+/force2_2.xlsm
+/force11.csv.txt

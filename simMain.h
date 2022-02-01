@@ -68,7 +68,7 @@
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	5000	// データ保存カウント数
+#define DATA_CNT_NUM	500	// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
 // 文字列定義
@@ -125,6 +125,8 @@ constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
+std::string forceOutfilename1 = "force1_2.csv";
+std::string forceOutfilename2 = "force2_2.csv";
 
 #endif
 
@@ -333,7 +335,7 @@ class cFinger {
 public:
 	std::vector<cParts*> finger;
 	//指先のカプセル
-	cPartsCapsule	fingerTopCapsule{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
+	cPartsCapsule	fingerTopCapsule{ ARM_LINK2_MASS, ARM_LINK2_LEN/3.0, ARM_LINK2_RAD };
 
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD};	// アームと密度をそろえる
 
@@ -349,6 +351,10 @@ public:
 	// 指の制御用変数
 	int fingerID;
 	int state_contact;			// 接触状態(0:OFF, 1:ON)
+
+
+	std::string forceOutFilename;	//力覚センサのcsv出力用
+	std::ofstream forceOutOfs;		//出力用ofstream
 
 	double	dist;				// アームと対象の距離
 	double	jnt_pos[ARM_JNT] = {};
@@ -397,6 +403,7 @@ public:
 	double	save_eff_force[DATA_CNT_NUM][DIM3] = {};
 	double	save_obj_pos[DATA_CNT_NUM][DIM3] = {};
 	double	save_obj_vel[DATA_CNT_NUM][DIM3] = {};
+	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
 	// 保存用ファイル名変数
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_info[DATA_FILE_NAME_MAXLEN] = {};
@@ -428,7 +435,7 @@ public:
 	//int ctrlMaxwell(Matrix* tau);
 
 	//コンストラクタ
-	cFinger(double* init_jnt_pos) 
+	cFinger(double* init_jnt_pos,std::string forceFilename) 
 		: jnt_pos{ init_jnt_pos[0], init_jnt_pos[1] }, 
 		finger{&base, &link1, &link2, &sensor} {
 		this->kine = Kinematics();
@@ -438,12 +445,15 @@ public:
 		this->var_prev = Variable();
 		this->var_prev2 = Variable();
 		this->var_init = Variable();
+		this->forceOutFilename = forceFilename;
+		
 	}
 ~cFinger() {		// ジョイント破壊
 		dJointDestroy(f_joint);				// 土台固定
 		dJointDestroy(r_joint[ARM_M1]);		// アーム
 		dJointDestroy(r_joint[ARM_M2]);		// アーム
 		dJointDestroy(f2_joint);   // センサ固定
+		//dJointDestroy(sensor2FingerTop);
 
 	}
 	auto getParts() { return finger; }
@@ -509,6 +519,8 @@ public:
 	void addExtForce();		// 外力
 
 	void addExtForce2();	// 外力
+
+	void outputForce();		//デバッグ用	外力をcsv出力する
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
@@ -610,17 +622,17 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = {  4* PI / 4.0-PI/7.0, PI/3.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0 + PI / 7.0, -PI/3.0 };			//二本目の指
+		double init_jnt_pos[2] = {  4* PI / 4.0/*-PI/7.0*/, /*PI/3.0*/0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0/* + PI / 7.0*/, /*-PI/3.0*/0 };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 
 		//1本目の指
-		this->pFinger = std::make_shared<cFinger>(init_jnt_pos);
+		this->pFinger = std::make_shared<cFinger>(init_jnt_pos,forceOutfilename1);
 		this->pFinger->fingerID = ++FingerNum;
 
 		//2本目の指
-		this->pFinger2 = std::make_shared<cFinger>(init_jnt_posF2);	
+		this->pFinger2 = std::make_shared<cFinger>(init_jnt_posF2,forceOutfilename2);	
 		this->pFinger2->fingerID = ++FingerNum;
 
 		this->pObj = std::make_shared<cPartsCylinder>(0.2, obj_pos, 0.15, 0.10);
@@ -641,7 +653,7 @@ public:
 	void destroyObject() {	pObj.reset(); } // インスタンスの破壊	// 対象破壊（ボディ・ジオメトリ）
 	void update() {		// シミュレーションを１ステップ進行
 		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// 衝突判定
-		dSpaceCollide(this->getSpace(), 0, &this->nearCallbackF2);		// 衝突判定
+		//dSpaceCollide(this->getSpace(), 0, &this->nearCallbackF2);		// 衝突判定
 
 		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ステップ進める
 		dJointGroupEmpty(this->contactgroup); // ジョイントグループを空にする

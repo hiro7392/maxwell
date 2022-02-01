@@ -127,11 +127,15 @@ void cFinger::addExtForce(){
 	
 	if (fingerID == 1) {
 		auto sensor = sim->getFinger()->getParts()[3];
-		dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y],eff_pos[CRD_Z]);
+		cPartsCapsule& fingerTopCapsule = sim->getFinger()->fingerTopCapsule;
+			
+		dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y],eff_pos[CRD_Z]);
 	}
 	else {
 		auto sensor = sim->getFinger2()->getParts()[3];
-		dBodyAddForceAtPos(sensor->getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X],eff_pos[CRD_Y],eff_pos[CRD_Z]);
+		cPartsCapsule& fingerTopCapsule = sim->getFinger2()->fingerTopCapsule;
+
+		dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X],eff_pos[CRD_Y],eff_pos[CRD_Z]);
 	}
 #if 1
 	printf("Finger %d extForce(fx,fy) = (%lf,%lf) \n",fingerID, ext_force[CRD_X], ext_force[CRD_Y]);
