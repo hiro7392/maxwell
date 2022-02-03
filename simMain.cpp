@@ -158,8 +158,9 @@ cPartsCylinder::cPartsCylinder(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r
 
 	dMassSetCylinderTotal(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
 	dBodySetMass(this->body, &mass);
-	//this->geom = dCreateCylinder(EntityManager::get()->getSpace(), this->r, this->l);
-	//dGeomSetBody(this->geom, this->body);
+	//ジオメトリの生成
+	this->geom = dCreateCylinder(EntityManager::get()->getSpace(), this->r, this->l);
+	dGeomSetBody(this->geom, this->body);
 }
 
 cPartsCapsule::cPartsCapsule(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) {
@@ -249,6 +250,7 @@ void cFinger::setJoint2() {
 	dGeomSetBody(geomBodySample, capsule.body);
 
 	//実際に把持する用のプレートの生成
+#if usePlateToGrasp
 	plateToGrasp.body= dBodyCreate(EntityManager::get()->getWorld());
 	dMassSetBox(&mass, DENSITY, plateX, plateY, plateZ);
 
@@ -260,7 +262,7 @@ void cFinger::setJoint2() {
 	auto geomBodyPlate = dCreateBox(EntityManager::get()->getSpace(), plateX, plateY, plateZ);
 	//	動力学Bodyと衝突計算ジオメトリの対応
 	dGeomSetBody(geomBodyPlate, plateToGrasp.body);
-
+#endif
 
 
 	auto sim = EntityManager::get();
@@ -408,14 +410,14 @@ void DrawStuff::simLoop(int pause)
 	R2 = dBodyGetRotation(capsule.body);
 	dsDrawCapsule(pos2, R2, ARM_LINK2_LEN, ARM_LINK2_RAD);  // カプセルの描画
 
-
+#if usePlateToGrasp
 	// 把持対象のプレートの描画
 	dsSetColorAlpha(1, 1, 1, 1);
 	pos2 = dBodyGetPosition(plateToGrasp.body);
 	R2 = dBodyGetRotation(plateToGrasp.body);
 	dReal sides[3] = { plateX,plateY,plateZ };
 	dsDrawBox(pos2, R2, sides);  // plateの描画
-
+#endif
 	//dSpaceCollide(EntityManager::get()->getSpace(), 0, &nearCallback);
 	if (!pause) {
 		auto sensor = _this->getParts()[3];
@@ -449,6 +451,7 @@ void DrawStuff::simLoop(int pause)
 #endif
 		//関節のフィードバックを反映
 		//_this->p_force = dJointGetFeedback(_this->f2_joint);
+		//関節にかかるトルクを取得する
 		_this->p_force = dJointGetFeedback(_this->sensor2FingerTop);
 #if finger2_use
 		//_this2->p_force = dJointGetFeedback(_this2->f2_joint);
@@ -490,6 +493,7 @@ void DrawStuff::simLoop(int pause)
 		_this2->control();
 #endif
 
+#if usePlateToGrasp
 		//plateを二次元平面に拘束する=>z==0に毎回戻す
 		//plateの角速度
 		const dReal* rot = dBodyGetAngularVel(plateToGrasp.body);
@@ -519,7 +523,7 @@ void DrawStuff::simLoop(int pause)
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
 			dBodyAddForceAtPos(plateToGrasp.body, 0, 2.0 * forceDir, 0.0, nowPos[0] - 0.5, nowPos[1], nowPos[2]);
 		}
-
+#endif
 
 		// 過去データとして代入
 		for (int jnt = 0; jnt < ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];

@@ -26,9 +26,9 @@
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
-#define finger2_use 1
+#define finger2_use 1		//二本目の指を使うとき
 #define print_debug 0
-
+#define usePlateToGrasp 0	//把持するプレートを置くとき
 
 //カプセル用
 #define DENSITY (5.0)	// 密度
@@ -106,6 +106,7 @@ void cFinger::control() {
 	double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };
 
 	matSetValDiag(&imp.M, impM); matSetValDiag(&imp.C, impC); matSetValDiag(&imp.K, impK); matSetValDiag(&imp.K0, impK0);	// ゲイン設定
+
 	ctrlPreProcessing();
 
 
