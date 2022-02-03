@@ -744,6 +744,7 @@
     <ClCompile Include="command.cpp" />
     <ClCompile Include="ctrlRobot.cpp" />
     <ClCompile Include="ctrlRobot2.cpp" />
+    <ClCompile Include="finger.cpp" />
     <ClCompile Include="finger.hpp" />
     <ClCompile Include="graphic.cpp" />
     <ClCompile Include="makeRobot.cpp" />
@@ -765,7 +766,6 @@
     <ClInclude Include="setEnv.h" />
     <ClInclude Include="setRobot.h" />
     <ClInclude Include="simMain.h" />
-    <ClInclude Include="simMainF2.h" />
     <ClInclude Include="simMode.h" />
     <ClInclude Include="texturepath.h" />
     <ClInclude Include="video.h" />

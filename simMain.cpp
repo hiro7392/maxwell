@@ -90,7 +90,8 @@ int exeCmd(int argc, char* argv[])
 		// シミュレーションループ
 #if FLAG_DRAW_SIM
 		DrawStuff DS;
-		dsSimulationLoop(argc, argv, DISPLAY_WIDTH, DISPLAY_HEIGHT, DS.getFn());
+		//dsSimulationLoop(argc, argv, DISPLAY_WIDTH, DISPLAY_HEIGHT, DS.getFn());
+		dsSimulationLoop(argc, argv,1280, 960, DS.getFn());
 #else
 		while (1) {
 			simLoop(0);
@@ -154,8 +155,10 @@ cPartsBox::cPartsBox(dReal m, Vec3 init_pos, Vec3 l) : cPartsBox(m, l) {
 }
 
 cPartsCylinder::cPartsCylinder(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) {
+
 	dMassSetCylinderTotal(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
 	dBodySetMass(this->body, &mass);
+	//ジオメトリの生成
 	this->geom = dCreateCylinder(EntityManager::get()->getSpace(), this->r, this->l);
 	dGeomSetBody(this->geom, this->body);
 }
@@ -164,17 +167,15 @@ cPartsCapsule::cPartsCapsule(dReal m, dReal l, dReal r) : cParts(m), l(l), r(r) 
 
 	//	ここからカプセル関連
 	dMassSetZero(&mass);
-	/*dReal newMass=5.0;
-	dMassAdjust(&mass,newMass);*/
-
+	
 	//	Cylinderの部分とほぼ同じ
-	this->body = dBodyCreate(EntityManager::get()->getWorld());
-	dMassSetCapsule(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
+	//this->body = dBodyCreate(EntityManager::get()->getWorld());
+	dMassSetCapsuleTotal(&this->mass, this->m, DIR_LONG_AXIS_Z, this->r, this->l);
 	dBodySetMass(this->body, &mass);
 
 	//	ジオメトリの生成
 	this->geom = dCreateCapsule(EntityManager::get()->getSpace(), this->r, this->l);
-	
+	dGeomCapsuleSetParams(this->geom, this->r, this->l);
 	//ジオメトリとボディの対応付け
 	dGeomSetBody(this->geom, this->body);
 
@@ -208,54 +209,76 @@ void cFinger::setJoint() {
 	dJointSetHingeAxis(r_joint[ARM_M2], 0, 0, 1);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
+
 	// 固定ジョイント
 	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
 	dJointSetFixed(f2_joint);
 
+	
+#if 1
+	// 固定ジョイント	センサと指先の円柱	
+	sensor2FingerTop = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(sensor2FingerTop, fingerTopCapsule.getBody(), finger[3]->getBody());
+	dJointSetFixed(sensor2FingerTop);
+
+	// センサ設定（力とトルクの取得に必要）
+	dJointSetFeedback(sensor2FingerTop, &force);
+
+	//指先カプセルとセンサを接続	//固定ジョイント
+	FingerTop2ForcePoint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(FingerTop2ForcePoint,forceContactPoint.getBody(), fingerTopCapsule.getBody());
+	dJointSetFixed(FingerTop2ForcePoint);
+
+	dJointSetFeedback(FingerTop2ForcePoint, &fingerTop2ForcePoint_joint);
+#endif
 
 	// センサ設定（力とトルクのに必要）
-	dJointSetFeedback(f2_joint, &force);
+	//dJointSetFeedback(f2_joint, &force);
+
+	
 }
-dReal capX = -3.0, capY = -0.5, capZ = 0.3;
-const dReal plateX = 1.5, plateY = 0.2, plateZ = 0.2;
+//把持物体の初期位置
+dReal capX = -2.0, capY = -0.5, capZ = 0.3;
+//把持物体の大きさ
+const dReal plateX = 1.5, plateY = 0.30, plateZ = 0.4;
+
+
 //二本目の指の初期位置設定
 void cFinger::setJoint2() {
 
-	////	接触判定をするためのカプセルの生成
+	//	接触判定をするためのカプセルの生成
 	capsule.body = dBodyCreate(EntityManager::get()->getWorld());
 	dMassSetCapsule(&mass, DENSITY, 3, ARM_LINK2_RAD, ARM_LINK2_LEN);
 	dMass massPlate;
 	dReal newMass = 0.5;
 	dMassSetZero(&massPlate);
 	dMassSetCapsuleTotal(&massPlate,newMass,3,ARM_LINK2_RAD, ARM_LINK2_LEN);				//質量
-	dBodySetPosition(capsule.body, capX, capY, capZ);	//位置
+	dBodySetPosition(capsule.body, capX-10, capY-10, capZ);	//位置
 	auto geomBodySample = dCreateCapsule(EntityManager::get()->getSpace(), ARM_LINK2_RAD, ARM_LINK2_LEN);
 	//	動力学Bodyと衝突計算ジオメトリの対応
 	dGeomSetBody(geomBodySample, capsule.body);
 
 	//実際に把持する用のプレートの生成
-	
+#if usePlateToGrasp
 	plateToGrasp.body= dBodyCreate(EntityManager::get()->getWorld());
 	dMassSetBox(&mass, DENSITY, plateX, plateY, plateZ);
+
 	//Bodyで位置と質量の設定
 	dMassSetZero(&massPlate);
 	dMassSetBoxTotal(&massPlate, newMass, plateX,plateY, plateZ);
-	dBodySetPosition(plateToGrasp.body, -1.1, capY, capZ);	//位置 //x=-1.1
+	dBodySetPosition(plateToGrasp.body, -0.8, capY, capZ);	//位置 //x=-1.1
 	//ジオメトリの生成
 	auto geomBodyPlate = dCreateBox(EntityManager::get()->getSpace(), plateX, plateY, plateZ);
 	//	動力学Bodyと衝突計算ジオメトリの対応
 	dGeomSetBody(geomBodyPlate, plateToGrasp.body);
-
-
-
+#endif
 	auto sim = EntityManager::get();
 
 	//把持する板を設置(位置は可変)
 	graspObj = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(graspObj, plate.getBody(), 0);
 	dJointSetHingeAnchor(graspObj, px1, py1, pz1);
-
 
 	// 固定ジョイント
 	f_joint = dJointCreateFixed(sim->getWorld(), 0);
@@ -267,24 +290,40 @@ void cFinger::setJoint2() {
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M1], x1, y1, 0.4 / 2);
 	dJointSetHingeAxis(r_joint[ARM_M1], 0, 0, 1);
-	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
-	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, 0);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI*2);
 
 	// ヒンジジョイント2
 	r_joint[ARM_M2] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M2], finger[2]->getBody(), finger[1]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M2], x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]), 0.4 / 2);
 	dJointSetHingeAxis(r_joint[ARM_M2], 0, 0, 1);
-	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
-	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
+	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI*2);
+	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, 0);
 
-	// 固定ジョイント
+	// 固定ジョイント	
 	f2_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(f2_joint, finger[3]->getBody(), finger[2]->getBody());
 	dJointSetFixed(f2_joint);
 
+#if 1
+	// 固定ジョイント	センサと指先の円柱	
+	sensor2FingerTop = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(sensor2FingerTop, fingerTopCapsule.getBody(),finger[3]->getBody());
+	dJointSetFixed(sensor2FingerTop);
+
 	// センサ設定（力とトルクの取得に必要）
-	dJointSetFeedback(f2_joint, &force);
+	dJointSetFeedback(sensor2FingerTop, &force);
+
+	//指先カプセルとセンサを接続	//固定ジョイント
+	FingerTop2ForcePoint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(FingerTop2ForcePoint, forceContactPoint.getBody(), fingerTopCapsule.getBody());
+	dJointSetFixed(FingerTop2ForcePoint);
+#endif
+
+	// センサ設定（力とトルクの取得に必要）
+	//dJointSetFeedback(f2_joint, &force);
+
 }
 ////////////////////////////////////////////////////////
 // 描画設定
@@ -344,8 +383,20 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-
-
+//センサの値を記録
+void cFinger::outputForce() {
+	forceOutOfs.open(forceOutFilename);
+	for (int k = 0; k < DATA_CNT_NUM; k++) {
+		forceOutOfs << k +1 << ",";
+		for (int i = 0; i < 2; i++) {
+			forceOutOfs << saveForce[k][i] << ",";
+		}
+		forceOutOfs << std::endl;
+	}
+	forceOutOfs.close();
+		
+		
+}
 
 ////////////////////////////////////////////////////////
 // シミュレーションループ
@@ -355,7 +406,7 @@ void DrawStuff::simLoop(int pause)
 	auto _this = EntityManager::get()->getFinger();
 #if finger2_use
 	//二本目の指用　kawahara
-	auto _this2 = EntityManager::get()->getFinger2();//kawahara二本目の指
+	auto _this2 = EntityManager::get()->getFinger2();
 	auto sensor2 = _this2->getParts()[3];
 	auto obj2 = EntityManager::get()->getObj2();
 #endif
@@ -372,19 +423,19 @@ void DrawStuff::simLoop(int pause)
 	R2 = dBodyGetRotation(capsule.body);
 	dsDrawCapsule(pos2, R2, ARM_LINK2_LEN, ARM_LINK2_RAD);  // カプセルの描画
 
-
-	// カプセルの描画
+#if usePlateToGrasp
+	// 把持対象のプレートの描画
 	dsSetColorAlpha(1, 1, 1, 1);
 	pos2 = dBodyGetPosition(plateToGrasp.body);
 	R2 = dBodyGetRotation(plateToGrasp.body);
 	dReal sides[3] = { plateX,plateY,plateZ };
 	dsDrawBox(pos2, R2, sides);  // plateの描画
-
-	dSpaceCollide(EntityManager::get()->getSpace(), 0, &nearCallback);
+#endif
+	//dSpaceCollide(EntityManager::get()->getSpace(), 0, &nearCallback);
 	if (!pause) {
-		auto sensor =_this->getParts()[3];
+		auto sensor = _this->getParts()[3];
 		auto obj = EntityManager::get()->getObj();
-		
+
 		// 初期設定
 #if SIM_OBJ_IMPACT
 		if (_this->step == 0)	dBodySetLinearVel(obj.body, _this->init_obj_att[AXIS_X][CRD_X] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Y] * SIM_OBJ_INIT_ABS_VEL, _this->init_obj_att[AXIS_X][CRD_Z] * SIM_OBJ_INIT_ABS_VEL);		// 対象速度
@@ -396,7 +447,7 @@ void DrawStuff::simLoop(int pause)
 		}
 #endif
 		// 状態取得
-		for (int jnt = 0; jnt<ARM_JNT; jnt++) {
+		for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(_this->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
 #if finger2_use
@@ -408,17 +459,20 @@ void DrawStuff::simLoop(int pause)
 		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
 		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
 #if finger2_use
-		dBodyGetRelPointPos(sensor2->getBody(), 0.0,0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
-		dBodyGetRelPointVel(sensor2->getBody(), 0.0,0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
+		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
+		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
 #endif
 		//関節のフィードバックを反映
-		_this->p_force = dJointGetFeedback(_this->f2_joint);
-		//追加
+		//_this->p_force = dJointGetFeedback(_this->f2_joint);
+		//関節にかかるトルクを取得する
+		_this->p_force = dJointGetFeedback(_this->sensor2FingerTop);
 #if finger2_use
-		_this2->p_force = dJointGetFeedback(_this2->f2_joint);
+		//_this2->p_force = dJointGetFeedback(_this2->f2_joint);
+		_this2->p_force = dJointGetFeedback(_this2->sensor2FingerTop);
+
 #endif
-		for (int crd = 0; crd<DIM3; crd++) {
-			_this->eff_force[crd] = -_this->p_force->f1[crd];				// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+		for (int crd = 0; crd < DIM3; crd++) {
+			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 			_this->obj_pos[crd] = (dBodyGetPosition(obj->getBody()))[crd];		// 対象位置
 			_this->obj_vel[crd] = (dBodyGetLinearVel(obj->getBody()))[crd];		// 対象速度
 #if finger2_use
@@ -437,9 +491,9 @@ void DrawStuff::simLoop(int pause)
 		// 外力設定
 #if SIM_ADD_EXT_FORCE
 		_this->addExtForce();
-	#if finger2_use
+#if finger2_use
 		_this2->addExtForce();
-	#endif
+#endif
 #endif
 		// ODE摩擦手動設定(粘性摩擦)
 		_this->setJntFric();
@@ -451,16 +505,42 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 		_this2->control();
 #endif
-		//カプセルに外力を加える
-		//dBodyAddForceAtPos(capsule.body, 0,3.0*sin(sim->step/10.0),0.0, capX, capY, capZ-0.5);
+
+#if usePlateToGrasp
+		//plateを二次元平面に拘束する=>z==0に毎回戻す
+		//plateの角速度
+		const dReal* rot = dBodyGetAngularVel(plateToGrasp.body);
+		const dReal* quat_ptr;
+		dReal quat[4], quat_len;
+
+		quat_ptr = dBodyGetQuaternion(plateToGrasp.body);
+		quat[0] = quat_ptr[0];
+		quat[1] = 0.0;
+		quat[2] = 0.0;
+		quat[3] = quat_ptr[3];
+		//正規化
+		/*quat_len = sqrt(quat[0] * quat[0] + quat[3] * quat[3]);
+		quat[0] /= quat_len;
+		quat[3] /= quat_len;*/
+
+		//現在の位置
+		const dReal* nowPos = dBodyGetPosition(plateToGrasp.body);
+		//速度,角度
+		dBodySetQuaternion(plateToGrasp.body, quat);
+		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
+		dBodySetPosition(plateToGrasp.body, nowPos[0], nowPos[1], capZ);
+
 		//plateの端に外力を加える
-		if (sim->step > 500) {
+		if (sim->step > 10 ) {
+			//int forceDir = (sim->step % 500 == 0) ? -1 : 1;
+			int forceDir = -1;
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
-			dBodyAddForceAtPos(plateToGrasp.body, 0, 10.0, 0.0, -0.20, capY, plateZ-0.1);
+			dBodyAddForceAtPos(plateToGrasp.body, 0, 5.0 * forceDir, 0.0, nowPos[0] - 0.5, nowPos[1], nowPos[2]);
 		}
+#endif
 
 		// 過去データとして代入
-		for (int jnt = 0; jnt<ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];
+		for (int jnt = 0; jnt < ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];
 		matCopy(&_this->var_prev2.r, &_this->var_prev.r); matCopy(&_this->var_prev2.dr, &_this->var_prev.dr);
 		matCopy(&_this->var_prev.r, &_this->var.r); matCopy(&_this->var_prev.dr, &_this->var.dr);
 
@@ -473,19 +553,17 @@ void DrawStuff::simLoop(int pause)
 		// 現在値を保存領域へコピー
 		copyData(_this.get());
 		copyData(_this2.get());
-		//_this->state_contact = 0;
+		// _this->state_contact = 0;
 #if finger2_use
-		//_this2->state_contact = 0;
+		// _this2->state_contact = 0;
 #endif	
-		
 		// シミュレーションを１ステップ進行
 		entity->update();
 		sim->step++;
-		
-
 #if FLAG_DRAW_SIM
-	// 終了設定
-		if (sim->step == DATA_CNT_NUM)	dsStop();
+		// 終了設定
+		if (sim->step == DATA_CNT_NUM+5)	dsStop();
+		//if (sim->step == 10000)	dsStop();
 #endif
 	}
 #if FLAG_DRAW_SIM
@@ -496,6 +574,21 @@ void DrawStuff::simLoop(int pause)
 #endif;
 	_this2->plate.draw();
 
+	//センサの値を出力
+	/*_this->outputForce();
+	_this2->outputForce();*/
+
+	if (sim->step < DATA_CNT_NUM) {
+		for (int i = 0; i < 2; i++)_this->saveForce[sim->step][i] = _this->var.F.el[i][0];
+		for (int i = 0; i < 2; i++)_this2->saveForce[sim->step][i] = _this2->var.F.el[i][0];
+	}else if(sim->step == DATA_CNT_NUM) {
+		_this->outputForce();
+		_this2->outputForce();
+	}
+	
+	
+
+
 
 	std::cout << "step:" << sim->step << std::endl;
 
@@ -503,10 +596,11 @@ void DrawStuff::simLoop(int pause)
 	//	drawObject(); // 衝突対象の描画
 	_this->getObj()->draw();
 #elif SIM_ADD_EXT_FORCE
-	drawExtForce();		// 外力の描画
-	drawExtForce2();	// 外力の描画
-
+	drawExtForce();		// 外力の描画(指1)
+	drawExtForce2();	// 外力の描画(指2)
+	//drawExtForcePlate(); // 外力の描画(把持物体)
 #endif
+
 #endif
 #if FLAG_DRAW_SIM & FLAG_SAVE_IMAGE
 					// 画像保存
@@ -518,7 +612,7 @@ void DrawStuff::simLoop(int pause)
 	if (_this->step % SAVE_VIDEO_RATE == 0)	save_video();
 #endif
 	//衝突している物体の集合を空にする
-	dJointGroupEmpty(contactgroup);
+	//dJointGroupEmpty(contactgroup);
 }
 
 ////////////////////////////////////////////////////////
