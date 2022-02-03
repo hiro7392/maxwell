@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////
 void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 {
-	return;
+	//return;
 	static const int N = 10;     // 接触点数
 	int	flag_ground, flag_sensor,flagFingerCylinder, flagFingerTopCapsule;	// 衝突検出用フラグ
 	dContact contact[N];
@@ -40,9 +40,10 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 		//	指先の衝突判定
 		flagFingerTopCapsule=((o1 == fingerTopCapsule.getGeom()) || (o2 == fingerTopCapsule.getGeom()));
 
-		//指先カプセルとアームの第二関節円柱が接触していても判定はないことにする
-		//if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
+		//	指先カプセルとアームの第二関節円柱が接触していても判定はないことにする
+		//	if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
 		//	((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
+
 
 		//センサと指先カプセルが接触していても判定しない
 		if (((o1 == sensor->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
@@ -105,7 +106,7 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 }
 void ODE::nearCallbackF2(void* data, dGeomID o1, dGeomID o2)
 {
-	return;
+	//return;
 	static const int N = 10;     // 接触点数
 	int	flag_ground, flag_sensor, flagFingerCylinder, flagFingerTopCapsule;	// 衝突検出用フラグ
 	dContact contact[N];

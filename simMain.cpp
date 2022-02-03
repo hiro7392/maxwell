@@ -224,7 +224,15 @@ void cFinger::setJoint() {
 
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(sensor2FingerTop, &force);
+
+	//指先カプセルとセンサを接続	//固定ジョイント
+	FingerTop2ForcePoint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(FingerTop2ForcePoint,forceContactPoint.getBody(), fingerTopCapsule.getBody());
+	dJointSetFixed(FingerTop2ForcePoint);
+
+	dJointSetFeedback(FingerTop2ForcePoint, &fingerTop2ForcePoint_joint);
 #endif
+
 	// センサ設定（力とトルクのに必要）
 	//dJointSetFeedback(f2_joint, &force);
 
@@ -233,7 +241,9 @@ void cFinger::setJoint() {
 //把持物体の初期位置
 dReal capX = -2.0, capY = -0.5, capZ = 0.3;
 //把持物体の大きさ
-const dReal plateX = 1.5, plateY = 0.40, plateZ = 0.4;
+const dReal plateX = 1.5, plateY = 0.30, plateZ = 0.4;
+
+
 //二本目の指の初期位置設定
 void cFinger::setJoint2() {
 
@@ -263,8 +273,6 @@ void cFinger::setJoint2() {
 	//	動力学Bodyと衝突計算ジオメトリの対応
 	dGeomSetBody(geomBodyPlate, plateToGrasp.body);
 #endif
-
-
 	auto sim = EntityManager::get();
 
 	//把持する板を設置(位置は可変)
@@ -304,9 +312,13 @@ void cFinger::setJoint2() {
 	dJointAttach(sensor2FingerTop, fingerTopCapsule.getBody(),finger[3]->getBody());
 	dJointSetFixed(sensor2FingerTop);
 
-
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(sensor2FingerTop, &force);
+
+	//指先カプセルとセンサを接続	//固定ジョイント
+	FingerTop2ForcePoint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(FingerTop2ForcePoint, forceContactPoint.getBody(), fingerTopCapsule.getBody());
+	dJointSetFixed(FingerTop2ForcePoint);
 #endif
 
 	// センサ設定（力とトルクの取得に必要）
@@ -382,6 +394,7 @@ void cFinger::outputForce() {
 		forceOutOfs << std::endl;
 	}
 	forceOutOfs.close();
+		
 		
 }
 
@@ -518,10 +531,11 @@ void DrawStuff::simLoop(int pause)
 		dBodySetPosition(plateToGrasp.body, nowPos[0], nowPos[1], capZ);
 
 		//plateの端に外力を加える
-		if (sim->step > 10 && false) {
-			int forceDir = (sim->step % 500 == 0) ? -1 : 1;
+		if (sim->step > 10 ) {
+			//int forceDir = (sim->step % 500 == 0) ? -1 : 1;
+			int forceDir = -1;
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
-			dBodyAddForceAtPos(plateToGrasp.body, 0, 2.0 * forceDir, 0.0, nowPos[0] - 0.5, nowPos[1], nowPos[2]);
+			dBodyAddForceAtPos(plateToGrasp.body, 0, 5.0 * forceDir, 0.0, nowPos[0] - 0.5, nowPos[1], nowPos[2]);
 		}
 #endif
 
@@ -539,20 +553,17 @@ void DrawStuff::simLoop(int pause)
 		// 現在値を保存領域へコピー
 		copyData(_this.get());
 		copyData(_this2.get());
-		//_this->state_contact = 0;
+		// _this->state_contact = 0;
 #if finger2_use
-		//_this2->state_contact = 0;
+		// _this2->state_contact = 0;
 #endif	
-
 		// シミュレーションを１ステップ進行
 		entity->update();
 		sim->step++;
-
-
 #if FLAG_DRAW_SIM
 		// 終了設定
-			//if (sim->step == DATA_CNT_NUM)	dsStop();
-		if (sim->step == 10000)	dsStop();
+		if (sim->step == DATA_CNT_NUM+5)	dsStop();
+		//if (sim->step == 10000)	dsStop();
 #endif
 	}
 #if FLAG_DRAW_SIM

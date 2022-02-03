@@ -68,7 +68,7 @@
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	500	// データ保存カウント数
+#define DATA_CNT_NUM	1000	// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
 // 文字列定義
@@ -302,6 +302,7 @@ public:
 	void draw() {
 		dsSetColor(color[0], color[1], color[2]);
 		dsDrawCapsule(dBodyGetPosition(getBody()), dBodyGetRotation(getBody()), this->l, this->r);
+
 	}
 };
 
@@ -335,20 +336,25 @@ class cFinger {
 public:
 	std::vector<cParts*> finger;
 	//指先のカプセル
-	cPartsCapsule	fingerTopCapsule{ ARM_LINK2_MASS, ARM_LINK2_LEN/3.0, ARM_LINK2_RAD };
+	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
+	cPartsCapsule	fingerTopCapsule{ ARM_LINK2_MASS, fingerTopCapsuleLen, ARM_LINK2_RAD };
 	//力の作用点	極薄の円柱
-	//cPartsCylinder forceContactPoint{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD/100 };
-
+	double forceContactPointThickness = 0.001;
+	cPartsCylinder forceContactPoint{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, forceContactPointThickness, ARM_LINK2_RAD/10};
+	
 	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD};	// アームと密度をそろえる
 
 	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
 	cPartsBox	plate{ 10.0, Vec3(px1,py1,pz1),Vec3(1.5,0.5,0.5) };
 
-	dJointFeedback force, *p_force;
-	dJointID f_joint, r_joint[ARM_JNT], f2_joint; // 固定関節と回転関節
-	dJointID sensor2FingerTop;						//センサの先端用　先端のカプセルとセンサの結合点
-	
-	dJointID graspObj; 							  //把持対象のプレート kawahara
+	dJointFeedback force, *p_force;		//力センサ用
+	dJointFeedback fingerTop2ForcePoint_joint;
+
+	dJointID f_joint, r_joint[ARM_JNT], f2_joint;	//	固定関節と回転関節
+	dJointID sensor2FingerTop;						//	センサの先端用　先端のカプセルとセンサの結合点
+	dJointID FingerTop2ForcePoint;					//	指先カプセルと力の作用点をつなぐ関節
+
+	dJointID graspObj; 								//把持対象のプレート kawahara
 
 	// 指の制御用変数
 	int fingerID;
@@ -474,9 +480,9 @@ public:
 			y0 + (ARM_LINK1_LEN) * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN+0.3) / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),//指先のカプセル
 #else
 		//指先のカプセル　センサと同じ位置
-		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		//力の作用点を指先端に固定
-		//forceContactPoint.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		forceContactPoint.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1+ fingerTopCapsuleLen/2.0+ARM_LINK2_RAD+ forceContactPointThickness /2) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1+ fingerTopCapsuleLen / 2.0 + ARM_LINK2_RAD+ forceContactPointThickness/2) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 
 #endif
 
@@ -489,6 +495,9 @@ public:
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+
+		forceContactPoint.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+
 	}
 
 	//kawaharaが追加　二本目の指用
@@ -502,8 +511,9 @@ public:
 		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),//指先のカプセル
 #else
 		//指先のカプセル
-		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
-
+		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);		forceContactPoint.setPosition(x0 + x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + ARM_LINK2_LEN / 2.0 + ARM_LINK2_RAD) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + ARM_LINK2_LEN / 2.0 + ARM_LINK2_RAD) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		//力の作用点を指先端に固定
+		forceContactPoint.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + fingerTopCapsuleLen / 2.0 + ARM_LINK2_RAD + forceContactPointThickness / 2) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + fingerTopCapsuleLen / 2.0 + ARM_LINK2_RAD + forceContactPointThickness / 2) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 #endif
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
@@ -511,6 +521,8 @@ public:
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+
+		forceContactPoint.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 	}
 	void setColor(std::vector<Vec3> color) {
 		auto i = color.begin();
@@ -518,9 +530,9 @@ public:
 		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) 	(*j)->setColor((*i).x, (*i).y, (*i).z);
 	}
 
-	void setJoint();	// 関節設定
-	void setJoint2();	// 関節設定 2本目の指
-	void setJntFric();	// 摩擦設定
+	void setJoint();		// 関節設定
+	void setJoint2();		// 関節設定 2本目の指
+	void setJntFric();		// 摩擦設定
 	void addExtForce();		// 外力
 
 	void addExtForce2();	// 外力
@@ -529,7 +541,7 @@ public:
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
-	int ctrlMaxwell2(Matrix* tau);		//kawaharaが追記　二本目の指用
+	int ctrlMaxwell2(Matrix* tau);	//kawaharaが追記　二本目の指用
 
 	//制約条件つきMaxwellモデル
 	int RestrictedCtrlMaxwell(Matrix* tau);
@@ -538,6 +550,7 @@ public:
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { 
 		fingerTopCapsule.draw();
+		forceContactPoint.draw();
 		for (auto &x : finger) { x->draw(); 
 		} }
 };
@@ -627,8 +640,8 @@ public:
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = {  4* PI / 4.0/*-PI/7.0*/, /*PI/3.0*/0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0/* + PI / 7.0*/, /*-PI/3.0*/0 };			//二本目の指
+		double init_jnt_pos[2] = {  4* PI / 4.0-PI/7.0, PI/3.0 };
+		double init_jnt_posF2[2] = { 4 * PI / 4.0+ PI / 7.0, -PI/3.0 };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 
