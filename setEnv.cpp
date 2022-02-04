@@ -9,7 +9,6 @@
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 
-
 ////////////////////////////////////////////////////////
 // 転がり摩擦
 ////////////////////////////////////////////////////////
@@ -106,13 +105,13 @@ void cFinger::addExtForce(){
 	if(sim->step <= 1000){
 
 		if (fingerID == 1) {
-			ext_force[CRD_X] = 1.0;
-			ext_force[CRD_Y] = 1.0;
+			ext_force[CRD_X] = -2.0;
+			ext_force[CRD_Y] = 2.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
-			ext_force[CRD_X] = 0.0;
-			ext_force[CRD_Y] = 0.0;
+			ext_force[CRD_X] = -1.0;
+			ext_force[CRD_Y] = 1.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 	}else{
@@ -127,6 +126,8 @@ void cFinger::addExtForce(){
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
 	
 	if (fingerID == 1) {
+		auto sensor = sim->getFinger()->getParts()[3];
+		cPartsCapsule& fingerTopCapsule = sim->getFinger()->fingerTopCapsule;
 		//指先のカプセルの内部に外力を加えるとき
 		//dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y],eff_pos[CRD_Z]);
 		
@@ -135,7 +136,8 @@ void cFinger::addExtForce(){
 
 	}
 	else {
-		//cPartsCapsule& fingerTopCapsule = sim->getFinger2()->fingerTopCapsule;
+		auto sensor = sim->getFinger2()->getParts()[3];
+		cPartsCapsule& fingerTopCapsule = sim->getFinger2()->fingerTopCapsule;
 		//指先のカプセルの内部に外力を加えるとき
 		//dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X],eff_pos[CRD_Y],eff_pos[CRD_Z]);
 		

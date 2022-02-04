@@ -28,7 +28,7 @@
 
 #define finger2_use 1		//二本目の指を使うとき
 #define print_debug 0
-#define usePlateToGrasp 1	//把持するプレートを置くとき
+#define usePlateToGrasp 0	//把持するプレートを置くとき
 
 //カプセル用
 #define DENSITY (5.0)	// 密度
@@ -112,12 +112,12 @@ void cFinger::control() {
 
 #if 1
 	if (fingerID == 1) {
-		ctrlMaxwell(&tau);
-		//RestrictedCtrlMaxwell(&tau);
+		//ctrlMaxwell(&tau);
+		RestrictedCtrlMaxwell(&tau);
 	}
 	else {
-		ctrlMaxwell2(&tau);
-		//RestrictedCtrlMaxwell2(&tau);
+		//ctrlMaxwell2(&tau);
+		RestrictedCtrlMaxwell2(&tau);
 	}
 
 

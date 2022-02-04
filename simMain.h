@@ -63,6 +63,7 @@
 #define	AXIS_X	0
 #define	AXIS_Y	1
 #define	AXIS_Z	2
+
 #define DIR_LONG_AXIS_Z	3	// 長軸方向(dMassSetCylinderTotalなどに利用)
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
@@ -346,8 +347,6 @@ public:
 	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
 	cPartsBox	plate{ 10.0, Vec3(px1,py1,pz1),Vec3(1.5,0.5,0.5) };
 
-
-	//
 	dJointFeedback force, *p_force;		//力センサ用
 	dJointFeedback fingerTop2ForcePoint_joint;
 

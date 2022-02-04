@@ -239,7 +239,7 @@ void cFinger::setJoint() {
 	
 }
 //把持物体の初期位置
-dReal capX = -5.0, capY = -0.5, capZ = 0.3;
+dReal capX = -2.0, capY = -0.5, capZ = 0.3;
 //把持物体の大きさ
 const dReal plateX = 1.5, plateY = 0.30, plateZ = 0.4;
 
@@ -420,6 +420,11 @@ void DrawStuff::simLoop(int pause)
 	auto sim = EntityManager::get();
 
 
+	// カプセルの描画
+	dsSetColorAlpha(1, 1, 1, 1);
+	pos2 = dBodyGetPosition(capsule.body);
+	R2 = dBodyGetRotation(capsule.body);
+	dsDrawCapsule(pos2, R2, ARM_LINK2_LEN, ARM_LINK2_RAD);  // カプセルの描画
 
 #if usePlateToGrasp
 	// 把持対象のプレートの描画
@@ -595,7 +600,7 @@ void DrawStuff::simLoop(int pause)
 	_this->getObj()->draw();
 #elif SIM_ADD_EXT_FORCE
 	drawExtForce();		// 外力の描画(指1)
-	//drawExtForce2();	// 外力の描画(指2)
+	drawExtForce2();	// 外力の描画(指2)
 	//drawExtForcePlate(); // 外力の描画(把持物体)
 #endif
 
