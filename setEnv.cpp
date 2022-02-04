@@ -110,8 +110,8 @@ void cFinger::addExtForce(){
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
-			ext_force[CRD_X] = -1.0;
-			ext_force[CRD_Y] = 1.0;
+			ext_force[CRD_X] =  0.0;
+			ext_force[CRD_Y] = 0.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 	}else{
@@ -121,7 +121,7 @@ void cFinger::addExtForce(){
 	}
 #endif
 
-	// 手先リンク表面の中心に外力入力
+	// 手先リンク表面の中心に外力入力q
 //	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
 	

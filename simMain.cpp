@@ -600,7 +600,7 @@ void DrawStuff::simLoop(int pause)
 	_this->getObj()->draw();
 #elif SIM_ADD_EXT_FORCE
 	drawExtForce();		// 外力の描画(指1)
-	drawExtForce2();	// 外力の描画(指2)
+	//drawExtForce2();	// 外力の描画(指2)
 	//drawExtForcePlate(); // 外力の描画(把持物体)
 #endif
 

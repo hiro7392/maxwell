@@ -1,4 +1,4 @@
-ï»¿//#include <ode/ode.h>
+//#include <ode/ode.h>
 //#include <drawstuff/drawstuff.h>
 #include <stdio.h>
 #include <math.h>
@@ -7,101 +7,101 @@
 #include "makeRobot.h"
 
 ////////////////////////////////////////////////////////
-// ï¿½ï¿½ï¿½{ï¿½bï¿½gï¿½ì¬
-// ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Rï¿½x
+// ƒƒ{ƒbƒgì¬
+// •½–Ê2©—R“x
 ////////////////////////////////////////////////////////
-int makeFinger(SIM *sim, int idx);
+int makeFinger(SIM* sim, int idx);
 #if 0
-int createRobot(SIM *sim)
+int createRobot(SIM* sim)
 {
 	makeFinger(sim, 0);
 	return 0;
 }
 
-int makeFinger(SIM *sim, int idx)
+int makeFinger(SIM* sim, int idx)
 {
 	auto _this = EntityManager::get();
 	dMass mass;
 	dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
 	dMatrix3	R;
 	//
-	MyObject *arm = sim->sys.finger[idx].arm;
-	MyObject *base = &sim->sys.finger[idx].base;
-	MyObject *sensor = &sim->sys.finger[idx].sensor;
-	// ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½İ’ï¿½
+	MyObject* arm = sim->sys.finger[idx].arm;
+	MyObject* base = &sim->sys.finger[idx].base;
+	MyObject* sensor = &sim->sys.finger[idx].sensor;
+	// ƒpƒ‰ƒ[ƒ^İ’è
 #define	Z_OFFSET	0.08
-	base->sides[CRD_X] = 0.3;	base->sides[CRD_Y] = 0.3;	base->sides[CRD_Z] = 0.4;	base->m = 14.0;	// ï¿½yï¿½ä’¼ï¿½ï¿½ï¿½ï¿½
-	arm[ARM_M1].l = ARM_LINK1_LEN;	arm[ARM_M1].r = ARM_LINK1_RAD;	arm[ARM_M1].m = ARM_LINK1_MASS;	// ï¿½Aï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½N1ï¿½~ï¿½ï¿½
-	arm[ARM_M2].l = ARM_LINK2_LEN;	arm[ARM_M2].r = ARM_LINK2_RAD;	arm[ARM_M2].m = ARM_LINK2_MASS;	// ï¿½Aï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½N2ï¿½~ï¿½ï¿½
-	sensor->l = 0.0001;    // ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½Tï¿½Cï¿½Yï¿½Ì‰eï¿½ï¿½ï¿½ï¿½ï¿½oï¿½È‚ï¿½ï¿½æ‚¤ï¿½Éï¿½ï¿½ï¿½ï¿½ß‚Éİ’ï¿½j
+	base->sides[CRD_X] = 0.3;	base->sides[CRD_Y] = 0.3;	base->sides[CRD_Z] = 0.4;	base->m = 14.0;	// “y‘ä’¼•û‘Ì
+	arm[ARM_M1].l = ARM_LINK1_LEN;	arm[ARM_M1].r = ARM_LINK1_RAD;	arm[ARM_M1].m = ARM_LINK1_MASS;	// ƒA[ƒ€ƒŠƒ“ƒN1‰~’Œ
+	arm[ARM_M2].l = ARM_LINK2_LEN;	arm[ARM_M2].r = ARM_LINK2_RAD;	arm[ARM_M2].m = ARM_LINK2_MASS;	// ƒA[ƒ€ƒŠƒ“ƒN2‰~’Œ
+	sensor->l = 0.0001;    // ’·‚³iƒTƒCƒY‚Ì‰e‹¿‚ªo‚È‚¢‚æ‚¤‚É¬‚³‚ß‚Éİ’èj
 	sensor->r = ARM_LINK2_RAD;
-	sensor->m   = sensor->l/ARM_LINK2_LEN * ARM_LINK2_MASS;		// ï¿½Aï¿½[ï¿½ï¿½ï¿½Æ–ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½ë‚¦ï¿½ï¿½
+	sensor->m = sensor->l / ARM_LINK2_LEN * ARM_LINK2_MASS;		// ƒA[ƒ€‚Æ–§“x‚ğ‚»‚ë‚¦‚é
 
-	// ï¿½yï¿½ä¶ï¿½ï¿½
+	// “y‘ä¶¬
 	base->body = dBodyCreate(_this->world);
 	dMassSetZero(&mass);
 	dMassSetBoxTotal(&mass, base->m, base->sides[CRD_X], base->sides[CRD_Y], base->sides[CRD_Z]);
 	dBodySetMass(base->body, &mass);
-	dBodySetPosition(base->body, x0, y0, base->sides[CRD_Z]/2);
+	dBodySetPosition(base->body, x0, y0, base->sides[CRD_Z] / 2);
 	base->geom = dCreateBox(_this->space, base->sides[CRD_X], base->sides[CRD_Y], base->sides[CRD_Z]);
 	dGeomSetBody(base->geom, base->body);
-	// ï¿½Aï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½N1ï¿½ï¿½ï¿½ï¿½
-	arm[ARM_M1].body   = dBodyCreate(_this->world);
+	// ƒA[ƒ€ƒŠƒ“ƒN1¶¬
+	arm[ARM_M1].body = dBodyCreate(_this->world);
 	dMassSetZero(&mass);
 	dMassSetCylinderTotal(&mass, arm[ARM_M1].m, DIR_LONG_AXIS_Z, arm[ARM_M1].r, arm[ARM_M1].l);
 	dBodySetMass(arm[ARM_M1].body, &mass);
-	dBodySetPosition(arm[ARM_M1].body, x0+arm[ARM_M1].l/2.0*cos(sim->init_jnt_pos[ARM_M1]), y0+arm[ARM_M1].l/2.0*sin(sim->init_jnt_pos[ARM_M1]), base->sides[CRD_Z]/2.0-Z_OFFSET);
-	dRFromAxisAndAngle(R, -sin(sim->init_jnt_pos[ARM_M1]), cos(sim->init_jnt_pos[ARM_M1]), 0, PI/2);
+	dBodySetPosition(arm[ARM_M1].body, x0 + arm[ARM_M1].l / 2.0 * cos(sim->init_jnt_pos[ARM_M1]), y0 + arm[ARM_M1].l / 2.0 * sin(sim->init_jnt_pos[ARM_M1]), base->sides[CRD_Z] / 2.0 - Z_OFFSET);
+	dRFromAxisAndAngle(R, -sin(sim->init_jnt_pos[ARM_M1]), cos(sim->init_jnt_pos[ARM_M1]), 0, PI / 2);
 	dBodySetRotation(arm[ARM_M1].body, R);
 	arm[ARM_M1].geom = dCreateCylinder(_this->space, arm[ARM_M1].r, arm[ARM_M1].l);
 	dGeomSetBody(arm[ARM_M1].geom, arm[ARM_M1].body);
-	// ï¿½Aï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½N2ï¿½ï¿½ï¿½ï¿½
-	arm[ARM_M2].body   = dBodyCreate(_this->world);
+	// ƒA[ƒ€ƒŠƒ“ƒN2¶¬
+	arm[ARM_M2].body = dBodyCreate(_this->world);
 	dMassSetZero(&mass);
 	dMassSetCylinderTotal(&mass, arm[ARM_M2].m, DIR_LONG_AXIS_Z, arm[ARM_M2].r, arm[ARM_M2].l);
 	dBodySetMass(arm[ARM_M2].body, &mass);
-	dBodySetPosition(arm[ARM_M2].body, x0+arm[ARM_M1].l*cos(sim->init_jnt_pos[ARM_M1])+arm[ARM_M2].l/2.0*cos(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), y0+arm[ARM_M1].l*sin(sim->init_jnt_pos[ARM_M1])+arm[ARM_M2].l/2.0*sin(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), base->sides[CRD_Z]/2.0-Z_OFFSET);
-	dRFromAxisAndAngle(R, -sin(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), cos(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), 0, PI/2);
+	dBodySetPosition(arm[ARM_M2].body, x0 + arm[ARM_M1].l * cos(sim->init_jnt_pos[ARM_M1]) + arm[ARM_M2].l / 2.0 * cos(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), y0 + arm[ARM_M1].l * sin(sim->init_jnt_pos[ARM_M1]) + arm[ARM_M2].l / 2.0 * sin(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), base->sides[CRD_Z] / 2.0 - Z_OFFSET);
+	dRFromAxisAndAngle(R, -sin(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), cos(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), 0, PI / 2);
 	dBodySetRotation(arm[ARM_M2].body, R);
 	arm[ARM_M2].geom = dCreateCylinder(_this->space, arm[ARM_M2].r, arm[ARM_M2].l);
 	dGeomSetBody(arm[ARM_M2].geom, arm[ARM_M2].body);
-	// ï¿½Zï¿½ï¿½ï¿½Tï¿½iï¿½ï¿½ï¿½É•tï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½Tï¿½Cï¿½Yï¿½Ì‰eï¿½ï¿½ï¿½ï¿½ï¿½oï¿½È‚ï¿½ï¿½æ‚¤ï¿½Éï¿½ï¿½ï¿½ï¿½ß‚Éİ’ï¿½j
+	// ƒZƒ“ƒTièæ‚É•t‰Á‚µCƒTƒCƒY‚Ì‰e‹¿‚ªo‚È‚¢‚æ‚¤‚É¬‚³‚ß‚Éİ’èj
 	sensor->body = dBodyCreate(_this->world);
 	dMassSetZero(&mass);
 	dMassSetCylinderTotal(&mass, sensor->m, DIR_LONG_AXIS_Z, sensor->r, sensor->l);
 	dBodySetMass(sensor->body, &mass);
-	dBodySetPosition(sensor->body, x0+arm[ARM_M1].l*cos(sim->init_jnt_pos[ARM_M1])+(arm[ARM_M2].l+sensor->l/2.0)*cos(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), y0+arm[ARM_M1].l*sin(sim->init_jnt_pos[ARM_M1])+(arm[ARM_M2].l+sensor->l/2.0)*sin(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), base->sides[CRD_Z]/2.0-Z_OFFSET);
-	dRFromAxisAndAngle(R, -sin(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), cos(sim->init_jnt_pos[ARM_M1]+sim->init_jnt_pos[ARM_M2]), 0, PI/2);
+	dBodySetPosition(sensor->body, x0 + arm[ARM_M1].l * cos(sim->init_jnt_pos[ARM_M1]) + (arm[ARM_M2].l + sensor->l / 2.0) * cos(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), y0 + arm[ARM_M1].l * sin(sim->init_jnt_pos[ARM_M1]) + (arm[ARM_M2].l + sensor->l / 2.0) * sin(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), base->sides[CRD_Z] / 2.0 - Z_OFFSET);
+	dRFromAxisAndAngle(R, -sin(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), cos(sim->init_jnt_pos[ARM_M1] + sim->init_jnt_pos[ARM_M2]), 0, PI / 2);
 	dBodySetRotation(sensor->body, R);
 	sensor->geom = dCreateCylinder(_this->space, sensor->r, sensor->l);
 	dGeomSetBody(sensor->geom, sensor->body);
-	// ï¿½Å’ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½g
+	// ŒÅ’èƒWƒ‡ƒCƒ“ƒg
 	_this->f_joint = dJointCreateFixed(_this->world, 0);
 	dJointAttach(_this->f_joint, base->body, 0);
 	dJointSetFixed(_this->f_joint);
-	// ï¿½qï¿½ï¿½ï¿½Wï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½g1
+	// ƒqƒ“ƒWƒWƒ‡ƒCƒ“ƒg1
 	_this->r_joint[ARM_M1] = dJointCreateHinge(_this->world, 0);
 	dJointAttach(_this->r_joint[ARM_M1], arm[ARM_M1].body, base->body);
-	dJointSetHingeAnchor(_this->r_joint[ARM_M1], x0, y0, base->sides[CRD_Z]/2);
+	dJointSetHingeAnchor(_this->r_joint[ARM_M1], x0, y0, base->sides[CRD_Z] / 2);
 	dJointSetHingeAxis(_this->r_joint[ARM_M1], 0, 0, 1);
 	dJointSetHingeParam(_this->r_joint[ARM_M1], dParamLoStop, -M_PI);
 	dJointSetHingeParam(_this->r_joint[ARM_M1], dParamHiStop, M_PI);
-//	dJointSetHingeParam(_this->r_joint[ARM_M1], dParamFudgeFactor, 0.1);
-//	dJointSetHingeParam(_this->r_joint[ARM_M1], dParamStopERP, 0.8);
-	// ï¿½qï¿½ï¿½ï¿½Wï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½g2
+	//	dJointSetHingeParam(_this->r_joint[ARM_M1], dParamFudgeFactor, 0.1);
+	//	dJointSetHingeParam(_this->r_joint[ARM_M1], dParamStopERP, 0.8);
+		// ƒqƒ“ƒWƒWƒ‡ƒCƒ“ƒg2
 	_this->r_joint[ARM_M2] = dJointCreateHinge(_this->world, 0);
 	dJointAttach(_this->r_joint[ARM_M2], arm[ARM_M2].body, arm[ARM_M1].body);
-	dJointSetHingeAnchor(_this->r_joint[ARM_M2], x0+arm[ARM_M1].l*cos(sim->init_jnt_pos[ARM_M1]), y0+arm[ARM_M1].l*sin(sim->init_jnt_pos[ARM_M1]), base->sides[CRD_Z]/2);
+	dJointSetHingeAnchor(_this->r_joint[ARM_M2], x0 + arm[ARM_M1].l * cos(sim->init_jnt_pos[ARM_M1]), y0 + arm[ARM_M1].l * sin(sim->init_jnt_pos[ARM_M1]), base->sides[CRD_Z] / 2);
 	dJointSetHingeAxis(_this->r_joint[ARM_M2], 0, 0, 1);
 	dJointSetHingeParam(_this->r_joint[ARM_M2], dParamLoStop, -M_PI);
 	dJointSetHingeParam(_this->r_joint[ARM_M2], dParamHiStop, M_PI);
-//	dJointSetHingeParam(_this->r_joint[ARM_M2], dParamFudgeFactor, 0.1);
-//	dJointSetHingeParam(_this->r_joint[ARM_M2], dParamStopERP, 0.8);
-	// ï¿½Å’ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½g
-	_this->f2_joint = dJointCreateFixed(_this->world, 0);  // ï¿½Å’ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½g
+	//	dJointSetHingeParam(_this->r_joint[ARM_M2], dParamFudgeFactor, 0.1);
+	//	dJointSetHingeParam(_this->r_joint[ARM_M2], dParamStopERP, 0.8);
+		// ŒÅ’èƒWƒ‡ƒCƒ“ƒg
+	_this->f2_joint = dJointCreateFixed(_this->world, 0);  // ŒÅ’èƒWƒ‡ƒCƒ“ƒg
 	dJointAttach(_this->f2_joint, sensor->body, arm[ARM_M2].body);
 	dJointSetFixed(_this->f2_joint);
-	// ï¿½Zï¿½ï¿½ï¿½Tï¿½İ’ï¿½iï¿½Í‚Æƒgï¿½ï¿½ï¿½Nï¿½Ìæ“¾ï¿½É•Kï¿½vï¿½j
+	// ƒZƒ“ƒTİ’èi—Í‚Æƒgƒ‹ƒN‚Ìæ“¾‚É•K—vj
 	dJointSetFeedback(_this->f2_joint, &_this->force);
 
 	return	0;
@@ -109,17 +109,17 @@ int makeFinger(SIM *sim, int idx)
 #endif
 
 ////////////////////////////////////////////////////////
-// ï¿½ï¿½ï¿½{ï¿½bï¿½gï¿½`ï¿½ï¿½
+// ƒƒ{ƒbƒg•`‰æ
 ////////////////////////////////////////////////////////
 int drawRobot()
 {
-	const dReal *pos, *R;
+	const dReal* pos, * R;
 	//  const dReal sides[3] = {0.5,0.5,0.5};
 
 #if 0
-	MyObject *arm = sim->sys.finger[idx].arm;
-	MyObject *base = &sim->sys.finger[idx].base;
-	MyObject *sensor = &sim->sys.finger[idx].sensor;
+	MyObject* arm = sim->sys.finger[idx].arm;
+	MyObject* base = &sim->sys.finger[idx].base;
+	MyObject* sensor = &sim->sys.finger[idx].sensor;
 #else
 	auto base = EntityManager::get()->getFinger()->getParts()[0];
 	auto link1 = EntityManager::get()->getFinger()->getParts()[1];
@@ -127,24 +127,24 @@ int drawRobot()
 	auto sensor = EntityManager::get()->getFinger()->getParts()[3];
 #endif
 #if 0
-	// ï¿½yï¿½ï¿½`ï¿½ï¿½
-	dsSetColor(1.0, 0.0, 0.0);                       // ï¿½ÔF
+	// “y‘ä•`‰æ
+	dsSetColor(1.0, 0.0, 0.0);                       // ÔF
 	pos = dBodyGetPosition(base->getBody());
 	R = dBodyGetRotation(base->getBody());
 	dsDrawBox(pos, R, base->sides);
-	// ï¿½Aï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½N1ï¿½`ï¿½ï¿½
+	// ƒA[ƒ€ƒŠƒ“ƒN1•`‰æ
 	pos = dBodyGetPosition(link1->getBody());
 	R = dBodyGetRotation(link1->getBody());
-	dsSetColor(0.0, 0.0, 1.0);                    // ï¿½ÂF
+	dsSetColor(0.0, 0.0, 1.0);                    // ÂF
 	dsDrawCylinder(pos, R, arm[ARM_M1].l, arm[ARM_M1].r);
-	// ï¿½Aï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½N2ï¿½`ï¿½ï¿½
+	// ƒA[ƒ€ƒŠƒ“ƒN2•`‰æ
 	pos = dBodyGetPosition(link2->getBody());
 	R = dBodyGetRotation(link2->getBody());
-	dsSetColor(0.0, 0.5, 0.5);                    // ï¿½ÂF
+	dsSetColor(0.0, 0.5, 0.5);                    // ÂF
 	dsDrawCylinder(pos, R, arm[ARM_M2].l, arm[ARM_M2].r);
-	//      dsSetColor(1.2,1.2,1.2);                   // ï¿½ï¿½ï¿½F
+	//      dsSetColor(1.2,1.2,1.2);                   // ”’F
 	//      dsDrawCylinder(pos2, R2, arm.l, arm.r);
-	// ï¿½Zï¿½ï¿½ï¿½Tï¿½`ï¿½ï¿½
+	// ƒZƒ“ƒT•`‰æ
 	pos = dBodyGetPosition(sensor->getBody());
 	R = dBodyGetRotation(sensor->getBody());
 	dsSetColor(0.0, 0.5, 0.5);                    // 
@@ -158,7 +158,7 @@ int drawRobot()
 }
 
 ////////////////////////////////////////////////////////
-// ï¿½ï¿½ï¿½Ê’ï¿½ï¿½Sï¿½\ï¿½ï¿½
+// ¿—Ê’†S•\¦
 ////////////////////////////////////////////////////////
 /*
 int drawCoM()
@@ -190,122 +190,91 @@ int drawCoM()
 	dsSetColor(0.2, 0.0, 0.1);
 	dsDrawSphere(pos_CoM, dammy_R , 0.01);
 
-	// ï¿½fï¿½oï¿½bï¿½Oï¿½\ï¿½ï¿½
+	// ƒfƒoƒbƒO•\¦
 	printf("mass=%f ", m_all);
 	return 0;
 }
 */
 
 ////////////////////////////////////////////////////////
-// ï¿½Oï¿½Í•`ï¿½ï¿½
-// ï¿½ÍƒZï¿½ï¿½ï¿½Tï¿½Ì’lï¿½É”ï¿½á‚µï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+// ŠO—Í•`‰æ
+// —ÍƒZƒ“ƒT‚Ì’l‚É”ä—á‚µ‚½’¼ü‚ğ•\¦‚·‚é
 ////////////////////////////////////////////////////////
-int drawExtForce(){
-	int width;
-	dJointFeedback *fb;
-	dVector3	p_s, p_e;    // ï¿½ï¿½ï¿½Ìnï¿½_ï¿½ÆIï¿½_
-	double k1 = 0.3;  // ï¿½ï¿½ï¿½ï¿½ï¿½Ì”ï¿½ï¿½è”
-	double line_w = 0.05;
-	dVector3	arrow_center, arrow_r, arrow_l;    // ï¿½ï¿½ï¿½Ì’ï¿½ï¿½_
-	dVector3	rect_ul, rect_ll, rect_ur, rect_lr;    // ï¿½ï¿½ï¿½Ì’ï¿½ï¿½_
-	dVector3	line, line_e;    // 
-	dVector3	ext_f;	// ï¿½Oï¿½ï¿½
-	double angArrow = PI/6;  //çŸ¢å°ã®è§’åº¦ rad
-	dJointFeedback *p_force,*p_force2;
-	
-//	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
-	dMatrix3	R;
-	double angArrow = PI/6;  //çŸ¢å°ã®è§’åº¦ rad
-	dJointFeedback *p_force;
-	
-//	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
+int drawExtForce() {
+
 	auto _this = EntityManager::get();
-	auto sensor = _this->getFinger()->getParts()[3];
 
+	//ƒZƒ“ƒT‚É‚©‚©‚é—Í‚ğ•`‰æ
+	cParts* sensor = _this->getFinger()->getParts()[3];		//ƒZƒ“ƒT‚©‚çæ“¾‚·‚éê‡
+	drawForceCylinder(sensor, dJointGetFeedback(_this->getFinger()->sensor2FingerTop));
 
-	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl()/2.0, p_s);			// æ‰‹å…ˆä½ç½®
-//		endP[0] = pos[0] + k1*sensor[jnt].f1[0];
-//		endP[1] = pos[1] + k1*sensor[jnt].f1[1];
-//		endP[2] = pos[2] + k1*sensor[jnt].f1[2];
-	//p_force = dJointGetFeedback(_this->getFinger()->f2_joint);
-	p_force = dJointGetFeedback(_this->getFinger()->sensor2FingerTop);
+	//	wæ‚É‚Â‚¢‚Ä
+	cPartsCylinder&  forcePoint = _this->getFinger()->forceContactPoint;			//ƒZƒ“ƒT‚©‚çæ“¾‚·‚éê‡
+	drawForceFingerTop(forcePoint, dJointGetFeedback(_this->getFinger()->sensor2FingerTop));
 
+	////ƒZƒ“ƒT‚É‚©‚©‚é—Í‚ğ•`‰æ
+	cParts* sensor2 = _this->getFinger2()->getParts()[3];		//ƒZƒ“ƒT‚©‚çæ“¾‚·‚éê‡
+	drawForceCylinder(sensor2, dJointGetFeedback(_this->getFinger2()->sensor2FingerTop));
 
-	std::cout << "p_force f1" << p_force->f1[0] << std::endl;
-	for(int crd=0;crd<DIM3;crd++)	ext_f[crd] = -p_force->f1[crd];	// å¯¾è±¡ãŒã‚»ãƒ³ã‚µã«åŠã¼ã—ã¦ã„ã‚‹åŠ›=ã‚»ãƒ³ã‚µãŒé–¢ç¯€ã«åŠã¼ã—ã¦ã„ã‚‹åŠ›
-	p_s[CRD_Z] += sensor->getr(); //è…•ã®ä¸Šã«è¡¨ç¤º
-	for(int crd=0;crd<DIM3;crd++)	p_e[crd] = p_s[crd] - k1*ext_f[crd];
-//	p_e[CRD_Z] = p_s[CRD_Z] + sensor.r;	// è…•ã®ä¸Šã«è¡¨ç¤º
-	p_e[CRD_Z] = p_s[CRD_Z];	// zï¿½ï¿½ï¿½ï¿½ï¿½Ì—Í‚Í–ï¿½ï¿½ï¿½
-	dsSetColor(1.0, 1.0, 1.0);                    // 
-#if 1
-//	arrow_l[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]-k1/2*fb->f1[CRD_Y];
-//	arrow_l[CRD_Y] = p_s[CRD_Y]+k1/2*fb->f1[CRD_Y]+k1/2*fb->f1[CRD_X];
-//	arrow_l[CRD_Z] = p_s[CRD_Z];
-//	arrow_r[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]+k1/2*fb->f1[CRD_Y];
-//	arrow_r[CRD_Y] = p_s[CRD_Y]+k1/2*fb->f1[CRD_Y]-k1/2*fb->f1[CRD_X];
-//	arrow_r[CRD_Z] = p_s[CRD_Z];
-	arrow_center[CRD_X] = 0;	arrow_center[CRD_Y] = 0.0;	arrow_center[CRD_Z] = 0;
-	arrow_l[CRD_X] = sin(angArrow)* ext_f[0] * k1 / 3;
-	arrow_l[CRD_Y] = cos(angArrow)* ext_f[0] * k1 / 3;
-	arrow_l[CRD_Z] = 0;
-	arrow_r[CRD_X] = -sin(angArrow)* ext_f[0] * k1 / 3;
-	arrow_r[CRD_Y] = cos(angArrow)* ext_f[0] * k1 / 3;
-	arrow_r[CRD_Z] = 0;
-	rect_ul[CRD_X] = rect_ll[CRD_X] = sin(angArrow)* ext_f[0] * k1 / 8;
-	rect_ur[CRD_X] = rect_lr[CRD_X] = -sin(angArrow)* ext_f[0] * k1 / 8;
-	rect_ul[CRD_Y] = rect_ur[CRD_Y] = cos(angArrow)* ext_f[0] * k1 / 3;
-	rect_ll[CRD_Y] = rect_lr[CRD_Y] = k1 * ext_f[0];
-	rect_ul[CRD_Z] = rect_ll[CRD_Z] = rect_ur[CRD_Z] = rect_lr[CRD_Z] = 0.0;
+	//	wæ‚É‚Â‚¢‚Ä
+	cPartsCylinder& forcePoint2 = _this->getFinger2()->forceContactPoint;			//ŠO—Í‚Æ‚ÌÚG“_(wæ‰~’Œ)‚©‚çæ“¾‚·‚éê‡
+	drawForceFingerTop(forcePoint2, dJointGetFeedback(_this->getFinger2()->sensor2FingerTop));
 
-	dRFromAxisAndAngle(R, 0, 0, 1, PI - atan2(p_s[CRD_Y] - p_e[CRD_Y], p_s[CRD_X] - p_e[CRD_X]));
-//	printf("%f %f %f\n\n", rect_ll[0],rect_ll[1],rect_ll[2]);
-
-	// ï¿½ï¿½ï¿½Ì“ï¿½
-	dsDrawTriangle(p_s, R, arrow_center, arrow_l, arrow_r, 1); // 
-	// ï¿½ï¿½ï¿½Ìï¿½ï¿½iï¿½Oï¿½pï¿½`ï¿½ï¿½2ï¿½Âï¿½ï¿½í‚¹ï¿½Ä•ï¿½ï¿½Ìï¿½ï¿½Âï¿½ï¿½ï¿½lï¿½pï¿½`ï¿½Æ‚ï¿½ï¿½Ä•\ï¿½ï¿½ï¿½j
-	dsDrawTriangle(p_s, R, rect_ul, rect_ll, rect_ur, 1); // 
-	dsDrawTriangle(p_s, R, rect_ur, rect_ll, rect_lr, 1); // 
-
-//	dsDrawLine(p_s, p_e); // p_sï¿½ï¿½ï¿½ï¿½p_eï¿½Ü‚Å‚Ì’ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½ï¿½
-//	dsDrawLine(line_center, p_e); // p_sï¿½ï¿½ï¿½ï¿½p_eï¿½Ü‚Å‚Ì’ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½ï¿½
-#endif
 	return	0;
 }
 
-
-
-//ï¿½ï¿½{ï¿½Ú‚Ìwï¿½ÌŠOï¿½Í‚ï¿½`ï¿½ï¿½
-int drawExtForce2() {
+void drawForceCylinder(cParts* sensor,dJointFeedback* p_force) {
 	int width;
 	dJointFeedback* fb;
-	dVector3	p_s, p_e;    // ï¿½ï¿½ï¿½Ìnï¿½_ï¿½ÆIï¿½_
-	double k1 = 0.3;  // ï¿½ï¿½ï¿½ï¿½ï¿½Ì”ï¿½ï¿½è”
+	dVector3	p_s, p_e;    // ü‚Ìn“_‚ÆI“_
+	double k1 = 0.3;  // ü’·‚Ì”ä—á’è”
 	double line_w = 0.05;
-	dVector3	arrow_center, arrow_r, arrow_l;    // ï¿½ï¿½ï¿½Ì’ï¿½ï¿½_
-	dVector3	rect_ul, rect_ll, rect_ur, rect_lr;    // ï¿½ï¿½ï¿½Ì’ï¿½ï¿½_
-	dVector3	line, line_e;    // 
-	dVector3	ext_f;	// ï¿½Oï¿½ï¿½
-	dMatrix3	R;
-	double angArrow = PI / 6;  //ï¿½ï¿½ï¿½ÌŠpï¿½x rad
-	dJointFeedback* p_force;
 
-	//	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
+	dVector3	ext_f;	// ŠO—Í
+	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
 	auto _this = EntityManager::get();
-	auto sensor = _this->getFinger2()->getParts()[3];
 
-
-	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, p_s);			// ï¿½ï¿½ï¿½Ê’u
-//		endP[0] = pos[0] + k1*sensor[jnt].f1[0];
-//		endP[1] = pos[1] + k1*sensor[jnt].f1[1];
-//		endP[2] = pos[2] + k1*sensor[jnt].f1[2];
-
-	p_force = dJointGetFeedback(_this->getFinger2()->sensor2FingerTop);
-	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// ï¿½ÎÛ‚ï¿½ï¿½Zï¿½ï¿½ï¿½Tï¿½É‹yï¿½Ú‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½=ï¿½Zï¿½ï¿½ï¿½Tï¿½ï¿½ï¿½Öß‚É‹yï¿½Ú‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½
-	p_s[CRD_Z] += sensor->getr(); //ï¿½rï¿½Ìï¿½É•\ï¿½ï¿½
+	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, p_s);			// èæˆÊ’u
+	
+	//std::cout << "p_force f1" << p_force->f1[0] << std::endl;
+	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// ‘ÎÛ‚ªƒZƒ“ƒT‚É‹y‚Ú‚µ‚Ä‚¢‚é—Í=ƒZƒ“ƒT‚ªŠÖß‚É‹y‚Ú‚µ‚Ä‚¢‚é—Í
+	p_s[CRD_Z] += sensor->getr(); //˜r‚Ìã‚É•\¦
 	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
-	//	p_e[CRD_Z] = p_s[CRD_Z] + sensor.r;	// ï¿½rï¿½Ìï¿½É•\ï¿½ï¿½
-	p_e[CRD_Z] = p_s[CRD_Z];	// zï¿½ï¿½ï¿½ï¿½ï¿½Ì—Í‚Í–ï¿½ï¿½ï¿½
+	drawArrow(p_s, p_e, ext_f);	//ƒZƒ“ƒT‚ÉŠÖ‚µ‚Ä‚©‚©‚é—Í‚ğ•`‰æ
+}
+
+void drawForceFingerTop(cPartsCylinder& sensor, dJointFeedback* p_force) {
+	int width;
+	dJointFeedback* fb;
+	dVector3	p_s, p_e;    // ü‚Ìn“_‚ÆI“_
+	double k1 = 0.3;  // ü’·‚Ì”ä—á’è”
+	double line_w = 0.05;
+
+	dVector3	ext_f;	// ŠO—Í
+	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
+	auto _this = EntityManager::get();
+
+	dBodyGetRelPointPos(sensor.getBody(), 0.0, 0.0, sensor.getl() / 2.0, p_s);			// èæˆÊ’u
+	
+	//std::cout << "p_force f1" << p_force->f1[0] << std::endl;
+	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// ‘ÎÛ‚ªƒZƒ“ƒT‚É‹y‚Ú‚µ‚Ä‚¢‚é—Í=ƒZƒ“ƒT‚ªŠÖß‚É‹y‚Ú‚µ‚Ä‚¢‚é—Í
+	p_s[CRD_Z] += sensor.getr(); //˜r‚Ìã‚É•\¦
+	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
+	drawArrow(p_s, p_e, ext_f);	//ƒZƒ“ƒT‚ÉŠÖ‚µ‚Ä‚©‚©‚é—Í‚ğ•`‰æ
+}
+
+
+//–îˆó‚ğ•`‰æ‚·‚éŠÖ”
+//ˆø”(–îˆó‚Ìn“_,–îˆó‚ÌI“_,‰Á‚¦‚é—Í‚Ì•ûŒü)
+void drawArrow(dVector3	p_s, dVector3 p_e, dVector3 ext_f) {
+	p_e[CRD_Z] = p_s[CRD_Z];	// z•ûŒü‚Ì—Í‚Í–³‹
+	double k1 = 0.3;  // ü’·‚Ì”ä—á’è”
+	double line_w = 0.05;
+	dVector3	arrow_center, arrow_r, arrow_l;    // –îˆó‚Ì’¸“_
+	dVector3	rect_ul, rect_ll, rect_ur, rect_lr;    // –îˆó‚Ì’¸“_
+	dVector3	line, line_e;    // 
+	dMatrix3	R;
+	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
 	dsSetColor(1.0, 1.0, 1.0);                    // 
 #if 1
 //	arrow_l[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]-k1/2*fb->f1[CRD_Y];
@@ -330,14 +299,83 @@ int drawExtForce2() {
 	dRFromAxisAndAngle(R, 0, 0, 1, PI - atan2(p_s[CRD_Y] - p_e[CRD_Y], p_s[CRD_X] - p_e[CRD_X]));
 	//	printf("%f %f %f\n\n", rect_ll[0],rect_ll[1],rect_ll[2]);
 
-		// ï¿½ï¿½ï¿½Ì“ï¿½
+		// –îˆó‚Ì“ª
 	dsDrawTriangle(p_s, R, arrow_center, arrow_l, arrow_r, 1); // 
-	// ï¿½ï¿½ï¿½Ìï¿½ï¿½iï¿½Oï¿½pï¿½`ï¿½ï¿½2ï¿½Âï¿½ï¿½í‚¹ï¿½Ä•ï¿½ï¿½Ìï¿½ï¿½Âï¿½ï¿½ï¿½lï¿½pï¿½`ï¿½Æ‚ï¿½ï¿½Ä•\ï¿½ï¿½ï¿½j
+	// –îˆó‚ÌüiOŠpŒ`‚ğ2‚Â‡‚í‚¹‚Ä•‚Ì‚Âü‚ğlŠpŒ`‚Æ‚µ‚Ä•\¦j
 	dsDrawTriangle(p_s, R, rect_ul, rect_ll, rect_ur, 1); // 
 	dsDrawTriangle(p_s, R, rect_ur, rect_ll, rect_lr, 1); // 
 
-//	dsDrawLine(p_s, p_e); // p_sï¿½ï¿½ï¿½ï¿½p_eï¿½Ü‚Å‚Ì’ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½ï¿½
-//	dsDrawLine(line_center, p_e); // p_sï¿½ï¿½ï¿½ï¿½p_eï¿½Ü‚Å‚Ì’ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½ï¿½
+//	dsDrawLine(p_s, p_e); // p_s‚©‚çp_e‚Ü‚Å‚Ì’¼ü‚ğ•`‰æ
+//	dsDrawLine(line_center, p_e); // p_s‚©‚çp_e‚Ü‚Å‚Ì’¼ü‚ğ•`‰æ
+#endif
+	return;
+}
+
+
+
+//“ñ–{–Ú‚Ìw‚ÌŠO—Í‚ğ•`‰æ
+int drawExtForce2() {
+	int width;
+	dJointFeedback* fb;
+	dVector3	p_s, p_e;    // ü‚Ìn“_‚ÆI“_
+	double k1 = 0.3;  // ü’·‚Ì”ä—á’è”
+	double line_w = 0.05;
+	dVector3	arrow_center, arrow_r, arrow_l;    // –îˆó‚Ì’¸“_
+	dVector3	rect_ul, rect_ll, rect_ur, rect_lr;    // –îˆó‚Ì’¸“_
+	dVector3	line, line_e;    // 
+	dVector3	ext_f;	// ŠO—Í
+	dMatrix3	R;
+	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
+	dJointFeedback* p_force;
+
+	//	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
+	auto _this = EntityManager::get();
+	auto sensor = _this->getFinger2()->getParts()[3];
+
+
+	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, p_s);			// èæˆÊ’u
+//		endP[0] = pos[0] + k1*sensor[jnt].f1[0];
+//		endP[1] = pos[1] + k1*sensor[jnt].f1[1];
+//		endP[2] = pos[2] + k1*sensor[jnt].f1[2];
+
+	p_force = dJointGetFeedback(_this->getFinger2()->sensor2FingerTop);
+	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// ‘ÎÛ‚ªƒZƒ“ƒT‚É‹y‚Ú‚µ‚Ä‚¢‚é—Í=ƒZƒ“ƒT‚ªŠÖß‚É‹y‚Ú‚µ‚Ä‚¢‚é—Í
+	p_s[CRD_Z] += sensor->getr(); //˜r‚Ìã‚É•\¦
+	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
+	//	p_e[CRD_Z] = p_s[CRD_Z] + sensor.r;	// ˜r‚Ìã‚É•\¦
+	p_e[CRD_Z] = p_s[CRD_Z];	// z•ûŒü‚Ì—Í‚Í–³‹
+	dsSetColor(1.0, 1.0, 1.0);                    // 
+#if 1
+//	arrow_l[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]-k1/2*fb->f1[CRD_Y];
+//	arrow_l[CRD_Y] = p_s[CRD_Y]+k1/2*fb->f1[CRD_Y]+k1/2*fb->f1[CRD_X];
+//	arrow_l[CRD_Z] = p_s[CRD_Z];
+//	arrow_r[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]+k1/2*fb->f1[CRD_Y];
+//	arrow_r[CRD_Y] = p_s[CRD_Y]+k1/2*fb->f1[CRD_Y]-k1/2*fb->f1[CRD_X];
+//	arrow_r[CRD_Z] = p_s[CRD_Z];
+	arrow_center[CRD_X] = 0;	arrow_center[CRD_Y] = 0.0;	arrow_center[CRD_Z] = 0;
+	arrow_l[CRD_X] = sin(angArrow) * ext_f[0] * k1 / 3;
+	arrow_l[CRD_Y] = cos(angArrow) * ext_f[0] * k1 / 3;
+	arrow_l[CRD_Z] = 0;
+	arrow_r[CRD_X] = -sin(angArrow) * ext_f[0] * k1 / 3;
+	arrow_r[CRD_Y] = cos(angArrow) * ext_f[0] * k1 / 3;
+	arrow_r[CRD_Z] = 0;
+	rect_ul[CRD_X] = rect_ll[CRD_X] = sin(angArrow) * ext_f[0] * k1 / 8;
+	rect_ur[CRD_X] = rect_lr[CRD_X] = -sin(angArrow) * ext_f[0] * k1 / 8;
+	rect_ul[CRD_Y] = rect_ur[CRD_Y] = cos(angArrow) * ext_f[0] * k1 / 3;
+	rect_ll[CRD_Y] = rect_lr[CRD_Y] = k1 * ext_f[0];
+	rect_ul[CRD_Z] = rect_ll[CRD_Z] = rect_ur[CRD_Z] = rect_lr[CRD_Z] = 0.0;
+
+	dRFromAxisAndAngle(R, 0, 0, 1, PI - atan2(p_s[CRD_Y] - p_e[CRD_Y], p_s[CRD_X] - p_e[CRD_X]));
+	//	printf("%f %f %f\n\n", rect_ll[0],rect_ll[1],rect_ll[2]);
+
+		// –îˆó‚Ì“ª
+	dsDrawTriangle(p_s, R, arrow_center, arrow_l, arrow_r, 1); // 
+	// –îˆó‚ÌüiOŠpŒ`‚ğ2‚Â‡‚í‚¹‚Ä•‚Ì‚Âü‚ğlŠpŒ`‚Æ‚µ‚Ä•\¦j
+	dsDrawTriangle(p_s, R, rect_ul, rect_ll, rect_ur, 1); // 
+	dsDrawTriangle(p_s, R, rect_ur, rect_ll, rect_lr, 1); // 
+
+//	dsDrawLine(p_s, p_e); // p_s‚©‚çp_e‚Ü‚Å‚Ì’¼ü‚ğ•`‰æ
+//	dsDrawLine(line_center, p_e); // p_s‚©‚çp_e‚Ü‚Å‚Ì’¼ü‚ğ•`‰æ
 #endif
 	return	0;
 }
@@ -346,70 +384,70 @@ int drawExtForce2() {
 
 
 ////////////////////////////////////////////////////////
-// ï¿½ï¿½ï¿½{ï¿½bï¿½gï¿½jï¿½ï¿½
+// ƒƒ{ƒbƒg”j‰ó
 ////////////////////////////////////////////////////////
 #if 0
 int destroyRobot()
 {
 	auto _this = EntityManager::get();
 #if 0
-	MyObject *arm = sim->sys.finger[idx].arm;
-	MyObject *base = &sim->sys.finger[idx].base;
-	MyObject *sensor = &sim->sys.finger[idx].sensor;
+	MyObject* arm = sim->sys.finger[idx].arm;
+	MyObject* base = &sim->sys.finger[idx].base;
+	MyObject* sensor = &sim->sys.finger[idx].sensor;
 #else
 	auto base = _this->getFinger()->getParts()[0];
 	auto link1 = _this->getFinger()->getParts()[1];
 	auto link2 = _this->getFinger()->getParts()[2];
 	auto sensor = _this->getFinger()->getParts()[3];
 #endif
-	// ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½gï¿½jï¿½ï¿½
-	dJointDestroy(_this->f_joint);   // ï¿½yï¿½ï¿½Å’ï¿½
-	dJointDestroy(_this->r_joint[ARM_M1]);   // ï¿½Aï¿½[ï¿½ï¿½
-	dJointDestroy(_this->r_joint[ARM_M2]);   // ï¿½Aï¿½[ï¿½ï¿½
-	dJointDestroy(_this->f2_joint);   // ï¿½Zï¿½ï¿½ï¿½Tï¿½Å’ï¿½
-	// ï¿½{ï¿½fï¿½Bï¿½jï¿½ï¿½
-	dBodyDestroy(base->getBody()); // ï¿½yï¿½ï¿½
-	dBodyDestroy(link1->getBody());  // ï¿½Aï¿½[ï¿½ï¿½
-	dBodyDestroy(link2->getBody());  // ï¿½Aï¿½[ï¿½ï¿½
-	dBodyDestroy(sensor->getBody());  // ï¿½Zï¿½ï¿½ï¿½T
-	// ï¿½Wï¿½Iï¿½ï¿½ï¿½gï¿½ï¿½ï¿½jï¿½ï¿½
-	dGeomDestroy(base->getGeom()); // ï¿½yï¿½ï¿½
-	dGeomDestroy(link1->getGeom());  // ï¿½Aï¿½[ï¿½ï¿½
-	dGeomDestroy(link2->getGeom());  // ï¿½Aï¿½[ï¿½ï¿½
-	dGeomDestroy(sensor->getGeom());  // ï¿½Zï¿½ï¿½ï¿½T
+	// ƒWƒ‡ƒCƒ“ƒg”j‰ó
+	dJointDestroy(_this->f_joint);   // “y‘äŒÅ’è
+	dJointDestroy(_this->r_joint[ARM_M1]);   // ƒA[ƒ€
+	dJointDestroy(_this->r_joint[ARM_M2]);   // ƒA[ƒ€
+	dJointDestroy(_this->f2_joint);   // ƒZƒ“ƒTŒÅ’è
+	// ƒ{ƒfƒB”j‰ó
+	dBodyDestroy(base->getBody()); // “y‘ä
+	dBodyDestroy(link1->getBody());  // ƒA[ƒ€
+	dBodyDestroy(link2->getBody());  // ƒA[ƒ€
+	dBodyDestroy(sensor->getBody());  // ƒZƒ“ƒT
+	// ƒWƒIƒƒgƒŠ”j‰ó
+	dGeomDestroy(base->getGeom()); // “y‘ä
+	dGeomDestroy(link1->getGeom());  // ƒA[ƒ€
+	dGeomDestroy(link2->getGeom());  // ƒA[ƒ€
+	dGeomDestroy(sensor->getGeom());  // ƒZƒ“ƒT
 	return	0;
 }
 #endif
 
 ////////////////////////////////////////////////////////
-// ï¿½ÎÛì¬
+// ‘ÎÛì¬
 ////////////////////////////////////////////////////////
 #if 0
-int createObject(SIM *sim)
+int createObject(SIM* sim)
 {
 	auto _this = EntityManager::get();
 	dMass mass;
 	dMatrix3	R;
-	MyObject *obj = &sim->sys.obj;
+	MyObject* obj = &sim->sys.obj;
 
-	// ï¿½pï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½^ï¿½İ’ï¿½
-	obj->l = 0.15;	obj->r = 0.10;	obj->m = 0.2;	// ï¿½~ï¿½ï¿½
+	// ƒpƒ‰ƒ[ƒ^İ’è
+	obj->l = 0.15;	obj->r = 0.10;	obj->m = 0.2;	// ‰~’Œ
 #if 1
-	// ï¿½~ï¿½ï¿½
-	obj->body   = dBodyCreate(_this->world);
+	// ‰~’Œ
+	obj->body = dBodyCreate(_this->world);
 	dMassSetZero(&mass);
 	dMassSetCylinderTotal(&mass, obj->m, DIR_LONG_AXIS_Z, obj->r, obj->l);
 	dBodySetMass(obj->body, &mass);
 	dBodySetPosition(obj->body, sim->init_obj_pos[CRD_X], sim->init_obj_pos[CRD_Y], sim->init_obj_pos[CRD_Z]);
-//	dRFromAxisAndAngle(R, 1, 0, 0, PI/2);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½yï¿½ï¿½ï¿½ï¿½ï¿½É‰ï¿½]
-//	dRFromAxisAndAngle(R, 0, 1, 0, PI/2);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½ï¿½É‰ï¿½]
+	//	dRFromAxisAndAngle(R, 1, 0, 0, PI/2);	// ’·²‚ğy•ûŒü‚É‰ñ“]
+	//	dRFromAxisAndAngle(R, 0, 1, 0, PI/2);	// ’·²‚ğx•ûŒü‚É‰ñ“]
 	dRFrom2Axes(R, sim->init_obj_att[AXIS_X][CRD_X], sim->init_obj_att[AXIS_X][CRD_Y], sim->init_obj_att[AXIS_X][CRD_Z], sim->init_obj_att[AXIS_Y][CRD_X], sim->init_obj_att[AXIS_Y][CRD_Y], sim->init_obj_att[AXIS_Y][CRD_Z]);
 	dBodySetRotation(obj->body, R);
 	obj->geom = dCreateCylinder(_this->space, obj->r, obj->l);
 	dGeomSetBody(obj->geom, obj->body);
 #else
-	// ï¿½ï¿½
-	obj->body   = dBodyCreate(_this->world);
+	// ‹…
+	obj->body = dBodyCreate(_this->world);
 	dMassSetZero(&mass);
 	dMassSetSphereTotal(&mass, obj->m, obj->r);
 	dBodySetMass(obj->body, &mass);
@@ -422,21 +460,21 @@ int createObject(SIM *sim)
 #endif
 
 ////////////////////////////////////////////////////////
-// ï¿½ÎÛ•`ï¿½ï¿½
+// ‘ÎÛ•`‰æ
 ////////////////////////////////////////////////////////
 #if 0
-int drawObject(SIM *sim)
+int drawObject(SIM* sim)
 {
 	int	i;
-	const dReal *pos,*R;
-	MyObject *obj = &sim->sys.obj;
-	// ï¿½Õ“Ë‘ÎÛ•`ï¿½ï¿½
+	const dReal* pos, * R;
+	MyObject* obj = &sim->sys.obj;
+	// Õ“Ë‘ÎÛ•`‰æ
 	pos = dBodyGetPosition(obj->body);
-	R   = dBodyGetRotation(obj->body);
+	R = dBodyGetRotation(obj->body);
 	dsSetColor(0.5, 0.5, 1.0);                    // 
-#if 1	// ï¿½~ï¿½ï¿½
+#if 1	// ‰~’Œ
 	dsDrawCylinder(pos, R, obj->l, obj->r);
-#else	// ï¿½ï¿½
+#else	// ‹…
 	dsDrawSphere(pos, R, obj->r);
 #endif
 	return	0;
@@ -444,23 +482,23 @@ int drawObject(SIM *sim)
 #endif
 
 ////////////////////////////////////////////////////////
-// ï¿½ÎÛ”jï¿½ï¿½
+// ‘ÎÛ”j‰ó
 ////////////////////////////////////////////////////////
 #if 0
-int destroyObject(SIM *sim)
+int destroyObject(SIM* sim)
 {
-	MyObject *obj = &sim->sys.obj;
-	// ï¿½{ï¿½fï¿½Bï¿½jï¿½ï¿½
+	MyObject* obj = &sim->sys.obj;
+	// ƒ{ƒfƒB”j‰ó
 	dBodyDestroy(obj->body);
-	// ï¿½Wï¿½Iï¿½ï¿½ï¿½gï¿½ï¿½ï¿½jï¿½ï¿½
+	// ƒWƒIƒƒgƒŠ”j‰ó
 	dGeomDestroy(obj->geom);
 	return	0;
 }
 #endif
 
 ////////////////////////////////////////////////////////
-// ï¿½ï¿½ï¿½{ï¿½bï¿½gï¿½ì¬
-// ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Rï¿½x
+// ƒƒ{ƒbƒgì¬
+// •½–Ê2©—R“x
 ////////////////////////////////////////////////////////
 void EntityODE::createRobot() {
 	this->pFinger->setPosition();
@@ -473,7 +511,7 @@ void EntityODE::createRobot() {
 
 void EntityODE::createObject() {
 	dMatrix3	R;
-	double	init_obj_att[DIM3][DIM3] = { { sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0 },{ 0.0, 0.0, -1.0 },{ -sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0 } };	// ï¿½ï¿½]ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½
+	double	init_obj_att[DIM3][DIM3] = { { sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0 },{ 0.0, 0.0, -1.0 },{ -sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0 } };	// ‰ñ“]²‚ªx•ûŒü
 	dRFrom2Axes(R, init_obj_att[AXIS_X][CRD_X], init_obj_att[AXIS_X][CRD_Y], init_obj_att[AXIS_X][CRD_Z], init_obj_att[AXIS_Y][CRD_X], init_obj_att[AXIS_Y][CRD_Y], init_obj_att[AXIS_Y][CRD_Z]);
 	dBodySetRotation(this->pObj->getBody(), R);
 }
