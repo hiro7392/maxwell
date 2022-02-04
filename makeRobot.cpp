@@ -201,69 +201,68 @@ int drawCoM()
 // 力センサの値に比例した直線を表示する
 ////////////////////////////////////////////////////////
 int drawExtForce(){
-	auto _this = EntityManager::get();
-
-	//センサにかかる力を描画
-	auto sensor = _this->getFinger()->getParts()[3];		//センサから取得する場合
-	drawForceCylinder(sensor);
-
-	//センサにかかる力を描画
-	auto sensor2 = _this->getFinger2()->getParts()[3];		//センサから取得する場合
-	drawForceCylinder(sensor2);
-	
-	//	指先について
-	auto forcePoint = _this->getFinger()->forceContactPoint;			//センサから取得する場合
-	//drawForceFingerTop(forcePoint);
-	
-	//	指先について
-	auto forcePoint2 = _this->getFinger2()->forceContactPoint;			//外力との接触点(指先円柱)から取得する場合
-	//drawForceFingerTop(forcePoint2);
-	
-	return	0;
-}
-
-void drawForceCylinder(cParts* sensor) {
 	int width;
-	dJointFeedback* fb;
+	dJointFeedback *fb;
 	dVector3	p_s, p_e;    // 線の始点と終点
 	double k1 = 0.3;  // 線長の比例定数
 	double line_w = 0.05;
 
 	dVector3	ext_f;	// 外力
-	double angArrow = PI / 6;  //矢印の角度 rad
-	dJointFeedback* p_force;
+	double angArrow = PI/6;  //矢印の角度 rad
+	dJointFeedback *p_force,*p_force2;
+	
+//	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 	auto _this = EntityManager::get();
-
-	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, p_s);			// 手先位置
+	auto sensor = _this->getFinger()->getParts()[3];		//センサから取得する場合
+	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl()/2.0, p_s);			// 手先位置
 	p_force = dJointGetFeedback(_this->getFinger()->sensor2FingerTop);
 	//std::cout << "p_force f1" << p_force->f1[0] << std::endl;
-	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+	for(int crd=0;crd<DIM3;crd++)	ext_f[crd] = -p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+	p_s[CRD_Z] += sensor->getr(); //腕の上に表示
+	for(int crd=0;crd<DIM3;crd++)	p_e[crd] = p_s[crd] - k1*ext_f[crd];
+	drawArrow(p_s, p_e, ext_f);	//センサに関してかかる力を描画
+
+
+	//
+	cPartsCylinder& forcePoint = _this->getFinger()->forceContactPoint;		//外力との接触点(指先円柱)から取得する場合
+	dBodyGetRelPointPos(forcePoint.getBody(), 0.0, 0.0, forcePoint.getl() / 2.0, p_s);			// 矢印の開始位置
+	p_force = dJointGetFeedback(_this->getFinger()->FingerTop2ForcePoint);
+
+	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = p_force->f2[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 	p_s[CRD_Z] += sensor->getr(); //腕の上に表示
 	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
-	drawArrow(p_s, p_e, ext_f);	//センサに関してかかる力を描画
-}
+	drawArrow(p_s, p_e, ext_f);	//指先に関してかかる力を描画
 
-void drawForceFingerTop(cPartsCylinder& sensor) {
-	int width;
-	dJointFeedback* fb;
-	dVector3	p_s, p_e;    // 線の始点と終点
-	double k1 = 0.3;  // 線長の比例定数
-	double line_w = 0.05;
 
-	dVector3	ext_f;	// 外力
-	double angArrow = PI / 6;  //矢印の角度 rad
-	dJointFeedback* p_force;
-	auto _this = EntityManager::get();
-
-	dBodyGetRelPointPos(sensor.getBody(), 0.0, 0.0, sensor.getl() / 2.0, p_s);			// 手先位置
-	p_force = dJointGetFeedback(_this->getFinger()->sensor2FingerTop);
+	//二本目の指について
+	//センサにかかる力を描画
+	auto sensor2 = _this->getFinger2()->getParts()[3];		//センサから取得する場合
+	dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, p_s);			// 手先位置
+	p_force2 = dJointGetFeedback(_this->getFinger2()->sensor2FingerTop);
 	//std::cout << "p_force f1" << p_force->f1[0] << std::endl;
-	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
-	p_s[CRD_Z] += sensor.getr(); //腕の上に表示
+	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force2->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+	p_s[CRD_Z] += sensor2->getr(); //腕の上に表示
 	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
 	drawArrow(p_s, p_e, ext_f);	//センサに関してかかる力を描画
-}
 
+
+	//指先にかかる力を描画
+	cPartsCylinder& forcePoint2 = _this->getFinger2()->forceContactPoint;		//外力との接触点(指先円柱)から取得する場合
+	dBodyGetRelPointPos(forcePoint2.getBody(), 0.0, 0.0, forcePoint2.getl() / 2.0, p_s);			// 矢印の開始位置
+	p_force2 = dJointGetFeedback(_this->getFinger2()->FingerTop2ForcePoint);
+
+	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = p_force2->f2[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+	p_s[CRD_Z] += sensor2->getr(); //腕の上に表示
+	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
+	drawArrow(p_s, p_e, ext_f);	//指先に関してかかる力を描画
+
+
+
+
+
+
+	return	0;
+}
 
 //矢印を描画する関数
 //引数(矢印の始点,矢印の終点,加える力の方向)

@@ -319,6 +319,9 @@ void cFinger::setJoint2() {
 	FingerTop2ForcePoint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
 	dJointAttach(FingerTop2ForcePoint, forceContactPoint.getBody(), fingerTopCapsule.getBody());
 	dJointSetFixed(FingerTop2ForcePoint);
+
+	dJointSetFeedback(FingerTop2ForcePoint, &fingerTop2ForcePoint_joint);
+
 #endif
 
 	// センサ設定（力とトルクの取得に必要）
