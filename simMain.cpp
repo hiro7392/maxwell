@@ -356,9 +356,9 @@ int main(int argc, char *argv[])
 
 	//パラメータ設定 指2
 	auto Finger2 = EntityManager::get()->getFinger2();
-	for (int jnt = 0; jnt < ARM_JNT; jnt++)	Finger2->init_jnt_pos[jnt] = init_jnt_pos[jnt];
+	for (int jnt = 0; jnt < ARM_JNT; jnt++)	Finger2->init_jnt_pos[jnt] = init_jnt_posF2[jnt];
 	for (int crd = 0; crd < DIM3; crd++) {
-		Finger2->init_obj_pos[crd] = init_obj_pos[crd];
+		Finger2->init_obj_pos[crd] = Finger2->init_obj_pos[crd];
 		for (int axis = 0; axis < DIM3; axis++)	Finger2->init_obj_att[axis][crd] = init_obj_att[axis][crd];
 	}
 	sim->createRobot();
@@ -399,6 +399,28 @@ void cFinger::outputForce() {
 	forceOutOfs.close();
 		
 		
+}
+
+//センサの値を記録
+void cFinger::outputJntAngle() {
+	std::ofstream outfile;
+	if (fingerID == 1) {
+		outfile.open(jntAngleOutfilename1);
+	}
+	else {
+		outfile.open(jntAngleOutfilename2);
+	}
+	for (int k = 0; k < DATA_CNT_NUM; k++) {
+		outfile << k + 1 << ",";
+		for (int i = 0; i < 2; i++) {
+			outfile << save_jnt_vel[k][i] << ",";
+			outfile << save_jnt_dq[k][i] << ",";
+		}
+		outfile << std::endl;
+	}
+	outfile.close();
+
+
 }
 
 ////////////////////////////////////////////////////////
@@ -578,15 +600,28 @@ void DrawStuff::simLoop(int pause)
 	_this2->plate.draw();
 
 	//センサの値を出力
-	/*_this->outputForce();
-	_this2->outputForce();*/
+	
 
+	//力覚センサの出力用
 	if (sim->step < DATA_CNT_NUM) {
-		for (int i = 0; i < 2; i++)_this->saveForce[sim->step][i] = _this->var.F.el[i][0];
-		for (int i = 0; i < 2; i++)_this2->saveForce[sim->step][i] = _this2->var.F.el[i][0];
+		for (int i = 0; i < 2; i++) {
+			_this->saveForce[sim->step - 1][i] = _this->var.F.el[i][0];
+			_this2->saveForce[sim->step - 1][i] = _this2->var.F.el[i][0];
+			_this->save_jnt_vel[sim->step - 1][i] = _this->var.q.el[i][0];
+			_this2->save_jnt_vel[sim->step - 1][i] = _this2->var.q.el[i][0];
+
+			_this->save_jnt_dq[sim->step-1][i] = _this->var.dq.el[i][0];
+			_this2->save_jnt_dq[sim->step - 1][i] = _this2->var.dq.el[i][0];
+		}
 	}else if(sim->step == DATA_CNT_NUM) {
+		//外力を出力
 		_this->outputForce();
 		_this2->outputForce();
+
+		//関節角を出力
+		_this->outputJntAngle();
+		_this2->outputJntAngle();
+			
 	}
 	
 	

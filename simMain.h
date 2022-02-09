@@ -128,6 +128,8 @@ constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
 std::string forceOutfilename1 = "force1_2.csv";
 std::string forceOutfilename2 = "force2_2.csv";
 
+std::string jntAngleOutfilename1 = "angle1.csv";
+std::string jntAngleOutfilename2 = "angle2.csv";
 #endif
 
 ////////////////////////////////////////////////////////
@@ -244,8 +246,15 @@ public:
 	// 回転を設定
 	void setRotation(double ang) {
 		dMatrix3	R;
+		//dRFromAxisAndAngle(dQuaternion q,dReal ax,dReal ay,aReal az,dReal angle)
+		//=回転軸ベクトル(ax,ay,az)を中心にangle[rad]回転させたときの回転行列を取得する
 		dRFromAxisAndAngle(R, -sin(ang), cos(ang), 0, PI / 2);
-		dBodySetRotation(getBody(), R);
+		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
+	}
+	void setRotation2(double ang) {
+		dMatrix3	R;
+		dRFromAxisAndAngle(R, -1,0,0, PI);
+		dBodySetRotation(getBody(), R);	//Bodyに回転行列Rを設定する
 	}
 	void setColor(float r, float g, float b) { color[0] = r; color[1] = g; color[2] = b; }
 	// 回転を取得
@@ -403,6 +412,8 @@ public:
 	double	save_ref_jnt_vel[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT] = {};
+	double	save_jnt_dq[DATA_CNT_NUM][ARM_JNT] = {};
+
 	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3] = {};
 	double	save_ref_eff_vel[DATA_CNT_NUM][DIM3] = {};
@@ -538,6 +549,7 @@ public:
 	void addExtForce2();	// 外力
 
 	void outputForce();		//デバッグ用	外力をcsv出力する
+	void outputJntAngle();	//関節角情報を出力する
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
@@ -635,13 +647,17 @@ class EntityODE : public ODE {
 
 public:
 	int FingerNum=0;
+	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
+	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
+
+
 	void setup() {
 		constexpr auto OBJ_RADIUS = 0.10;
 		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 
 		//各関節の初期姿勢(角度)
-		double init_jnt_pos[2] = {  4* PI / 4.0-PI/7.0, PI/3.0 };
-		double init_jnt_posF2[2] = { 4 * PI / 4.0+ PI / 7.0, -PI/3.0 };			//二本目の指
+		//double init_jnt_pos[2] = {   init_jnt_pos[0], init_jnt_pos[1] };
+		//double init_jnt_posF2[2] = { init_jnt_posF2[0], init_jnt_posF2[1] };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 

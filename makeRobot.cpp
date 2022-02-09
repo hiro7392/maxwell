@@ -231,7 +231,6 @@ void drawForceCylinder(cParts* sensor,dJointFeedback* p_force) {
 	double line_w = 0.05;
 
 	dVector3	ext_f;	// ŠO—Í
-	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
 	auto _this = EntityManager::get();
 
 	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, p_s);			// ŽèæˆÊ’u
@@ -251,7 +250,8 @@ void drawForceFingerTop(cPartsCylinder& sensor, dJointFeedback* p_force) {
 	double line_w = 0.05;
 
 	dVector3	ext_f;	// ŠO—Í
-	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
+	//double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
+	double angArrow = 0;
 	auto _this = EntityManager::get();
 
 	dBodyGetRelPointPos(sensor.getBody(), 0.0, 0.0, sensor.getl() / 2.0, p_s);			// ŽèæˆÊ’u
@@ -274,7 +274,9 @@ void drawArrow(dVector3	p_s, dVector3 p_e, dVector3 ext_f) {
 	dVector3	rect_ul, rect_ll, rect_ur, rect_lr;    // –îˆó‚Ì’¸“_
 	dVector3	line, line_e;    // 
 	dMatrix3	R;
-	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad
+	double angArrow = PI / 6;  //–îˆó‚ÌŠp“x rad	
+	//double angArrow = 0;  //–îˆó‚ÌŠp“x rad
+
 	dsSetColor(1.0, 1.0, 1.0);                    // 
 #if 1
 //	arrow_l[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]-k1/2*fb->f1[CRD_Y];
