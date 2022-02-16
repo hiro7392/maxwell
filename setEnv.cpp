@@ -105,13 +105,13 @@ void cFinger::addExtForce(){
 	if(sim->step <= 1000){
 
 		if (fingerID == 1) {
-			ext_force[CRD_X] = 1.0;
-			ext_force[CRD_Y] = 1.0;
+			ext_force[CRD_X] = 2.0;
+			ext_force[CRD_Y] = -1.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
-			ext_force[CRD_X] =  0.0;
-			ext_force[CRD_Y] = 0.0;
+			ext_force[CRD_X] = 2.0;
+			ext_force[CRD_Y] = -1.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 	}else{

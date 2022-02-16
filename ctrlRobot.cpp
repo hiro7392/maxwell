@@ -811,10 +811,9 @@ int cFinger::ctrlMaxwell2(Matrix* tau)
 		armCalcImpPeriod();		// 周期計算
 	}
 	// 前処理
-	matSub(&re, &var.r, &var_init.r);		// 手先位置変位
+	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
 #if 1
-	
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
 #else
 	if (sim->step > 0)	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &sim->var.F));		// Integ = ∫Fdt

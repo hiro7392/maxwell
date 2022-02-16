@@ -472,6 +472,8 @@ void DrawStuff::simLoop(int pause)
 		}
 #endif
 		// 状態取得
+		for(int i=0;i<2;i++)printf("finger init_jnt[%d] %f\n",i,_this->init_jnt_pos[i]);
+		for (int i = 0; i < 2; i++)printf("finger2 init_jnt[%d] %f\n", i, _this2->init_jnt_pos[i]);
 		for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(_this->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
@@ -664,7 +666,7 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -0.5;	xyz[1] =-0.3;	xyz[2] = 2.5;
+	xyz[0] = -0.5;	xyz[1] =-0.3;	xyz[2] = 3.5;
 	hpr[0] = 0.0;	hpr[1] = -90.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定

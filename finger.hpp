@@ -187,7 +187,13 @@ void cFinger::control() {
 	//	for(jnt=0;jnt<ARM_JNT;jnt++)	if(_this->jnt_force[jnt] > 100 || _this->jnt_force[jnt] < -100)	_this->jnt_force[jnt] = 0.0;
 		// 駆動力入力をODEに設定
 
-	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
+	//指の姿勢がによって向きを変化
+	if (fingerID == 1) {
+		for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
+	}
+	else {
+		for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt],-jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
+	}
 }
 
 ////////////////////////////////////////////////////////
