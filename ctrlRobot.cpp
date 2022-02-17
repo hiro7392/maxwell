@@ -865,7 +865,18 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	Matrix half(2, 2);
 	half.el[0][0] = 0.5;
 	half.el[1][1] = 0.5;
+
+#if addOffset
+	Matrix Offset(2, 1);
+	Offset.el[0][0] = 0;
+	Offset.el[1][0] = 0.2;
+	matAdd(&re, &re, &Offset);
+	
+#endif
+	
 #if 1//prinf_debug
+
+
 	std::cout << "F12" << std::endl;
 	matPrint(&F12);
 	std::cout << "half" << std::endl;
@@ -932,7 +943,19 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	half.el[1][1] = 0.5;
 	//matMul(&F12, &half, &F12);
 
+#if addOffset
+	Matrix Offset(2, 1);
+	Offset.el[0][0] = 0;
+	Offset.el[1][0] = 0.2;
+	matSub(&re, &re, &Offset);
+
+#endif
+
+	
 #if 1//prinf_debug
+	
+
+
 	std::cout << "F12" << std::endl;
 	matPrint(&F12);
 	std::cout << "half" << std::endl;
@@ -940,6 +963,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matMul(&F12, &half, &F12);
 	std::cout << "F12 half" << std::endl;
 	matPrint(&F12);
+	
 #endif	
 
 

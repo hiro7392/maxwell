@@ -130,6 +130,8 @@ std::string forceOutfilename2 = "force2_2.csv";
 
 std::string jntAngleOutfilename1 = "angle1.csv";
 std::string jntAngleOutfilename2 = "angle2.csv";
+#define addOffset		1			//把持力を生み出すオフセットを与えるとき
+
 #endif
 
 ////////////////////////////////////////////////////////

@@ -112,12 +112,12 @@ void cFinger::control() {
 
 #if 1
 	if (fingerID == 1) {
-		ctrlMaxwell(&tau);
-		//RestrictedCtrlMaxwell(&tau);
+		//ctrlMaxwell(&tau);
+		RestrictedCtrlMaxwell(&tau);
 	}
 	else {
-		ctrlMaxwell2(&tau);
-		//RestrictedCtrlMaxwell2(&tau);
+		//ctrlMaxwell2(&tau);
+		RestrictedCtrlMaxwell2(&tau);
 	}
 
 
