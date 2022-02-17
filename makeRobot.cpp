@@ -354,7 +354,6 @@ void drawArrowOriginal(dVector3	p_s, dVector3 p_e, dVector3 ext_f) {
 	double angArrow = PI / 4;  //–îˆó‚ÌŠp“x rad	
 
 	dsSetColor(1.0, 1.0, 1.0);                    // 
-#if 1
 	arrow_center[CRD_X] = 0;	arrow_center[CRD_Y] = 0.0;	arrow_center[CRD_Z] = 0;
 
 	double L2Norm = sqrt(ext_f[CRD_X] * ext_f[CRD_X] + ext_f[CRD_Y] * ext_f[CRD_Y]);
@@ -394,9 +393,6 @@ void drawArrowOriginal(dVector3	p_s, dVector3 p_e, dVector3 ext_f) {
 	dsDrawTriangle(p_s, R, rect_ur, rect_ll, rect_lr, 1); // 
 
 
-//	dsDrawLine(p_s, p_e); // p_s‚©‚çp_e‚Ü‚Å‚Ì’¼ü‚ğ•`‰æ
-//	dsDrawLine(line_center, p_e); // p_s‚©‚çp_e‚Ü‚Å‚Ì’¼ü‚ğ•`‰æ
-#endif
 
 	return;
 }

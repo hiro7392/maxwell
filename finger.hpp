@@ -28,7 +28,7 @@
 
 #define finger2_use 1		//二本目の指を使うとき
 #define print_debug 0
-#define usePlateToGrasp 0	//把持するプレートを置くとき
+#define usePlateToGrasp 1	//把持するプレートを置くとき
 
 //カプセル用
 #define DENSITY (5.0)	// 密度
@@ -192,7 +192,7 @@ void cFinger::control() {
 		for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
 	}
 	else {
-		for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt],-jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
+		for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt],jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
 	}
 }
 

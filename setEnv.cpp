@@ -105,13 +105,13 @@ void cFinger::addExtForce(){
 	if(sim->step <= 1000){
 
 		if (fingerID == 1) {
-			ext_force[CRD_X] = 2.0;
-			ext_force[CRD_Y] = -1.0;
+			ext_force[CRD_X] = 0.0;
+			ext_force[CRD_Y] = 0.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
-			ext_force[CRD_X] = 2.0;
-			ext_force[CRD_Y] = -1.0;
+			ext_force[CRD_X] = 0.0;
+			ext_force[CRD_Y] = 0.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 	}else{
@@ -153,8 +153,6 @@ void cFinger::addExtForce(){
 
 void cFinger::printInfo() {
 
-
-
 	std::cout << "finger " << fingerID << std::endl;
 	for (int i = 0; i < 2; i++)std::cout << "init_jnt_pos" << init_jnt_pos[i]<<std::endl;
 	for(int i=0;i<2;i++)std::cout <<"jnt_force  "<<i<<" : "<< jnt_force[i] << std::endl;
@@ -168,6 +166,7 @@ void cFinger::printInfo() {
 	for (int i = 0; i < ARM_JNT; i++)std::cout << "jnt_force  " << i << " : " << jnt_force[i] << std::endl;
 
 	for (int i = 0; i < ARM_JNT; i++)std::cout << "obj_pos  " << i << " : " << obj_pos[i] << std::endl;
+
 	std::cout << "kine " << kine.J.el[0][0] << std::endl;
 	std::cout << "this kine " << this->kine.J.el[0][0] << std::endl;
 	std::cout << std::endl;

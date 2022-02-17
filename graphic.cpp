@@ -1,35 +1,38 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <GL/glut.h>
 #include "graphic.h"
 #include "command.h"
 
-#include "simMain.h"		// PI‚Ì‚½‚ß
+#include "simMain.h"		// PIï¿½Ì‚ï¿½ï¿½ï¿½
 
 ////////////////////////////////////
-// “®ì§Œä•Ï”
+// ï¿½ï¿½ï¿½ì§ï¿½ï¿½Ïï¿½
 ////////////////////////////////////
 static FLAG	animation_disp_num;
 static FLAG	animation_flag;
 static FLAG	viewpoint_flag;
 static FLAG	video_flag;
-static int	push_point[2];		// ƒhƒ‰ƒbƒOŠJŽn‚Ì‰æ‘œÀ•W‚ð•Û‘¶
+static int	push_point[2];		// ï¿½hï¿½ï¿½ï¿½bï¿½Oï¿½Jï¿½nï¿½Ì‰æ‘œï¿½ï¿½ï¿½Wï¿½ï¿½Û‘ï¿½
 ////////////////////////////////////
-// ƒAƒjƒ[ƒVƒ‡ƒ“•\Ž¦
+// ï¿½Aï¿½jï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
 ////////////////////////////////////
-static double	pov[3];		// Ž‹“_•ÀiˆÚ“®(point of view)
-static double	pan_jnt_deg;	// Ž‹“_‰ñ“]ˆÚ“®iƒpƒ“j
-static double	tilt_jnt_deg;	// Ž‹“_‰ñ“]ˆÚ“®iƒ`ƒ‹ƒgj
+static double	pov[3];		// ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½iï¿½Ú“ï¿½(point of view)
+static double	pan_jnt_deg;	// ï¿½ï¿½ï¿½_ï¿½ï¿½]ï¿½Ú“ï¿½ï¿½iï¿½pï¿½ï¿½ï¿½j
+static double	tilt_jnt_deg;	// ï¿½ï¿½ï¿½_ï¿½ï¿½]ï¿½Ú“ï¿½ï¿½iï¿½`ï¿½ï¿½ï¿½gï¿½j
 static int	disp_count;
-static int	display_rate;		// ‘‘—‚è‚¾‚Æ+,’x‚¢‚Æ-
-//static GLfloat lightpos[] = {-2.0, 2.0, -2.0, 1.0};		// ŒõŒ¹ˆÊ’u
-static GLfloat lightpos[] = {0.5, 0.5, 0.5, 1.0};		// ŒõŒ¹ˆÊ’u
+static int	display_rate;		// ï¿½ï¿½ï¿½ï¿½ï¿½è‚¾ï¿½ï¿½+,ï¿½xï¿½ï¿½ï¿½ï¿½-
+//static GLfloat lightpos[] = {-2.0, 2.0, -2.0, 1.0};		// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’u
+static GLfloat lightpos[] = {0.5, 0.5, 0.5, 1.0};		// ï¿½ï¿½ï¿½ï¿½ï¿½Ê’u
 ////////////////////////////////////
-// “®‰æ•Û‘¶•Ï”
+// ï¿½ï¿½ï¿½ï¿½Û‘ï¿½ï¿½Ïï¿½
 ////////////////////////////////////
 //IplImage *frame;
 //CvVideoWriter *vw;
+
+
+
 
 
 void idle()
@@ -38,7 +41,7 @@ void idle()
 }
 
 /////////////////////////////////////////////////////////////////////////
-// •¶Žš•\Ž¦Ý’è
+// ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½Ý’ï¿½
 /////////////////////////////////////////////////////////////////////////
 void  drawMessage()
 {
@@ -53,19 +56,19 @@ void  drawMessage()
 	int   i;
 	int	win_width = 200, win_height = 200;
 
-	// ŽË‰es—ñ‚ð‰Šú‰»i‰Šú‰»‚Ì‘O‚ÉŒ»Ý‚Ìs—ñ‚ð‘Þ”ðj
+	// ï¿½Ë‰eï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‘Oï¿½ÉŒï¿½ï¿½Ý‚Ìsï¿½ï¿½ï¿½Þ”ï¿½j
 	glMatrixMode( GL_PROJECTION );
 	glPushMatrix();
 	glLoadIdentity();
 	gluOrtho2D( 0.0, win_width, win_height, 0.0 );
-	// ƒ‚ƒfƒ‹ƒrƒ…[s—ñ‚ð‰Šú‰»i‰Šú‰»‚Ì‘O‚ÉŒ»Ý‚Ìs—ñ‚ð‘Þ”ðj
+	// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½rï¿½ï¿½ï¿½[ï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‘Oï¿½ÉŒï¿½ï¿½Ý‚Ìsï¿½ï¿½ï¿½Þ”ï¿½j
 	glMatrixMode( GL_MODELVIEW );
 	glPushMatrix();
 	glLoadIdentity();
-	// ‚yƒoƒbƒtƒ@Eƒ‰ƒCƒeƒBƒ“ƒO‚ÍƒIƒt‚É‚·‚é
+	// ï¿½yï¿½oï¿½bï¿½tï¿½@ï¿½Eï¿½ï¿½ï¿½Cï¿½eï¿½Bï¿½ï¿½ï¿½Oï¿½ÍƒIï¿½tï¿½É‚ï¿½ï¿½ï¿½
 	glDisable( GL_DEPTH_TEST );
 	glDisable( GL_LIGHTING );
-	// ƒƒbƒZ[ƒW‚Ì•`‰æ
+	// ï¿½ï¿½ï¿½bï¿½Zï¿½[ï¿½Wï¿½Ì•`ï¿½ï¿½
 	glColor3f( 1.0, 0.0, 0.0 );
 	glRasterPos2i( 8, 8 + 18 );
 	if(display_rate > 0)	sprintf(str_rate, "%d", display_rate);
@@ -76,7 +79,7 @@ void  drawMessage()
 	else if(animation_flag == ANIMATION_FLAG_STOP)	sprintf(message, "%s %s %s", str_rate, string, str_stop);
 	if(video_flag == VIDEO_FLAG_REC)	strcat(message, str_rec);
 	for ( i=0; message[i]!='\0'; i++ )	glutBitmapCharacter( GLUT_BITMAP_HELVETICA_18, message[i] );
-	// Ý’è‚ð‘S‚Ä•œŒ³
+	// ï¿½Ý’ï¿½ï¿½Sï¿½Ä•ï¿½ï¿½ï¿½
 	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_LIGHTING );
 	glMatrixMode( GL_PROJECTION );
@@ -86,30 +89,30 @@ void  drawMessage()
 }
 
 /////////////////////////////////////////////////////////////////////////
-// •`‰æÝ’è
+// ï¿½`ï¿½ï¿½Ý’ï¿½
 /////////////////////////////////////////////////////////////////////////
 void display()
 {
-	static int	incount = 0;		// ƒAƒjƒ[ƒVƒ‡ƒ“I—¹‚Å0‚É–ß‚é
-	static int	prev_disp_count = 0;		// ƒAƒjƒ[ƒVƒ‡ƒ“‚ªI—¹‚µ‚½‚Æ‚«‚ÌŽp¨‚ð•`‰æ‚·‚é‚½‚ß‚É“±“ü
+	static int	incount = 0;		// ï¿½Aï¿½jï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½ï¿½0ï¿½É–ß‚ï¿½
+	static int	prev_disp_count = 0;		// ï¿½Aï¿½jï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ï¿½ÌŽpï¿½ï¿½ï¿½ï¿½`ï¿½æ‚·ï¿½é‚½ï¿½ß‚É“ï¿½ï¿½ï¿½
 
-	// ‰æ–ÊƒNƒŠƒA
+	// ï¿½ï¿½ÊƒNï¿½ï¿½ï¿½A
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// ƒ‚ƒfƒ‹ƒrƒ…[•ÏŠ·s—ñ‚Ì‰Šú‰»
+	// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½rï¿½ï¿½ï¿½[ï¿½ÏŠï¿½ï¿½sï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
 	glLoadIdentity();
-	// ŒõŒ¹‚ÌˆÊ’u
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ÌˆÊ’u
 	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-	// Ž‹“_‚ÌˆÚ“®
+	// ï¿½ï¿½ï¿½_ï¿½ÌˆÚ“ï¿½
 	glTranslated(pov[0], pov[1], pov[2]);
 	glRotated(pan_jnt_deg, 0.0, 1.0, 0.0);
 	glRotated(tilt_jnt_deg, cos(pan_jnt_deg*PI/180), 0.0, sin(pan_jnt_deg*PI/180));
 
 	//////////////////////////////
-	// •`‰æ
+	// ï¿½`ï¿½ï¿½
 	//////////////////////////////
-	// ’n–Ê
+	// ï¿½nï¿½ï¿½
 	myGround(0.0);
-	// ƒAƒjƒ[ƒVƒ‡ƒ“•`‰æ
+	// ï¿½Aï¿½jï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½ï¿½
 #if 0	//SYSTEM_HAND
 	if(animation_disp_num == ANIMATION_DISP_HAND)
 		if(animation_flag == ANIMATION_FLAG_STOP)	display_hand(prev_disp_count);
@@ -126,52 +129,52 @@ void display()
 		}
 #endif
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“•`‰æ‘¬“xÝ’è
+	// ï¿½Aï¿½jï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½æ‘¬ï¿½xï¿½Ý’ï¿½
 	if(animation_flag == ANIMATION_FLAG_PLAY){
-		prev_disp_count = disp_count;		// ’¼‘O‚É•`‰æ‚³‚ê‚½ƒJƒEƒ“ƒg”‚ð•Û‘¶
+		prev_disp_count = disp_count;		// ï¿½ï¿½ï¿½Oï¿½É•`ï¿½æ‚³ï¿½ê‚½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½Û‘ï¿½
 		if(display_rate > 0)	disp_count += display_rate;
 		else if(incount % -display_rate == 0)	disp_count++;
 		incount++;
 	}else if(animation_flag == ANIMATION_FLAG_PLAY_REVERSE){
-		prev_disp_count = disp_count;		// ’¼‘O‚É•`‰æ‚³‚ê‚½ƒJƒEƒ“ƒg”‚ð•Û‘¶
+		prev_disp_count = disp_count;		// ï¿½ï¿½ï¿½Oï¿½É•`ï¿½æ‚³ï¿½ê‚½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½Û‘ï¿½
 		if(display_rate > 0)	disp_count -= display_rate;
 		else if(incount % -display_rate == 0)	disp_count--;
 		incount--;
 	}
-	// ƒAƒjƒ[ƒVƒ‡ƒ“I—¹Ý’è
-//	if(disp_count >= (int)(1000*MOTION_TIME) || disp_count < 0){		// ÅŒã‚Ü‚ÅÄ¶‚µ‚½‚Æ‚« or Å‰‚Ü‚Å‹tÄ¶‚µ‚½‚Æ‚«
-	if(disp_count >= DATA_CNT_NUM || disp_count < 0){		// ÅŒã‚Ü‚ÅÄ¶‚µ‚½‚Æ‚« or Å‰‚Ü‚Å‹tÄ¶‚µ‚½‚Æ‚«
+	// ï¿½Aï¿½jï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½Ý’ï¿½
+//	if(disp_count >= (int)(1000*MOTION_TIME) || disp_count < 0){		// ï¿½ÅŒï¿½Ü‚ÅÄï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ or ï¿½Åï¿½ï¿½Ü‚Å‹tï¿½Äï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½
+	if(disp_count >= DATA_CNT_NUM || disp_count < 0){		// ï¿½ÅŒï¿½Ü‚ÅÄï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ or ï¿½Åï¿½ï¿½Ü‚Å‹tï¿½Äï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½
 		disp_count = 0;	incount = 0;
 		animation_flag = ANIMATION_FLAG_STOP;	glutIdleFunc(NULL);
 	}
-	// “®‰æ•Û‘¶
+	// ï¿½ï¿½ï¿½ï¿½Û‘ï¿½
 //	if(video_flag == VIDEO_FLAG_REC)	save_video();
-//	if(disp_count % SAVE_IMG_RATE == 0)	saveImage(600, 600);	// SAVE_IMG_RATE–ˆ‚É‰æ‘œ•Û‘¶
+//	if(disp_count % SAVE_IMG_RATE == 0)	saveImage(600, 600);	// SAVE_IMG_RATEï¿½ï¿½ï¿½É‰æ‘œï¿½Û‘ï¿½
 
-// ‚±‚±ˆÈ~‚Ì‹Lq‚Í“®‰æ‚É‚Í•\Ž¦‚³‚ê‚È‚¢
-	// •¶Žš—ñ•\Ž¦
+// ï¿½ï¿½ï¿½ï¿½ï¿½È~ï¿½Ì‹Lï¿½qï¿½Í“ï¿½ï¿½ï¿½É‚Í•\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È‚ï¿½
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
 	drawMessage();
-	// ‰æ–Ê‚Ì‚¿‚ç‚Â‚«‚ð—}§DglutInitDisplayMode ŠÖ”‚Å GLUT_DOUBLE ‚ðŽw’è‚·‚é‚±‚ÆD
+	// ï¿½ï¿½Ê‚Ì‚ï¿½ï¿½ï¿½Â‚ï¿½ï¿½ï¿½}ï¿½ï¿½ï¿½DglutInitDisplayMode ï¿½Öï¿½ï¿½ï¿½ GLUT_DOUBLE ï¿½ï¿½wï¿½è‚·ï¿½é‚±ï¿½ÆD
 	glutSwapBuffers();
 }
 
 /////////////////////////////////////////////////////////////////////////
-// •`‰æÝ’è
+// ï¿½`ï¿½ï¿½Ý’ï¿½
 /////////////////////////////////////////////////////////////////////////
 void resize(int w, int h)
 {
 	glViewport(0, 0, w, h);
-	// “§Ž‹•ÏŠ·s—ñ‚ÌÝ’è
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ÏŠï¿½ï¿½sï¿½ï¿½ÌÝ’ï¿½
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 //	gluPerspective(30.0, (double)w/(double)h, 1.0, 100.0);
 	gluPerspective(18.0, (double)w/(double)h, 1.0, 100.0);
-	// ƒ‚ƒfƒ‹ƒrƒ…[•ÏŠ·s—ñ‚ÌÝ’è
+	// ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½rï¿½ï¿½ï¿½[ï¿½ÏŠï¿½ï¿½sï¿½ï¿½ÌÝ’ï¿½
 	glMatrixMode(GL_MODELVIEW);
 }
 
 /////////////////////////////////////////////////////////////////////////
-// ƒ}ƒEƒX‘€ìFŽ‹“_•ÏX
+// ï¿½}ï¿½Eï¿½Xï¿½ï¿½ï¿½ï¿½Fï¿½ï¿½ï¿½_ï¿½ÏX
 /////////////////////////////////////////////////////////////////////////
 void mouse(int button, int state, int x, int y)
 {
@@ -187,7 +190,7 @@ void mouse(int button, int state, int x, int y)
 }
 
 /////////////////////////////////////////////////////////////////////////
-// ƒ}ƒEƒX“®ìÝ’è
+// ï¿½}ï¿½Eï¿½Xï¿½ï¿½ï¿½ï¿½Ý’ï¿½
 /////////////////////////////////////////////////////////////////////////
 void motion(int x, int y)
 {
@@ -196,98 +199,98 @@ void motion(int x, int y)
 #define VIEWPOINT_UPDATE_RATE	0.5
 	if(viewpoint_flag == VIEWPOINT_MOVE){
 		prev_point[0] = save_point[0];	prev_point[1] = save_point[1];
-	}else{		// ƒhƒ‰ƒbƒO‚µŽn‚ß‚½uŠÔ
+	}else{		// ï¿½hï¿½ï¿½ï¿½bï¿½Oï¿½ï¿½ï¿½nï¿½ß‚ï¿½ï¿½uï¿½ï¿½
 		prev_point[0] = push_point[0];	prev_point[1] = push_point[1];
 		viewpoint_flag = VIEWPOINT_MOVE;
 	}
-	// Ž‹“_Šp“x‚Ì•ÏX
+	// ï¿½ï¿½ï¿½_ï¿½pï¿½xï¿½Ì•ÏX
 	pan_jnt_deg += VIEWPOINT_UPDATE_RATE * (x-prev_point[0]);
 	tilt_jnt_deg += VIEWPOINT_UPDATE_RATE * (y-prev_point[1]);
-	// ƒhƒ‰ƒbƒO’†‚Ì‘OƒtƒŒ[ƒ€‰æ‘f‚ð•Û‘¶
+	// ï¿½hï¿½ï¿½ï¿½bï¿½Oï¿½ï¿½ï¿½Ì‘Oï¿½tï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½fï¿½ï¿½Û‘ï¿½
 	save_point[0] = x;	save_point[1] = y;
-	// •`‰æXV
+	// ï¿½`ï¿½ï¿½Xï¿½V
 	glutPostRedisplay();
 }
 
 /////////////////////////////////////////////////////////////////////////
-// ƒRƒ}ƒ“ƒhÝ’è
+// ï¿½Rï¿½}ï¿½ï¿½ï¿½hï¿½Ý’ï¿½
 /////////////////////////////////////////////////////////////////////////
 void keyboard(unsigned char key, int x, int y)
 {
 	switch(key){
-	// •\Ž¦Ø‘Ö
+	// ï¿½\ï¿½ï¿½ï¿½Ø‘ï¿½
 #if SYSTEM_HAND
-	case 'h': animation_disp_num = ANIMATION_DISP_HAND; break;		// Handiƒnƒ“ƒh•\Ž¦j
+	case 'h': animation_disp_num = ANIMATION_DISP_HAND; break;		// Handï¿½iï¿½nï¿½ï¿½ï¿½hï¿½\ï¿½ï¿½ï¿½j
 #endif
 #if SYSTEM_WAM
-	case 'w': animation_disp_num = ANIMATION_DISP_WAM; break;		// WAMiƒA[ƒ€•\Ž¦j
+	case 'w': animation_disp_num = ANIMATION_DISP_WAM; break;		// WAMï¿½iï¿½Aï¿½[ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½j
 #endif
-	case 'a': animation_disp_num = ANIMATION_DISP_HARM; break;		// HDSƒA[ƒ€‚ð•\Ž¦
-	// Ž‹“_ˆÚ“®
-	case 'x': pov[0] += 0.01; break;		// x•ûŒü
-	case 'X': pov[0] -= 0.01; break;		// x•ûŒü
-	case 'y': pov[1] += 0.01; break;		// y•ûŒü
-	case 'Y': pov[1] -= 0.01; break;		// y•ûŒü
-	case 'z': pov[2] += 0.1; break;		// 	z•ûŒü (Zoom In)
-	case 'Z': pov[2] -= 0.1; break;		// z•ûŒü (Zoom Out)
-	// Ä¶‘¬“xis‚Å2”{CS‚Å1/2”{j
+	case 'a': animation_disp_num = ANIMATION_DISP_HARM; break;		// HDSï¿½Aï¿½[ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½
+	// ï¿½ï¿½ï¿½_ï¿½Ú“ï¿½
+	case 'x': pov[0] += 0.01; break;		// xï¿½ï¿½ï¿½ï¿½
+	case 'X': pov[0] -= 0.01; break;		// xï¿½ï¿½ï¿½ï¿½
+	case 'y': pov[1] += 0.01; break;		// yï¿½ï¿½ï¿½ï¿½
+	case 'Y': pov[1] -= 0.01; break;		// yï¿½ï¿½ï¿½ï¿½
+	case 'z': pov[2] += 0.1; break;		// 	zï¿½ï¿½ï¿½ï¿½ (Zoom In)
+	case 'Z': pov[2] -= 0.1; break;		// zï¿½ï¿½ï¿½ï¿½ (Zoom Out)
+	// ï¿½Äï¿½ï¿½ï¿½ï¿½xï¿½isï¿½ï¿½2ï¿½{ï¿½CSï¿½ï¿½1/2ï¿½{ï¿½j
 	case 's': if(display_rate > 0) display_rate *= 2; else if(display_rate < -2) display_rate /= 2; else display_rate = 1; break;		// Speed Up
 	case 'S': if(display_rate > 1) display_rate /= 2; else if(display_rate < 0) display_rate *= 2; else display_rate = -2; break;		// Speed Down
-	// ƒŠƒZƒbƒg
+	// ï¿½ï¿½ï¿½Zï¿½bï¿½g
 	case 'R': init(); break;		// Reset
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒtƒ‰ƒO
-	case 'p':			// Play, PauseiŠJŽn‚ÆˆêŽž’âŽ~‚ÌƒgƒOƒ‹“®ìj
+	// ï¿½Aï¿½jï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½tï¿½ï¿½ï¿½O
+	case 'p':			// Play, Pauseï¿½iï¿½Jï¿½nï¿½ÆˆêŽžï¿½ï¿½~ï¿½Ìƒgï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½ï¿½j
 		if(animation_flag == ANIMATION_FLAG_PLAY){
 			animation_flag = ANIMATION_FLAG_PAUSE; glutIdleFunc(NULL); break;
 		}else{
 			animation_flag = ANIMATION_FLAG_PLAY; glutIdleFunc(idle); return;
 		}
-	case 'b': animation_flag = ANIMATION_FLAG_PLAY_REVERSE; glutIdleFunc(idle); break;		// ‹tÄ¶ backward
-	// ‰æ‘œ•Û‘¶
+	case 'b': animation_flag = ANIMATION_FLAG_PLAY_REVERSE; glutIdleFunc(idle); break;		// ï¿½tï¿½Äï¿½ backward
+	// ï¿½æ‘œï¿½Û‘ï¿½
 //	case 'i': saveImage(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));	break;	//save_image(); break;		// image
 	case 'i': saveImage(600, 600);	break;		// image
-	// “®‰æ•Û‘¶
-	case 'v':			// •Û‘¶‚ÆˆêŽž’âŽ~‚ÌƒgƒOƒ‹“®ì
+	// ï¿½ï¿½ï¿½ï¿½Û‘ï¿½
+	case 'v':			// ï¿½Û‘ï¿½ï¿½ÆˆêŽžï¿½ï¿½~ï¿½Ìƒgï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(video_flag == VIDEO_FLAG_REC){ video_flag = VIDEO_FLAG_PAUSE; display_rate = 1; return; }
 		else{ video_flag = VIDEO_FLAG_REC; display_rate = 33; return; }
-	// I—¹
+	// ï¿½Iï¿½ï¿½
 	case 'q': case '\0x1B': exit(0);	// Quit or Esc
 	default: return;
 	}
-	// 'p''q''v'ˆÈŠO‚ÌƒRƒ}ƒ“ƒh‚Íˆê“xÄ•`‰æ
+	// 'p''q''v'ï¿½ÈŠOï¿½ÌƒRï¿½}ï¿½ï¿½ï¿½hï¿½Íˆï¿½xï¿½Ä•`ï¿½ï¿½
 	glutPostRedisplay();
 }
 
 /////////////////////////////////////////////////////////////////////////
-// ‰ŠúÝ’è
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ý’ï¿½
 /////////////////////////////////////////////////////////////////////////
 void init()
 {
 	glClearColor(1.0, 1.0, 1.0, 1.0);
-	// ƒfƒvƒXEƒoƒbƒtƒ@
+	// ï¿½fï¿½vï¿½Xï¿½Eï¿½oï¿½bï¿½tï¿½@
 	glEnable(GL_DEPTH_TEST);
-	// ƒJƒŠƒ“ƒOˆ—
+	// ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½
 	glEnable(GL_CULL_FACE);
 //	glFrontFace(GL_CW);
-	glCullFace(GL_BACK);		// — –Ê‚ð”ñ•\Ž¦
-	// ŒõŒ¹Ý’è
+	glCullFace(GL_BACK);		// ï¿½ï¿½ï¿½Ê‚ï¿½ï¿½\ï¿½ï¿½
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Ý’ï¿½
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	// •Ï”‰Šú‰»
+	// ï¿½Ïï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	animation_disp_num = ANIMATION_DISP_WAM;
 	animation_flag = ANIMATION_FLAG_STOP;
 	video_flag = VIDEO_FLAG_STOP;
 	viewpoint_flag = VIEWPOINT_FIXED;
 	disp_count = 0;
 	display_rate = 1;
-	pov[0] = -0.4;	pov[1] = -0.0;	pov[2] = -10.0;		// Ž‹“_ˆÊ’u
-//	pov[0] = -0.2;	pov[1] = 0.5;	pov[2] = -2.5;		// Ž‹“_ˆÊ’u
-	pan_jnt_deg = 150.0;	tilt_jnt_deg = 20.0;		// Ž‹“_Žp¨
+	pov[0] = -0.4;	pov[1] = -0.0;	pov[2] = -10.0;		// ï¿½ï¿½ï¿½_ï¿½Ê’u
+//	pov[0] = -0.2;	pov[1] = 0.5;	pov[2] = -2.5;		// ï¿½ï¿½ï¿½_ï¿½Ê’u
+	pan_jnt_deg = 150.0;	tilt_jnt_deg = 20.0;		// ï¿½ï¿½ï¿½_ï¿½pï¿½ï¿½
 
 
-	// ƒrƒfƒIƒ‰ƒCƒ^\‘¢‘Ì‚ðì¬‚·‚é
+	// ï¿½rï¿½fï¿½Iï¿½ï¿½ï¿½Cï¿½^ï¿½\ï¿½ï¿½ï¿½Ì‚ï¿½ì¬ï¿½ï¿½ï¿½ï¿½
 //	vw = cvCreateVideoWriter("cap.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, cvSize(600, 600), 1);
-//	vw = cvCreateVideoWriter("cap.avi", 0, 29.97, cvSize(600, 600), 1);		// ”ñˆ³kAVIƒtƒ@ƒCƒ‹‚ð¶¬
+//	vw = cvCreateVideoWriter("cap.avi", 0, 29.97, cvSize(600, 600), 1);		// ï¿½ñˆ³kAVIï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ð¶ï¿½
 //	cvNamedWindow("test",1);
 //	frame = cvCreateImage(cvSize(600,600),IPL_DEPTH_8U,3);
 }
