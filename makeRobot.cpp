@@ -206,21 +206,21 @@ int drawExtForce() {
 
 	auto _this = EntityManager::get();
 
-	//センサにかかる力を描画
+	//	センサにかかる力を描画
 	cParts* sensor = _this->getFinger()->getParts()[3];		//センサから取得する場合
 	drawForceCylinder(sensor, dJointGetFeedback(_this->getFinger()->sensor2FingerTop));
 
 	//	指先について
-	cPartsCylinder&  forcePoint = _this->getFinger()->forceContactPoint;			//センサから取得する場合
-	drawForceFingerTop(forcePoint, dJointGetFeedback(_this->getFinger()->sensor2FingerTop));
+	//cPartsCylinder&  forcePoint = _this->getFinger()->forceContactPoint;			//センサから取得する場合
+	//drawForceFingerTop(forcePoint, dJointGetFeedback(_this->getFinger()->sensor2FingerTop));
 
-	//////センサにかかる力を描画
+	//	センサにかかる力を描画
 	cParts* sensor2 = _this->getFinger2()->getParts()[3];		//センサから取得する場合
 	drawForceCylinder(sensor2, dJointGetFeedback(_this->getFinger2()->sensor2FingerTop));
 
 	//	指先について
-	cPartsCylinder& forcePoint2 = _this->getFinger2()->forceContactPoint;			//外力との接触点(指先円柱)から取得する場合
-	drawForceFingerTop(forcePoint2, dJointGetFeedback(_this->getFinger2()->sensor2FingerTop));
+	//cPartsCylinder& forcePoint2 = _this->getFinger2()->forceContactPoint;			//外力との接触点(指先円柱)から取得する場合
+	//drawForceFingerTop(forcePoint2, dJointGetFeedback(_this->getFinger2()->sensor2FingerTop));
 
 	return	0;
 }
@@ -278,8 +278,7 @@ void drawArrow(dVector3	p_s, dVector3 p_e, dVector3 ext_f) {
 	dMatrix3	R;
 	double angArrow = PI / 4;  //矢印の角度 rad	
 	//double angArrow = atan2(-ext_f[0],-ext_f[1]);  //
-
-	dsSetColor(1.0, 1.0, 1.0);                    // 
+	dsSetColor(1.0,1.0,1.0);                    // 
 #if 1
 //	arrow_l[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]-k1/2*fb->f1[CRD_Y];
 //	arrow_l[CRD_Y] = p_s[CRD_Y]+k1/2*fb->f1[CRD_Y]+k1/2*fb->f1[CRD_X];
@@ -386,79 +385,6 @@ void drawArrowOriginal(dVector3	p_s, dVector3 p_e, dVector3 ext_f) {
 
 
 	return;
-}
-
-
-//二本目の指の外力を描画
-int drawExtForce2() {
-	int width;
-	dJointFeedback* fb;
-	dVector3	p_s, p_e;    // 線の始点と終点
-	double k1 = 0.3;  // 線長の比例定数
-	double line_w = 0.05;
-	dVector3	arrow_center, arrow_r, arrow_l;    // 矢印の頂点
-	dVector3	rect_ul, rect_ll, rect_ur, rect_lr;    // 矢印の頂点
-	dVector3	line, line_e;    // 
-	dVector3	ext_f;	// 外力
-	dMatrix3	R;
-	double angArrow = PI / 6;  //矢印の角度 rad
-	dJointFeedback* p_force;
-
-	//	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
-	auto _this = EntityManager::get();
-	auto sensor = _this->getFinger2()->getParts()[3];
-
-
-	dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, p_s);			// 手先位置
-//		endP[0] = pos[0] + k1*sensor[jnt].f1[0];
-//		endP[1] = pos[1] + k1*sensor[jnt].f1[1];
-//		endP[2] = pos[2] + k1*sensor[jnt].f1[2];
-
-	p_force = dJointGetFeedback(_this->getFinger2()->sensor2FingerTop);
-	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
-	p_s[CRD_Z] += sensor->getr(); //腕の上に表示
-	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
-	//	p_e[CRD_Z] = p_s[CRD_Z] + sensor.r;	// 腕の上に表示
-	p_e[CRD_Z] = p_s[CRD_Z];	// z方向の力は無視
-	dsSetColor(1.0, 1.0, 1.0);                    // 
-#if 1
-//	arrow_l[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]-k1/2*fb->f1[CRD_Y];
-//	arrow_l[CRD_Y] = p_s[CRD_Y]+k1/2*fb->f1[CRD_Y]+k1/2*fb->f1[CRD_X];
-//	arrow_l[CRD_Z] = p_s[CRD_Z];
-//	arrow_r[CRD_X] = p_s[CRD_X]+k1/2*fb->f1[CRD_X]+k1/2*fb->f1[CRD_Y];
-//	arrow_r[CRD_Y] = p_s[CRD_Y]+k1/2*fb->f1[CRD_Y]-k1/2*fb->f1[CRD_X];
-//	arrow_r[CRD_Z] = p_s[CRD_Z];
-	arrow_center[CRD_X] = 0;	arrow_center[CRD_Y] = 0.0;	arrow_center[CRD_Z] = 0;
-	//矢印の左の頂点
-	arrow_l[CRD_X] = sin(angArrow) * ext_f[0] * k1 / 3;
-	arrow_l[CRD_Y] = cos(angArrow) * ext_f[0] * k1 / 3;
-	arrow_l[CRD_Z] = 0;
-	//矢印の右の頂点
-	arrow_r[CRD_X] = -sin(angArrow) * ext_f[0] * k1 / 3;
-	arrow_r[CRD_Y] = cos(angArrow) * ext_f[0] * k1 / 3;
-	arrow_r[CRD_Z] = 0;
-
-	//矢印の長方形部分
-	//=直角三角形×2で描画
-	rect_ul[CRD_X] = rect_ll[CRD_X] = sin(angArrow) * ext_f[0] * k1 / 8;
-	rect_ur[CRD_X] = rect_lr[CRD_X] = -sin(angArrow) * ext_f[0] * k1 / 8;
-	rect_ul[CRD_Y] = rect_ur[CRD_Y] = cos(angArrow) * ext_f[0] * k1 / 3;
-	rect_ll[CRD_Y] = rect_lr[CRD_Y] = k1 * ext_f[0];
-	rect_ul[CRD_Z] = rect_ll[CRD_Z] = rect_ur[CRD_Z] = rect_lr[CRD_Z] = 0.0;
-
-	dRFromAxisAndAngle(R, 0, 0, 1, PI - atan2(p_s[CRD_Y] - p_e[CRD_Y], p_s[CRD_X] - p_e[CRD_X]));
-	//	printf("%f %f %f\n\n", rect_ll[0],rect_ll[1],rect_ll[2]);
-
-		// 矢印の頭
-	dsDrawTriangle(p_s, R, arrow_center, arrow_l, arrow_r, 0); // 
-	// 矢印の線（三角形を2つ合わせて幅の持つ線を四角形として表示）
-	//dsDrawTriangle(p_s, R, rect_ul, rect_ll, rect_ur, 1); // 
-	//dsDrawTriangle(p_s, R, rect_ur, rect_ll, rect_lr, 1); // 
-
-//	dsDrawLine(p_s, p_e); // p_sからp_eまでの直線を描画
-//	dsDrawLine(line_center, p_e); // p_sからp_eまでの直線を描画
-#endif
-	return	0;
 }
 
 

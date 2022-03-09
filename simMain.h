@@ -126,11 +126,11 @@ constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
 constexpr double    OFFSET_VAL = 0.50;
-std::string forceOutfilename1 = "force1_2.csv";
-std::string forceOutfilename2 = "force2_2.csv";
+std::string forceOutfilename1 = "./data/force_finger1.csv";
+std::string forceOutfilename2 = "./data/force_finger2.csv";
 
-std::string jntAngleOutfilename1 = "finger1_info.csv";
-std::string jntAngleOutfilename2 = "finger2_info.csv";
+std::string jntAngleOutfilename1 = "./data/finger1_info.csv";
+std::string jntAngleOutfilename2 = "./data/finger2_info.csv";
 #define addOffset		1			//把持力を生み出すオフセットを与えるとき
 
 #endif
@@ -325,8 +325,9 @@ public:
 	void draw() {
 		dsSetColor(color[0], color[1], color[2]);
 		dsDrawCapsule(dBodyGetPosition(getBody()), dBodyGetRotation(getBody()), this->l, this->r);
-
 	}
+
+
 };
 
 // 指
@@ -351,7 +352,7 @@ class cFinger {
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
 
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
-	dReal x1 = 0.5, y1 = -1.0, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
+	dReal x1 = 0.5, y1 = -1.2, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
 
 	dReal px1 =-20, py1 = -20, pz1 = 0;
 	double Z_OFFSET = 0.08;
@@ -437,10 +438,12 @@ public:
 	double	save_obj_pos[DATA_CNT_NUM][DIM3] = {};
 	double	save_obj_vel[DATA_CNT_NUM][DIM3] = {};
 	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
+
 	// 保存用ファイル名変数
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_info[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_graph[DATA_FILE_NAME_MAXLEN] = {};
+
 	// メンバ関数
 	void initJntPos(double* init_jnt_pos) {}
 	int armWithoutInertiaShaping();

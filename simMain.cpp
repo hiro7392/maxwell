@@ -239,9 +239,9 @@ void cFinger::setJoint() {
 	
 }
 //把持物体の初期位置
-dReal capX = -1.2, capY = -0.50, capZ = 0.3;
+dReal capX = -1.2, capY = -0.60, capZ = 0.3;
 //把持物体の大きさ
-const dReal plateX = 1.5, plateY = 0.38, plateZ = 0.4;
+const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 
 
 //二本目の指の初期位置設定
@@ -434,7 +434,7 @@ void cFinger::outputJntAngle() {
 
 
 	for (int k = 0; k < DATA_CNT_NUM; k++) {
-		outfile << k + 1 << ",";
+		outfile << k<< ",";
 		for (int i = 0; i < 2; i++) {
 			outfile << save_jnt_vel[k][i] << ",";			//関節角度[rad]
 			outfile << radToAng(save_jnt_vel[k][i]) << ",";	//関節角度[度]
@@ -444,7 +444,12 @@ void cFinger::outputJntAngle() {
 
 			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
 
-			outfile << save_eff_pos[k][i] << ",";		//対象の位置
+			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
+
+			
+			outfile << save_jnt_force[k][i]<<",";		//対象の関節に抱える力
+
+			outfile << ",";
 		}
 		outfile << std::endl;
 	}
@@ -532,6 +537,7 @@ void DrawStuff::simLoop(int pause)
 			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 			_this->obj_pos[crd] = (dBodyGetPosition(obj->getBody()))[crd];		// 対象位置
 			_this->obj_vel[crd] = (dBodyGetLinearVel(obj->getBody()))[crd];		// 対象速度
+			
 #if finger2_use
 			_this2->eff_force[crd] = -_this2->p_force->f1[crd];
 			_this2->obj_pos[crd] = (dBodyGetPosition(obj2->getBody()))[crd];		// 対象位置
@@ -574,7 +580,7 @@ void DrawStuff::simLoop(int pause)
 		quat[0] = quat_ptr[0];
 		quat[1] = 0.0;
 		quat[2] = 0.0;
-		quat[3] = 0.0;// quat_ptr[3];
+		quat[3] = 0.0;// quat_ptr[3];	//外力による回転を無視したいので0にする
 		//正規化
 		/*quat_len = sqrt(quat[0] * quat[0] + quat[3] * quat[3]);
 		quat[0] /= quat_len;
@@ -582,21 +588,27 @@ void DrawStuff::simLoop(int pause)
 
 		//現在の位置
 		const dReal* nowPos = dBodyGetPosition(plateToGrasp.body);
+		
+		static double beforeXpos; 
+		if(sim->step==0)beforeXpos=nowPos[0];
 		//速度,角度
 		dBodySetQuaternion(plateToGrasp.body, quat);
 		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
-		dBodySetPosition(plateToGrasp.body, nowPos[0], nowPos[1], capZ);
+		dBodySetPosition(plateToGrasp.body, beforeXpos, nowPos[1], capZ);
+		
+		beforeXpos = nowPos[0];
 
+		//x座標を記録
 		//plateの端に外力を加える
-		if (sim->step > 10 ) {
+		if (sim->step > 10 && sim->step<=1500) {
 
-			static int duty = 500;	//外力の向きの周期
-			static int forceVal = 30;
+			static int duty = 1500;	//外力の向きの周期
+			static int forceVal = 10;
 			//int forceDir = (sim->step % duty <= duty/2) ? -1 : 1;
 			double  forceDir = sin(sim->step*((double)2.0*PI/duty));
 			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
 			//int forceDir = -1;
-			double distFromCenter = 0.3;
+			double distFromCenter = 0.0;
 			// distFromCenter = 0.2; duty=100,forceVal=30,1点のみについて力を加える
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
 			dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
@@ -667,6 +679,9 @@ void DrawStuff::simLoop(int pause)
 			_this->save_eff_pos[sim->step - 1][i] = finger1TopPos[i];
 			_this2->save_eff_pos[sim->step - 1][i] = finger2TopPos[i];
 
+			_this->save_jnt_force[sim->step - 1][i] = _this->jnt_force[i];
+			_this2->save_jnt_force[sim->step - 1][i] = _this2->jnt_force[i];
+
 		}
 	}else if(sim->step == DATA_CNT_NUM) {
 		//外力を出力
@@ -689,8 +704,7 @@ void DrawStuff::simLoop(int pause)
 	//	drawObject(); // 衝突対象の描画
 	_this->getObj()->draw();
 #elif SIM_ADD_EXT_FORCE
-	//drawExtForce();		// 外力の描画(指1)
-	//drawExtForce2();	// 外力の描画(指2)
+	//drawExtForce();		// 外力の描画(指1と指2)
 	//drawExtForcePlate(); // 外力の描画(把持物体)
 #endif
 
