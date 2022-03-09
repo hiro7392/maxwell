@@ -239,9 +239,9 @@ void cFinger::setJoint() {
 	
 }
 //把持物体の初期位置
-dReal capX = -2.0, capY = -0.5, capZ = 0.3;
+dReal capX = -1.2, capY = -0.50, capZ = 0.3;
 //把持物体の大きさ
-const dReal plateX = 1.5, plateY = 0.30, plateZ = 0.4;
+const dReal plateX = 1.5, plateY = 0.38, plateZ = 0.4;
 
 
 //二本目の指の初期位置設定
@@ -267,7 +267,7 @@ void cFinger::setJoint2() {
 	//Bodyで位置と質量の設定
 	dMassSetZero(&massPlate);
 	dMassSetBoxTotal(&massPlate, newMass, plateX,plateY, plateZ);
-	dBodySetPosition(plateToGrasp.body, -0.8, capY, capZ);	//位置 //x=-1.1
+	dBodySetPosition(plateToGrasp.body, capX, capY, capZ);	//位置 //x=-1.1
 	//ジオメトリの生成
 	auto geomBodyPlate = dCreateBox(EntityManager::get()->getSpace(), plateX, plateY, plateZ);
 	//	動力学Bodyと衝突計算ジオメトリの対応
@@ -410,18 +410,48 @@ void cFinger::outputJntAngle() {
 	else {
 		outfile.open(jntAngleOutfilename2);
 	}
+	/*outfile <<"step" << ",";
+	outfile << "第1関節[rad]" << ",";
+	outfile << "第1関節[rad/s]" << ",";
+
+	outfile << "第2関節[rad]" << ",";
+	outfile << "第2関節[rad/s]" << ",";
+
+	outfile << "第1関節[度]" << ",";
+	outfile << "第1関節[度/s]" << ",";
+
+	outfile << "第2関節[度]" << ",";
+	outfile << "第2関節[度/s]" << ",";
+
+	outfile << "Fx[N]" << ",";
+	outfile << "Fy[N]" << ",";
+	
+	outfile << "手先位置x" << ",";
+	outfile << "手先位置y" << ",";
+	
+	
+	*/
+
+
 	for (int k = 0; k < DATA_CNT_NUM; k++) {
 		outfile << k + 1 << ",";
 		for (int i = 0; i < 2; i++) {
-			outfile << save_jnt_vel[k][i] << ",";
-			outfile << save_jnt_dq[k][i] << ",";
+			outfile << save_jnt_vel[k][i] << ",";			//関節角度[rad]
+			outfile << radToAng(save_jnt_vel[k][i]) << ",";	//関節角度[度]
+
+			outfile << save_jnt_dq[k][i] << ",";			//関節速度[rad]
+			outfile << radToAng(save_jnt_dq[k][i]) << ",";	//関節速度[度]
+
+			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
+
+			outfile << save_eff_pos[k][i] << ",";		//対象の位置
 		}
 		outfile << std::endl;
 	}
 	outfile.close();
-
-
 }
+
+
 
 ////////////////////////////////////////////////////////
 // シミュレーションループ
@@ -509,7 +539,7 @@ void DrawStuff::simLoop(int pause)
 #endif
 		}
 		auto entity = EntityManager::get();
-		// 距離計算
+		// 距離計算	//
 		_this->calcDist();
 #if finger2_use
 		_this2->calcDist();
@@ -544,7 +574,7 @@ void DrawStuff::simLoop(int pause)
 		quat[0] = quat_ptr[0];
 		quat[1] = 0.0;
 		quat[2] = 0.0;
-		quat[3] = quat_ptr[3];
+		quat[3] = 0.0;// quat_ptr[3];
 		//正規化
 		/*quat_len = sqrt(quat[0] * quat[0] + quat[3] * quat[3]);
 		quat[0] /= quat_len;
@@ -559,10 +589,21 @@ void DrawStuff::simLoop(int pause)
 
 		//plateの端に外力を加える
 		if (sim->step > 10 ) {
-			//int forceDir = (sim->step % 500 == 0) ? -1 : 1;
-			int forceDir = -1;
+
+			static int duty = 500;	//外力の向きの周期
+			static int forceVal = 30;
+			//int forceDir = (sim->step % duty <= duty/2) ? -1 : 1;
+			double  forceDir = sin(sim->step*((double)2.0*PI/duty));
+			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
+			//int forceDir = -1;
+			double distFromCenter = 0.3;
+			// distFromCenter = 0.2; duty=100,forceVal=30,1点のみについて力を加える
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
-			dBodyAddForceAtPos(plateToGrasp.body, 0, 5.0 * forceDir, 0.0, nowPos[0] - 0.5, nowPos[1], nowPos[2]);
+			dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
+			//dBodyAddForceAtPos(plateToGrasp.body, forceVal / 2.0 * forceDirX, forceVal* forceDir, 0.0, nowPos[0] + distFromCenter, nowPos[1], nowPos[2]);
+			printf("forceDir = %lf\n", forceDir);
+			dVector3 ext_f{ 0, 5.0 *(forceDir), 0.0 };
+			drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 		}
 #endif
 
@@ -607,13 +648,25 @@ void DrawStuff::simLoop(int pause)
 	//力覚センサの出力用
 	if (sim->step < DATA_CNT_NUM) {
 		for (int i = 0; i < 2; i++) {
+			//	力覚センサの値
 			_this->saveForce[sim->step - 1][i] = _this->var.F.el[i][0];
 			_this2->saveForce[sim->step - 1][i] = _this2->var.F.el[i][0];
+
+			//	関節角度
 			_this->save_jnt_vel[sim->step - 1][i] = _this->var.q.el[i][0];
 			_this2->save_jnt_vel[sim->step - 1][i] = _this2->var.q.el[i][0];
 
+			//	関節速度
 			_this->save_jnt_dq[sim->step-1][i] = _this->var.dq.el[i][0];
 			_this2->save_jnt_dq[sim->step - 1][i] = _this2->var.dq.el[i][0];
+
+			//  手先位置を取得する
+			const dReal* finger1TopPos = dBodyGetPosition(_this->forceContactPoint.getBody());
+			const dReal* finger2TopPos = dBodyGetPosition(_this2->forceContactPoint.getBody());
+
+			_this->save_eff_pos[sim->step - 1][i] = finger1TopPos[i];
+			_this2->save_eff_pos[sim->step - 1][i] = finger2TopPos[i];
+
 		}
 	}else if(sim->step == DATA_CNT_NUM) {
 		//外力を出力
@@ -666,7 +719,7 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -0.5;	xyz[1] =-0.3;	xyz[2] = 3.5;
+	xyz[0] = -1.2;	xyz[1] =-0.5;	xyz[2] = 3.5;
 	hpr[0] = 0.0;	hpr[1] = -90.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
@@ -674,6 +727,7 @@ void DrawStuff::start() {
 #if	FLAG_SAVE_VIDEO
 	init_video();
 #endif
+	//capX = -1.2, capY = -0.50, capZ = 0.3;
 }
 
 ////////////////////////////////////////////////////////

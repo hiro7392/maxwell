@@ -7,15 +7,6 @@
 #include "makeRobot.h"
 
 
-template <typename T>
-T angToRad(T ang){	
-	return (ang / 360.0) * 2 * PI;
-}
-
-template <typename T>
-T radToAng(T rad) {
-	return (rad / (2 * PI)) * 360.0;
-}
 
 ////////////////////////////////////////////////////////
 // ロボット作成
@@ -353,7 +344,7 @@ void drawArrowOriginal(dVector3	p_s, dVector3 p_e, dVector3 ext_f) {
 	dMatrix3	R;
 	double angArrow = PI / 4;  //矢印の角度 rad	
 
-	dsSetColor(1.0, 1.0, 1.0);                    // 
+	dsSetColor(0.0, 1.0, 0.0);                    // 
 	arrow_center[CRD_X] = 0;	arrow_center[CRD_Y] = 0.0;	arrow_center[CRD_Z] = 0;
 
 	double L2Norm = sqrt(ext_f[CRD_X] * ext_f[CRD_X] + ext_f[CRD_Y] * ext_f[CRD_Y]);

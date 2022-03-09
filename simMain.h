@@ -68,7 +68,7 @@
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	1000	// データ保存カウント数
+#define DATA_CNT_NUM	2000	// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
 // 文字列定義
@@ -125,14 +125,26 @@ constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
+constexpr double    OFFSET_VAL = 0.50;
 std::string forceOutfilename1 = "force1_2.csv";
 std::string forceOutfilename2 = "force2_2.csv";
 
-std::string jntAngleOutfilename1 = "angle1.csv";
-std::string jntAngleOutfilename2 = "angle2.csv";
+std::string jntAngleOutfilename1 = "finger1_info.csv";
+std::string jntAngleOutfilename2 = "finger2_info.csv";
 #define addOffset		1			//把持力を生み出すオフセットを与えるとき
 
 #endif
+
+
+template <typename T>
+T angToRad(T ang) {
+	return (ang / 360.0) * 2 * PI;
+}
+
+template <typename T>
+T radToAng(T rad) {
+	return (rad / (2 * PI)) * 360.0;
+}
 
 ////////////////////////////////////////////////////////
 // 構造体定義

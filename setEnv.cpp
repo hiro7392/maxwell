@@ -60,6 +60,7 @@ int cFinger::calcDist()
 	C12 = cos(jnt_pos[ARM_M1]+jnt_pos[ARM_M2]); S12 = sin(jnt_pos[ARM_M1]+jnt_pos[ARM_M2]);
 	// 対象回転軸(p_R[2],p_R[6],p_R[10])のz成分を除去してxy方向で正規化
 	p_R = dBodyGetRotation(obj->getBody());
+
 	norX = p_R[2]/sqrt(p_R[2]*p_R[2]+p_R[6]*p_R[6]);	
 	norY = p_R[6]/sqrt(p_R[2]*p_R[2]+p_R[6]*p_R[6]);
 	// 手先に一番近い点の計算
