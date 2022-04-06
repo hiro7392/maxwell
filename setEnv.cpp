@@ -131,20 +131,20 @@ void cFinger::addExtForce(){
 		cPartsCapsule& fingerTopCapsule = sim->getFinger()->fingerTopCapsule;
 		//指先のカプセルの内部に外力を加えるとき
 		//dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y],eff_pos[CRD_Z]);
-		
+#if useForceContactPoint
 		//指先先端に取り付けた円柱に力を加えるとき
 		dBodyAddForceAtPos(forceContactPoint.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y], eff_pos[CRD_Z]);
-
+#endif
 	}
 	else {
 		auto sensor = sim->getFinger2()->getParts()[3];
 		cPartsCapsule& fingerTopCapsule = sim->getFinger2()->fingerTopCapsule;
 		//指先のカプセルの内部に外力を加えるとき
 		//dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X],eff_pos[CRD_Y],eff_pos[CRD_Z]);
-		
+#if useForceContactPoint
 		//指先先端に取り付けた円柱に力を加えるとき
 		dBodyAddForceAtPos(forceContactPoint.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y], eff_pos[CRD_Z]);
-
+#endif
 	}
 #if 1
 	printf("Finger %d extForce(fx,fy) = (%lf,%lf) \n",fingerID, ext_force[CRD_X], ext_force[CRD_Y]);

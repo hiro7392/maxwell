@@ -40,9 +40,14 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 		//	指先の衝突判定
 		flagFingerTopCapsule=((o1 == fingerTopCapsule.getGeom()) || (o2 == fingerTopCapsule.getGeom()));
 
+
+		if (o1 == fingerCylinder->getGeom() || o2 == fingerCylinder->getGeom())return;
+
+		if (o1 == sensor->getGeom() || o2 == sensor->getGeom())return;
+
 		//	指先カプセルとアームの第二関節円柱が接触していても判定はないことにする
-		//	if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
-		//	((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
+		if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
+		((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
 
 
 		//センサと指先カプセルが接触していても判定しない
@@ -73,14 +78,17 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 			//		if(n!=0)( o1, COEF_FRIC_ROLL, contact );
 		}
 		//センサーor指の第二関節が何かと接触していた時
-		if (flag_sensor ||/*flagFingerCylinder ||*/  flagFingerTopCapsule ) {
+		if (/*flag_sensor||/*flagFingerCylinder ||*/  flagFingerTopCapsule ) {
 			for (int cnt = 0; cnt < n; cnt++) {
 				//指先と指の腹の接触判定をなくす
 				if(((contact[cnt].geom.g1 == fingerCylinder->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
 					((contact[cnt].geom.g2 == fingerCylinder->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
 
+				//センサーと先端カプセル
 				if (((contact[cnt].geom.g1 == sensor->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
 					((contact[cnt].geom.g2 == sensor->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
+
+				//把持物体と指先
 
 
 				contact[cnt].surface.mode = dContactBounce | dContactSoftERP | dContactSoftCFM;
@@ -135,6 +143,11 @@ void ODE::nearCallbackF2(void* data, dGeomID o1, dGeomID o2)
 		//指先の衝突判定
 		flagFingerTopCapsule = ((o1 == fingerTopCapsule.getGeom()) || (o2 == fingerTopCapsule.getGeom()));
 		
+		if (o1 == fingerCylinder->getGeom() || o2 == fingerCylinder->getGeom())return;
+
+		if (o1 == sensor->getGeom() || o2 == sensor->getGeom())return;
+
+
 		//指先カプセルとアームの第二関節円柱が接触していても判定はないことにする
 		//if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
 		//	((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
@@ -167,7 +180,7 @@ void ODE::nearCallbackF2(void* data, dGeomID o1, dGeomID o2)
 		}
 
 		//センサーor指の第二関節が何かと接触していた時
-		if (flag_sensor || /*flagFingerCylinder ||*/ flagFingerTopCapsule) {
+		if (/*flag_sensor || flagFingerCylinder ||*/ flagFingerTopCapsule) {
 			for (int cnt = 0; cnt < n; cnt++) {
 
 				//指先カプセルとそれ以外のパーツの接触は無視する

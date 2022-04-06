@@ -868,7 +868,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 
 #if addOffset
 	Matrix Offset(2, 1);
-	Offset.el[0][0] = 0;
+	Offset.el[0][0] = 0;//x軸なので0
 	Offset.el[1][0] = OFFSET_VAL;
 	matAdd(&re, &re, &Offset);
 	
@@ -945,7 +945,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 
 #if addOffset
 	Matrix Offset(2, 1);
-	Offset.el[0][0] = 0;
+	Offset.el[0][0] = 0;//x軸なので0
 	Offset.el[1][0] = OFFSET_VAL;
 	matSub(&re, &re, &Offset);
 

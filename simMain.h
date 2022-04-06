@@ -125,7 +125,8 @@ constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
-constexpr double    OFFSET_VAL = 0.50;
+constexpr double    OFFSET_VAL = 0.5;
+
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
 
@@ -346,7 +347,7 @@ class cFinger {
 	cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 
 	//センサの長さ等について設定
-	//double sensorLength = 0.01;
+	double sensorLength = 0.01;
 
 	//	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
@@ -361,12 +362,13 @@ public:
 	std::vector<cParts*> finger;
 	//指先のカプセル
 	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
-	cPartsCapsule	fingerTopCapsule{ ARM_LINK2_MASS, fingerTopCapsuleLen, ARM_LINK2_RAD };
+	cPartsCapsule	fingerTopCapsule{ ARM_LINK2_MASS, fingerTopCapsuleLen, ARM_LINK2_RAD};
 	//力の作用点	極薄の円柱
 	double forceContactPointThickness = 0.001;
+#if useForceContactPoint
 	cPartsCylinder forceContactPoint{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, forceContactPointThickness, ARM_LINK2_RAD/10};
-	
-	cPartsCylinder	sensor{ 0.0001 / ARM_LINK2_LEN * ARM_LINK2_MASS, 0.0001, ARM_LINK2_RAD};	// アームと密度をそろえる
+#endif
+	cPartsCylinder	sensor{ sensorLength / ARM_LINK2_LEN * ARM_LINK2_MASS, sensorLength, ARM_LINK2_RAD};	// アームと密度をそろえる
 
 	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
 	cPartsBox	plate{ 10.0, Vec3(px1,py1,pz1),Vec3(1.5,0.5,0.5) };
@@ -501,16 +503,20 @@ public:
 		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0*cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0*sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 		//センサ
-		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 
 #if 0
 		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]),
 			y0 + (ARM_LINK1_LEN) * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN+0.3) / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),//指先のカプセル
 #else
+
 		//指先のカプセル　センサと同じ位置
 		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+#if forceContactPoint
 		//力の作用点を指先端に固定
 		forceContactPoint.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1+ fingerTopCapsuleLen/2.0+ARM_LINK2_RAD+ forceContactPointThickness /2) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1+ fingerTopCapsuleLen / 2.0 + ARM_LINK2_RAD+ forceContactPointThickness/2) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+
+#endif
 
 #endif
 
@@ -523,9 +529,9 @@ public:
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
-
+#if forceContactPoint
 		forceContactPoint.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
-
+#endif
 	}
 
 	//kawaharaが追加　二本目の指用
@@ -534,14 +540,17 @@ public:
 		finger[0]->setPosition(x1,y1, 0.2);	// z:base->sides[CRD_Z]/2
 		finger[1]->setPosition(x1 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y1 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
-		finger[3]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.0001 / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		finger[3]->setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
 #if 0
 		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),//指先のカプセル
 #else
 		//指先のカプセル
-		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);		forceContactPoint.setPosition(x0 + x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + ARM_LINK2_LEN / 2.0 + ARM_LINK2_RAD) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + ARM_LINK2_LEN / 2.0 + ARM_LINK2_RAD) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		fingerTopCapsule.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);		
+		//forceContactPoint.setPosition(x0 + x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + ARM_LINK2_LEN / 2.0 + ARM_LINK2_RAD) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + ARM_LINK2_LEN / 2.0 + ARM_LINK2_RAD) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+#if useForceContactPoint
 		//力の作用点を指先端に固定
 		forceContactPoint.setPosition(x1 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + fingerTopCapsuleLen / 2.0 + ARM_LINK2_RAD + forceContactPointThickness / 2) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y1 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1 + fingerTopCapsuleLen / 2.0 + ARM_LINK2_RAD + forceContactPointThickness / 2) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+#endif
 #endif
 		finger[0]->setRotation(0);
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
@@ -549,13 +558,22 @@ public:
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
-
+#if useForceContactPoint
 		forceContactPoint.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+#endif
 	}
 	void setColor(std::vector<Vec3> color) {
 		auto i = color.begin();
+		int cnt=0;
 		//fingerTopCapsule->setColor((*i).x, (*i).y, (*i).z);	//指先のカプセル用
-		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) 	(*j)->setColor((*i).x, (*i).y, (*i).z);
+		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) {
+			
+			if(cnt<3)(*j)->setColor((*i).x, (*i).y, (*i).z);
+			else {
+				(*j)->setColor(0,0,0);
+			}
+			cnt++;
+		}
 	}
 
 	void setJoint();		// 関節設定
@@ -579,7 +597,9 @@ public:
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { 
 		fingerTopCapsule.draw();
+#if useForceContactPoint 
 		forceContactPoint.draw();
+#endif
 		for (auto &x : finger) { x->draw(); 
 		} }
 };
