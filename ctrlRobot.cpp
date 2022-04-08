@@ -851,10 +851,19 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
+		Matrix Offset(2, 1);
+		Offset.el[0][0] = 0;//x軸なので0
+		Offset.el[1][0] = OFFSET_VAL;
+		matSub(&var_init.r, &var_init.r, &Offset);
+
 	}
 	// 前処理
 	matSub(&re, &var.r, &var_init.r);		// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
+	printf("finger1 re=\n");
+	matPrint(&dre);
+	printf("finger1 dre=\n");
+	matPrint(&dre);
 #if 1
 	Matrix F1 = EntityManager::get()->getFinger()->var.F;
 	Matrix F2 = EntityManager::get()->getFinger2()->var.F;
@@ -866,7 +875,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	half.el[0][0] = 0.5;
 	half.el[1][1] = 0.5;
 
-#if addOffset
+#if 0 //addOffset
 	Matrix Offset(2, 1);
 	Offset.el[0][0] = 0;//x軸なので0
 	Offset.el[1][0] = OFFSET_VAL;
@@ -874,7 +883,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	
 #endif
 	
-#if 1//prinf_debug
+#if prinf_debug
 
 
 	std::cout << "F12" << std::endl;
@@ -888,8 +897,8 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 #endif	
 	
 	
-	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
-	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// 制約条件付きの時
+	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
+	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// 制約条件付きの時
 
 	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
 
@@ -901,8 +910,8 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	matSub(&tauNC, &dyn.h, matMul4(&Tmp21, &dyn.Mq, &kine.Jinv, &kine.dJ, &var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
 	matAdd(&Tmp21, matMul4(&tauVE, &imp.K, &imp.Cinv, &imp.M, &dre), matMul(&Tmp21, &imp.K, &re));		// Kd*Cd^{-1}*Md*dr+Kd*r
 	matSignInv(matMul(&tauVE, &E, &Tmp21));	// tauVE = -E{Kd*Cd^{-1}*Md*dr+Kd*r}
-	//matMul(&tauIN, matSub(&Tmp22, &E, &kine.Jt), &var.F);		// tauIN = (E-J^T)F
-	matSub(&tauIN, matMul(&Tmp22, &E,&F12), matMul(&Tmp22_2, &kine.Jt, &var.F));		// tauIN = (E*((F1+F2)/2) -J^T*F)
+	matMul(&tauIN, matSub(&Tmp22, &E, &kine.Jt), &var.F);		// tauIN = (E-J^T)F
+	//matSub(&tauIN, matMul(&Tmp22, &E,&F12), matMul(&Tmp22_2, &kine.Jt, &var.F));		// tauIN = (E*((F1+F2)/2) -J^T*F)	制約条件付き
 
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}∫Fdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
@@ -923,14 +932,36 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
 	static Matrix	Integ(2, 1);
 	static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
-
+	auto Finger1 = EntityManager::get()->getFinger();
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
+		Matrix Offset(2, 1);
+		Offset.el[0][0] = 0;//x軸なので0
+		Offset.el[1][0] = OFFSET_VAL;
+		matAdd(&var_init.r, &var_init.r, &Offset);
 	}
 	// 前処理
+	//　制約条件付きにおいて、二本目の指の手先位置変位は
+	// x1=-x2となる
 	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
+	Matrix tmp,tmp_init;
+	tmp = Finger1->var.r;
+	tmp_init = Finger1->var_init.r;
+	//matSub(&re, &tmp, &tmp_init);			// 手先位置変位
+	//re.el[0][0] = -re.el[0][0];
+
+	Matrix tmpd, tmp_initd;
+	tmpd = Finger1->var.dr;
+	tmp_initd = Finger1->var_init.dr;
+	matSub(&dre, &tmpd, &tmp_initd);		// 手先速度変位
+	dre.el[1][0] = -dre.el[1][0];
+
+	printf("finger2 re=\n");
+	matPrint(&re);
+	printf("finger2 dre=\n");
+	matPrint(&dre);
 #if 1
 	Matrix F1 = EntityManager::get()->getFinger()->var.F;
 	Matrix F2 = EntityManager::get()->getFinger2()->var.F;
@@ -943,7 +974,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	half.el[1][1] = 0.5;
 	//matMul(&F12, &half, &F12);
 
-#if addOffset
+#if 0	//addOffset
 	Matrix Offset(2, 1);
 	Offset.el[0][0] = 0;//x軸なので0
 	Offset.el[1][0] = OFFSET_VAL;
@@ -952,7 +983,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 #endif
 
 	
-#if 1//prinf_debug
+#if prinf_debug
 	
 
 
@@ -967,8 +998,8 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 #endif	
 
 
-	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
-	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// 制約条件付きの時
+	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
+	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// 制約条件付きの時
 
 	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
 
@@ -980,13 +1011,13 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matSub(&tauNC, &dyn.h, matMul4(&Tmp21, &dyn.Mq, &kine.Jinv, &kine.dJ, &var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
 	matAdd(&Tmp21, matMul4(&tauVE, &imp.K, &imp.Cinv, &imp.M, &dre), matMul(&Tmp21, &imp.K, &re));		// Kd*Cd^{-1}*Md*dr+Kd*r
 	matSignInv(matMul(&tauVE, &E, &Tmp21));	// tauVE = -E{Kd*Cd^{-1}*Md*dr+Kd*r}
-	//matMul(&tauIN, matSub(&Tmp22, &E, &kine.Jt), &var.F);		// tauIN = (E-J^T)F
-	matSub(&tauIN, matMul(&Tmp22, &E, &F12), matMul(&Tmp22_2, &kine.Jt, &var.F));		// tauIN = (E*((F1+F2)/2) -J^T*F)
+	matMul(&tauIN, matSub(&Tmp22, &E, &kine.Jt), &var.F);		// tauIN = (E-J^T)F
+	//matSub(&tauIN, matMul(&Tmp22, &E, &F12), matMul(&Tmp22_2, &kine.Jt, &var.F));		// tauIN = (E*((F1+F2)/2) -J^T*F)
 
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}∫Fdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
 	// デバッグ
-#if 1//print_debug
+#if 0//print_debug
 	std::cout << "fingerID : " <<fingerID << " tau = "<<std::endl;
 	matPrint(tau);		// Inertia Shaping無しの場合は0になればOK
 #endif

@@ -346,6 +346,7 @@ int main(int argc, char *argv[])
 	// パラメータ設定 指1
 	auto Finger1 = EntityManager::get()->getFinger();
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)Finger1->init_jnt_pos[jnt] = init_jnt_pos[jnt];
+
 	for (int crd = 0; crd < DIM3; crd++) {
 		Finger1->init_obj_pos[crd] = Finger1->init_obj_pos[crd];
 		for (int axis = 0; axis < DIM3; axis++)	Finger1->init_obj_att[axis][crd] = Finger1->init_obj_att[axis][crd];
@@ -497,8 +498,8 @@ void DrawStuff::simLoop(int pause)
 		}
 #endif
 		// 状態取得
-		for(int i=0;i<2;i++)printf("finger init_jnt[%d] %f\n",i,_this->init_jnt_pos[i]);
-		for (int i = 0; i < 2; i++)printf("finger2 init_jnt[%d] %f\n", i, _this2->init_jnt_pos[i]);
+		//for(int i=0;i<2;i++)printf("finger init_jnt[%d] %f\n",i,_this->init_jnt_pos[i]);
+		//for (int i = 0; i < 2; i++)printf("finger2 init_jnt[%d] %f\n", i, _this2->init_jnt_pos[i]);
 		for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(_this->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
@@ -593,7 +594,7 @@ void DrawStuff::simLoop(int pause)
 		if (sim->step > 10 && sim->step<=500) {
 
 			static int duty = 1500;	//外力の向きの周期
-			static int forceVal = 10;
+			static int forceVal = 5;
 			int forceDir = (sim->step % duty <= duty/2) ? -1 : 1;
 			//double  forceDir = sin(sim->step*((double)2.0*PI/duty));
 			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
@@ -603,7 +604,7 @@ void DrawStuff::simLoop(int pause)
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
 			dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
 			//dBodyAddForceAtPos(plateToGrasp.body, forceVal / 2.0 * forceDirX, forceVal* forceDir, 0.0, nowPos[0] + distFromCenter, nowPos[1], nowPos[2]);
-			printf("forceDir = %lf\n", forceDir);
+			//printf("forceDir = %lf\n", forceDir);
 			dVector3 ext_f{ 0, 5.0 *(forceDir), 0.0 };
 			drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 		}
@@ -644,7 +645,13 @@ void DrawStuff::simLoop(int pause)
 #endif;
 	_this2->plate.draw();
 
-	//センサの値を出力
+	//初期位置を出力
+	std::cout << "F1 initial position r= " << std::endl;
+	matPrint(&_this->var_init.r);
+
+	std::cout << "F2 initial position r= "<< std::endl;
+	matPrint(&_this2->var_init.r);
+	
 	
 
 	//力覚センサの出力用

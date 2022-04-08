@@ -146,7 +146,7 @@ void cFinger::addExtForce(){
 		dBodyAddForceAtPos(forceContactPoint.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y], eff_pos[CRD_Z]);
 #endif
 	}
-#if 1
+#if 0
 	printf("Finger %d extForce(fx,fy) = (%lf,%lf) \n",fingerID, ext_force[CRD_X], ext_force[CRD_Y]);
 #endif
 
