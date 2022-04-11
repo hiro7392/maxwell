@@ -433,21 +433,19 @@ void cFinger::outputJntAngle() {
 
 	for (int k = 0; k < DATA_CNT_NUM; k++) {
 		outfile << k<< ",";
+		//各関節について
 		for (int i = 0; i < 2; i++) {
 			outfile << save_jnt_vel[k][i] << ",";			//関節角度[rad]
 			outfile << radToAng(save_jnt_vel[k][i]) << ",";	//関節角度[度]
 
-			outfile << save_jnt_dq[k][i] << ",";			//関節速度[rad]
-			outfile << radToAng(save_jnt_dq[k][i]) << ",";	//関節速度[度]
+			outfile << save_jnt_dq[k][i] << ",";			//関節速度[rad/s]
+			outfile << radToAng(save_jnt_dq[k][i]) << ",";	//関節速度[度/s]
 
 			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
+			outfile << save_jnt_force[k][i] << ",";		//対象の関節に抱える力
 
 			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
-
-			
-			outfile << save_jnt_force[k][i]<<",";		//対象の関節に抱える力
-
-			outfile << ",";
+			//outfile << ",";
 		}
 		outfile << std::endl;
 	}
@@ -595,7 +593,7 @@ void DrawStuff::simLoop(int pause)
 
 			static int duty = 1500;	//外力の向きの周期
 			static int forceVal = 5;
-			int forceDir = (sim->step % duty <= duty/2) ? -1 : 1;
+			int forceDir = (sim->step % duty <= duty/2) ? 1 : -1;
 			//double  forceDir = sin(sim->step*((double)2.0*PI/duty));
 			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
 			//int forceDir = -1;
@@ -605,7 +603,7 @@ void DrawStuff::simLoop(int pause)
 			dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
 			//dBodyAddForceAtPos(plateToGrasp.body, forceVal / 2.0 * forceDirX, forceVal* forceDir, 0.0, nowPos[0] + distFromCenter, nowPos[1], nowPos[2]);
 			//printf("forceDir = %lf\n", forceDir);
-			dVector3 ext_f{ 0, 5.0 *(forceDir), 0.0 };
+			dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
 			drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 		}
 #endif
@@ -676,8 +674,8 @@ void DrawStuff::simLoop(int pause)
 			_this->save_eff_pos[sim->step - 1][i] = finger1TopPos[i];
 			_this2->save_eff_pos[sim->step - 1][i] = finger2TopPos[i];
 #else
-			_this->save_eff_pos[sim->step - 1][i] = 0;
-			_this2->save_eff_pos[sim->step - 1][i] = 0;
+			_this->save_eff_pos[sim->step - 1][i] = _this->var.r.el[i][0];
+			_this2->save_eff_pos[sim->step - 1][i] = _this2->var.r.el[i][0];
 #endif
 			
 

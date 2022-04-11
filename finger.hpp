@@ -28,7 +28,7 @@
 
 #define finger2_use 1				//二本目の指を使うとき
 #define print_debug 0
-#define usePlateToGrasp 1			//把持するプレートを置くとき
+#define usePlateToGrasp 0			//把持するプレートを置くとき
 #define useForceContactPoint 0		//力の接触点を利用するとき
 
 //カプセル用
