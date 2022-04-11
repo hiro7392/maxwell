@@ -861,7 +861,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	matSub(&re, &var.r, &var_init.r);		// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
 	printf("finger1 re=\n");
-	matPrint(&dre);
+	matPrint(&re);
 	printf("finger1 dre=\n");
 	matPrint(&dre);
 #if 1
@@ -944,13 +944,13 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	// 前処理
 	//　制約条件付きにおいて、二本目の指の手先位置変位は
 	// x1=-x2となる
-	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
-	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
+	//matSub(&re, &var.r, &var_init.r);			// 手先位置変位
+	//matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
 	Matrix tmp,tmp_init;
 	tmp = Finger1->var.r;
 	tmp_init = Finger1->var_init.r;
-	//matSub(&re, &tmp, &tmp_init);			// 手先位置変位
-	//re.el[0][0] = -re.el[0][0];
+	matSub(&re, &tmp, &tmp_init);			// 手先位置変位
+	re.el[0][0] = -re.el[0][0];
 
 	Matrix tmpd, tmp_initd;
 	tmpd = Finger1->var.dr;
