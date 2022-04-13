@@ -890,7 +890,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	Matrix F12;
 	matAdd(&F12,&F1,&F2);
 	Matrix half(2, 2);
-	half.el[0][0] = 0.5;
+	half.el[0][0] = 0;
 	half.el[1][1] = 0.5;
 
 #if 0 //addOffset
@@ -955,32 +955,30 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
 		Matrix Offset(2, 1);
-		Offset.el[0][0] = -0.1;//x軸なので0
+		Offset.el[0][0] = 0;//x軸なので0
 		Offset.el[1][0] = OFFSET_VAL;
 		matAdd(&var_init.r, &var_init.r, &Offset);
 	}
 	// 前処理
 	//　制約条件付きにおいて、二本目の指の手先位置変位は
 	// x1=-x2となる
-	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
-	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
-	//Matrix tmp,tmp_init;
-	//tmp = Finger1->var.r;
-	//tmp_init = Finger1->var_init.r;
-	//matSub(&re, &tmp, &tmp_init);			// 手先位置変位
-	//re.el[1][0] = -re.el[1][0];				//x軸について符号反転
-	//re.el[0][0] = -re.el[0][0];				//y軸について符号反転
+	Matrix tmp,tmp_init;
+	tmp = Finger1->var.r;
+	tmp_init = Finger1->var_init.r;
+	matSub(&re, &tmp, &tmp_init);			// 手先位置変位
+	re.el[1][0] = -re.el[1][0];				//x軸について符号反転
+	re.el[0][0] = -re.el[0][0];				//y軸について符号反転
 
-	//Matrix tmpd, tmp_initd;
-	//tmpd = Finger1->var.dr;
-	//tmp_initd = Finger1->var_init.dr;
-	//matSub(&dre, &tmpd, &tmp_initd);		// 手先速度変位
-	//dre.el[1][0] = -dre.el[1][0];			// x軸について符号反転
-	//dre.el[0][0] = -dre.el[0][0];				//y軸について符号反転
+	Matrix tmpd, tmp_initd;
+	tmpd = Finger1->var.dr;
+	tmp_initd = Finger1->var_init.dr;
+	matSub(&dre, &tmpd, &tmp_initd);		// 手先速度変位
+	dre.el[1][0] = -dre.el[1][0];			// x軸について符号反転
+	dre.el[0][0] = -dre.el[0][0];				//y軸について符号反転
 
 	//通常
 	//matSub(&re, &var.r, &var_init.r);			// 手先位置変位
-	//matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
+	///matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
 
 	printf("finger2 re=\n");
 	matPrint(&re);
