@@ -15,6 +15,7 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 	//return;
 	static const int N = 10;     // 接触点数
 	int	flag_ground, flag_sensor,flagFingerCylinder, flagFingerTopCapsule;	// 衝突検出用フラグ
+	int	flag_ground2, flag_sensor2, flagFingerCylinder2, flagFingerTopCapsule2;	// 衝突検出用フラグ
 	dContact contact[N];
 	dBodyID b1, b2;
 	dJointID c;
@@ -24,8 +25,124 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 	for (int idx = 0; idx < 1; idx++) {
 //		MyObject *sensor = &_this->sys.finger[idx].sensor;
 		auto sensor = EntityManager::get()->getFinger()->getParts()[3];
+		auto sensor2 = EntityManager::get()->getFinger2()->getParts()[3];
 		auto fingerCylinder = EntityManager::get()->getFinger()->getParts()[2];
+		auto fingerCylinder2 = EntityManager::get()->getFinger2()->getParts()[2];
+		
 		cPartsCapsule& fingerTopCapsule =(EntityManager::get()->getFinger()->fingerTopCapsule);
+		cPartsCapsule& fingerTopCapsule2 = (EntityManager::get()->getFinger2()->fingerTopCapsule);
+
+		// 地面との衝突検出
+		flag_ground = ((o1 == _this->ground) || (o2 == _this->ground));
+		// アーム手先との衝突検出
+		flag_sensor = ((o1 == sensor->getGeom()) || (o2 == sensor->getGeom()));
+		flag_sensor2 = ((o1 == sensor->getGeom()) || (o2 == sensor->getGeom()));
+		//	指先の衝突判定
+		flagFingerTopCapsule=((o1 == fingerTopCapsule.getGeom()) || (o2 == fingerTopCapsule.getGeom()));
+		flagFingerTopCapsule2 = ((o1 == fingerTopCapsule2.getGeom()) || (o2 == fingerTopCapsule2.getGeom()));
+
+
+
+		if (o1 == fingerCylinder->getGeom() || o2 == fingerCylinder->getGeom())return;
+		if (o1 == sensor->getGeom() || o2 == sensor->getGeom())return;
+		if (o1 == fingerCylinder2->getGeom() || o2 == fingerCylinder2->getGeom())return;
+		if (o1 == sensor2->getGeom() || o2 == sensor2->getGeom())return;
+
+		//	指先カプセルとアームの第二関節円柱が接触していても判定はないことにする
+		if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
+		((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
+
+		if (((o1 == fingerCylinder2->getGeom()) && (o2 == fingerTopCapsule2.getGeom())) ||
+			((o2 == fingerCylinder2->getGeom()) && (o1 == fingerTopCapsule2.getGeom())))return;
+
+
+		//センサと指先カプセルが接触していても判定しない
+		if (((o1 == sensor->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
+			((o2 == sensor->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
+
+		if (((o1 == sensor2->getGeom()) && (o2 == fingerTopCapsule2.getGeom())) ||
+			((o2 == sensor2->getGeom()) && (o1 == fingerTopCapsule2.getGeom())))return;
+
+
+		// 2つのボディがジョイントで結合されていたら衝突検出しない
+		b1 = dGeomGetBody(o1);	b2 = dGeomGetBody(o2);
+		if (b1 && b2 && dAreConnectedExcluding(b1, b2, dJointTypeContact)) return;
+		// 衝突設定
+		int n = dCollide(o1, o2, N, &contact[0].geom, sizeof(dContact));
+
+		//地面と接触していたとき
+		if (flag_ground) {
+			for (int cnt = 0; cnt < n; cnt++) {
+				contact[cnt].surface.mode = dContactBounce | dContactSoftERP | dContactSoftCFM;
+				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
+				contact[cnt].surface.soft_cfm = 0.001; // 接触点のCFM
+				contact[cnt].surface.mu = 0.5; // 摩擦係数　もともと0.5
+				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
+				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
+				// 転がり摩擦
+				//#define	COEF_FRIC_ROLL	0.006
+#define	COEF_FRIC_ROLL	0.0006
+				rolling_function(_this, o1, COEF_FRIC_ROLL / n, contact + cnt);
+				rolling_function(_this, o2, COEF_FRIC_ROLL / n, contact + cnt);
+			}
+			//		if(n!=0)( o1, COEF_FRIC_ROLL, contact );
+		}
+		//センサーor指の第二関節が何かと接触していた時
+		if (/*flag_sensor||/*flagFingerCylinder ||*/  flagFingerTopCapsule || flagFingerTopCapsule2 ) {
+			for (int cnt = 0; cnt < n; cnt++) {
+				//指先と指の腹の接触判定をなくす
+				if(((contact[cnt].geom.g1 == fingerCylinder->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
+					((contact[cnt].geom.g2 == fingerCylinder->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
+				if (((contact[cnt].geom.g1 == fingerCylinder2->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule2.getGeom())) ||
+					((contact[cnt].geom.g2 == fingerCylinder2->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule2.getGeom())))return;
+
+
+				//センサーと先端カプセル
+				if (((contact[cnt].geom.g1 == sensor->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
+					((contact[cnt].geom.g2 == sensor->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
+				if (((contact[cnt].geom.g1 == sensor2->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule2.getGeom())) ||
+					((contact[cnt].geom.g2 == sensor2->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule2.getGeom())))return;
+
+				//把持物体と指先
+				contact[cnt].surface.mode = dContactBounce | dContactSoftERP | dContactSoftCFM;
+				//			contact[cnt].surface.soft_erp   = 0.45;   // 接触点のERP
+				//			contact[cnt].surface.soft_cfm   = 0.005; // 接触点のCFM
+#if 1
+				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
+				contact[cnt].surface.soft_cfm = 0.005; // 接触点のCFM
+#else
+				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
+				contact[cnt].surface.soft_cfm = 0.0005; // 接触点のCFM
+#endif
+				contact[cnt].surface.mu = 0.5;			// 摩擦係数
+				contact[cnt].surface.bounce = 0.5;		// 反発係数
+				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
+				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
+			}
+
+			if (flagFingerTopCapsule != 0)	_this->getFinger()->state_contact = 1;
+			if (flagFingerTopCapsule2 != 0)	_this->getFinger2()->state_contact = 1;
+
+		}
+	}
+}
+// 指ごとに一般化
+void ODE::nearCallback2(void* data, dGeomID o1, dGeomID o2)
+{
+	//return;
+	static const int N = 10;     // 接触点数
+	int	flag_ground, flag_sensor, flagFingerCylinder, flagFingerTopCapsule;	// 衝突検出用フラグ
+	dContact contact[N];
+	dBodyID b1, b2;
+	dJointID c;
+	auto _this = EntityManager::get();
+
+	//for (int idx = 0; idx < ARM_NUM; idx++) {
+	for (int idx = 0; idx < 1; idx++) {
+		//		MyObject *sensor = &_this->sys.finger[idx].sensor;
+		auto sensor = EntityManager::get()->getFinger2()->getParts()[3];
+		auto fingerCylinder = EntityManager::get()->getFinger2()->getParts()[2];
+		cPartsCapsule& fingerTopCapsule = (EntityManager::get()->getFinger2()->fingerTopCapsule);
 
 		// 地面との衝突検出
 		flag_ground = ((o1 == _this->ground) || (o2 == _this->ground));
@@ -38,11 +155,16 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 		//flagFingerCylinder = ((o1 == fingerCylinder->getGeom()) || (o2 == fingerCylinder->getGeom()));
 
 		//	指先の衝突判定
-		flagFingerTopCapsule=((o1 == fingerTopCapsule.getGeom()) || (o2 == fingerTopCapsule.getGeom()));
+		flagFingerTopCapsule = ((o1 == fingerTopCapsule.getGeom()) || (o2 == fingerTopCapsule.getGeom()));
+
+
+		if (o1 == fingerCylinder->getGeom() || o2 == fingerCylinder->getGeom())return;
+
+		if (o1 == sensor->getGeom() || o2 == sensor->getGeom())return;
 
 		//	指先カプセルとアームの第二関節円柱が接触していても判定はないことにする
-		//	if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
-		//	((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
+		if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
+			((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
 
 
 		//センサと指先カプセルが接触していても判定しない
@@ -61,7 +183,7 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 				contact[cnt].surface.mode = dContactBounce | dContactSoftERP | dContactSoftCFM;
 				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
 				contact[cnt].surface.soft_cfm = 0.001; // 接触点のCFM
-				contact[cnt].surface.mu = 0.5; // 摩擦係数
+				contact[cnt].surface.mu = 0.5; // 摩擦係数　もともと0.5
 				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
 				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
 				// 転がり摩擦
@@ -73,14 +195,17 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 			//		if(n!=0)( o1, COEF_FRIC_ROLL, contact );
 		}
 		//センサーor指の第二関節が何かと接触していた時
-		if (flag_sensor ||/*flagFingerCylinder ||*/  flagFingerTopCapsule ) {
+		if (/*flag_sensor||/*flagFingerCylinder ||*/  flagFingerTopCapsule) {
 			for (int cnt = 0; cnt < n; cnt++) {
 				//指先と指の腹の接触判定をなくす
-				if(((contact[cnt].geom.g1 == fingerCylinder->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
+				if (((contact[cnt].geom.g1 == fingerCylinder->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
 					((contact[cnt].geom.g2 == fingerCylinder->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
 
+				//センサーと先端カプセル
 				if (((contact[cnt].geom.g1 == sensor->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
 					((contact[cnt].geom.g2 == sensor->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
+
+				//把持物体と指先
 
 
 				contact[cnt].surface.mode = dContactBounce | dContactSoftERP | dContactSoftCFM;
@@ -104,101 +229,7 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 		}
 	}
 }
-void ODE::nearCallbackF2(void* data, dGeomID o1, dGeomID o2)
-{
-	//return;
-	static const int N = 10;     // 接触点数
-	int	flag_ground, flag_sensor, flagFingerCylinder, flagFingerTopCapsule;	// 衝突検出用フラグ
-	dContact contact[N];
-	dBodyID b1, b2;
-	dJointID c;
-	auto _this = EntityManager::get();
 
-	//for (int idx = 0; idx < ARM_NUM; idx++) {
-	for (int idx = 0; idx < 1; idx++) {
-		//		MyObject *sensor = &_this->sys.finger[idx].sensor;
-		auto sensor = EntityManager::get()->getFinger2()->getParts()[3];
-		auto fingerCylinder = EntityManager::get()->getFinger2()->getParts()[2];
-		cPartsCapsule& fingerTopCapsule = (EntityManager::get()->getFinger2()->fingerTopCapsule);
-
-		//auto link2
-		// 地面との衝突検出
-		flag_ground = ((o1 == _this->ground) || (o2 == _this->ground));
-		// アームリンクとの衝突検出
-		//	flag_arm = ((o1 == arm.geom) || (o2 == arm.geom));
-		// アーム手先との衝突検出
-		flag_sensor = ((o1 == sensor->getGeom()) || (o2 == sensor->getGeom()));
-
-		// アームの第二関節
-		//flagFingerCylinder = ((o1 == fingerCylinder->getGeom()) || (o2 == fingerCylinder->getGeom()));
-
-		//指先の衝突判定
-		flagFingerTopCapsule = ((o1 == fingerTopCapsule.getGeom()) || (o2 == fingerTopCapsule.getGeom()));
-		
-		//指先カプセルとアームの第二関節円柱が接触していても判定はないことにする
-		//if (((o1 == fingerCylinder->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
-		//	((o2 == fingerCylinder->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
-
-		if (((o1 == sensor->getGeom()) && (o2 == fingerTopCapsule.getGeom())) ||
-			((o2 == sensor->getGeom()) && (o1 == fingerTopCapsule.getGeom())))return;
-
-		// 2つのボディがジョイントで結合されていたら衝突検出しない
-		b1 = dGeomGetBody(o1);	b2 = dGeomGetBody(o2);
-		if (b1 && b2 && dAreConnectedExcluding(b1, b2, dJointTypeContact)) return;
-		// 衝突設定
-		int n = dCollide(o1, o2, N, &contact[0].geom, sizeof(dContact));
-
-		//地面と接触していたとき
-		if (flag_ground) {
-			for (int cnt = 0; cnt < n; cnt++) {
-				contact[cnt].surface.mode = dContactBounce | dContactSoftERP | dContactSoftCFM;
-				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
-				contact[cnt].surface.soft_cfm = 0.001; // 接触点のCFM
-				contact[cnt].surface.mu = 0.5; // 摩擦係数
-				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
-				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
-				// 転がり摩擦
-				//#define	COEF_FRIC_ROLL	0.006
-#define	COEF_FRIC_ROLL	0.0006
-				rolling_function(_this, o1, COEF_FRIC_ROLL / n, contact + cnt);
-				rolling_function(_this, o2, COEF_FRIC_ROLL / n, contact + cnt);
-			}
-			//		if(n!=0)	rolling_function( o1, COEF_FRIC_ROLL, contact );
-		}
-
-		//センサーor指の第二関節が何かと接触していた時
-		if (flag_sensor || /*flagFingerCylinder ||*/ flagFingerTopCapsule) {
-			for (int cnt = 0; cnt < n; cnt++) {
-
-				//指先カプセルとそれ以外のパーツの接触は無視する
-				if (((contact[cnt].geom.g1 == fingerCylinder->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
-					((contact[cnt].geom.g2 == fingerCylinder->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
-
-				//センサと指先カプセルの接触は無視する
-				if (((contact[cnt].geom.g1 == sensor->getGeom()) && (contact[cnt].geom.g2 == fingerTopCapsule.getGeom())) ||
-					((contact[cnt].geom.g2 == sensor->getGeom()) && (contact[cnt].geom.g1 == fingerTopCapsule.getGeom())))return;
-
-				contact[cnt].surface.mode = dContactBounce | dContactSoftERP | dContactSoftCFM;
-				//			contact[cnt].surface.soft_erp   = 0.45;   // 接触点のERP
-				//			contact[cnt].surface.soft_cfm   = 0.005; // 接触点のCFM
-#if 1
-				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
-				contact[cnt].surface.soft_cfm = 0.005; // 接触点のCFM
-#else
-				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
-				contact[cnt].surface.soft_cfm = 0.0005; // 接触点のCFM
-#endif
-				contact[cnt].surface.mu = 0.5; // 摩擦係数
-				contact[cnt].surface.bounce = 0.5; // 反発係数
-				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
-				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
-			}
-
-			if (n != 0)	_this->getFinger()->state_contact = 1;
-
-		}
-	}
-}
 ////////////////////////////////////////////////////////
 // 初期化
 ////////////////////////////////////////////////////////
@@ -378,8 +409,8 @@ int cFinger::armInvKine(Kinematics *kine, Variable *var)
 #endif
 	// 関節速度
 #if 1
-	auto _this = EntityManager::get()->getFinger();
-	_this->armJacob(kine, var);		// 後で順番を要検討
+	//auto _this = EntityManager::get()->getFinger();
+	armJacob(kine, var);		// 後で順番を要検討
 #endif
 //	matMul(&var->dq, &kine->Jinv, &var->dr);		// dq = J^{-1}*dr
 	return	0;

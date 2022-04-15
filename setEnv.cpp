@@ -60,6 +60,7 @@ int cFinger::calcDist()
 	C12 = cos(jnt_pos[ARM_M1]+jnt_pos[ARM_M2]); S12 = sin(jnt_pos[ARM_M1]+jnt_pos[ARM_M2]);
 	// 対象回転軸(p_R[2],p_R[6],p_R[10])のz成分を除去してxy方向で正規化
 	p_R = dBodyGetRotation(obj->getBody());
+
 	norX = p_R[2]/sqrt(p_R[2]*p_R[2]+p_R[6]*p_R[6]);	
 	norY = p_R[6]/sqrt(p_R[2]*p_R[2]+p_R[6]*p_R[6]);
 	// 手先に一番近い点の計算
@@ -105,13 +106,13 @@ void cFinger::addExtForce(){
 	if(sim->step <= 1000){
 
 		if (fingerID == 1) {
-			ext_force[CRD_X] = -2.0;
-			ext_force[CRD_Y] = 2.0;
+			ext_force[CRD_X] = 0.0;
+			ext_force[CRD_Y] = 0.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 		else if (fingerID == 2) {
-			ext_force[CRD_X] = -1.0;
-			ext_force[CRD_Y] = 1.0;
+			ext_force[CRD_X] = 0.0;
+			ext_force[CRD_Y] = 0.0;
 			ext_force[CRD_Z] = 0.0;
 		}
 	}else{
@@ -121,7 +122,7 @@ void cFinger::addExtForce(){
 	}
 #endif
 
-	// 手先リンク表面の中心に外力入力
+	// 手先リンク表面の中心に外力入力q
 //	MyObject *sensor = &sim->sys.finger[ARM_N1].sensor;
 //	dBodyAddForceAtPos(sensor->body, ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], sim->eff_pos[CRD_X], sim->eff_pos[CRD_Y], sim->eff_pos[CRD_Z]);
 	
@@ -130,30 +131,28 @@ void cFinger::addExtForce(){
 		cPartsCapsule& fingerTopCapsule = sim->getFinger()->fingerTopCapsule;
 		//指先のカプセルの内部に外力を加えるとき
 		//dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y],eff_pos[CRD_Z]);
-		
+#if useForceContactPoint
 		//指先先端に取り付けた円柱に力を加えるとき
 		dBodyAddForceAtPos(forceContactPoint.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y], eff_pos[CRD_Z]);
-
+#endif
 	}
 	else {
 		auto sensor = sim->getFinger2()->getParts()[3];
 		cPartsCapsule& fingerTopCapsule = sim->getFinger2()->fingerTopCapsule;
 		//指先のカプセルの内部に外力を加えるとき
 		//dBodyAddForceAtPos(fingerTopCapsule.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X],eff_pos[CRD_Y],eff_pos[CRD_Z]);
-		
+#if useForceContactPoint
 		//指先先端に取り付けた円柱に力を加えるとき
 		dBodyAddForceAtPos(forceContactPoint.getBody(), ext_force[CRD_X], ext_force[CRD_Y], ext_force[CRD_Z], eff_pos[CRD_X], eff_pos[CRD_Y], eff_pos[CRD_Z]);
-
+#endif
 	}
-#if 1
+#if 0
 	printf("Finger %d extForce(fx,fy) = (%lf,%lf) \n",fingerID, ext_force[CRD_X], ext_force[CRD_Y]);
 #endif
 
 }
 
 void cFinger::printInfo() {
-
-
 
 	std::cout << "finger " << fingerID << std::endl;
 	for (int i = 0; i < 2; i++)std::cout << "init_jnt_pos" << init_jnt_pos[i]<<std::endl;
@@ -168,6 +167,7 @@ void cFinger::printInfo() {
 	for (int i = 0; i < ARM_JNT; i++)std::cout << "jnt_force  " << i << " : " << jnt_force[i] << std::endl;
 
 	for (int i = 0; i < ARM_JNT; i++)std::cout << "obj_pos  " << i << " : " << obj_pos[i] << std::endl;
+
 	std::cout << "kine " << kine.J.el[0][0] << std::endl;
 	std::cout << "this kine " << this->kine.J.el[0][0] << std::endl;
 	std::cout << std::endl;
