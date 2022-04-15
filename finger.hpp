@@ -70,6 +70,9 @@ double	init_obj_att[DIM3][DIM3] = { {sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0}, {0.0, 0
 // 関節制御
 // 戻り値：関節一般化力（直動関節では力，回転関節ではトルク）
 ////////////////////////////////////////////////////////
+
+
+
 void cFinger::control() {
 	auto entity = EntityManager::get();
 
@@ -183,17 +186,12 @@ void cFinger::control() {
 	jnt_force[ARM_M1] = tau.el[ARM_M1][0];
 	jnt_force[ARM_M2] = tau.el[ARM_M2][0];
 
-	//	if(_this->step == IMP_SWITCH_STEP){	_this->jnt_force[ARM_M1] = 0.0;	_this->jnt_force[ARM_M2] = 0.0;}
-		// 駆動力制限
-	//	for(jnt=0;jnt<ARM_JNT;jnt++)	if(_this->jnt_force[jnt] > 100 || _this->jnt_force[jnt] < -100)	_this->jnt_force[jnt] = 0.0;
-		// 駆動力入力をODEに設定
+		//if(entity->step == IMP_SWITCH_STEP){	jnt_force[ARM_M1] = 0.0;	jnt_force[ARM_M2] = 0.0;}
+		// //駆動力制限
+		//for(int jnt=0;jnt<ARM_JNT;jnt++)	if(jnt_force[jnt] > 100 || jnt_force[jnt] < -100)	jnt_force[jnt] = 0.0;
+		// //駆動力入力をODEに設定
 
 	//指の姿勢がによって向きを変化
-	if (fingerID == 1) {
-		for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
-	}
-	else {
-		for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt],jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
-	}
+	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
 }
 

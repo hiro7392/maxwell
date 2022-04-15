@@ -68,7 +68,7 @@
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	2000	// データ保存カウント数
+#define DATA_CNT_NUM	1500	// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
 // 文字列定義
@@ -125,7 +125,7 @@ constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
-constexpr double    OFFSET_VAL = 0.2;
+constexpr double    OFFSET_VAL = -0.5;
 
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
@@ -352,13 +352,14 @@ class cFinger {
 	//	std::vector<cParts*> finger{ 4 };	// 4 = ARM_JNT + base + sensor
 	//dReal x0 = 0.0, y0 = 0.0, z0 = 1.5;
 
-	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
-	dReal x1 = 0.5, y1 = -1.2, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
 
 	dReal px1 =-20, py1 = -20, pz1 = 0;
 	double Z_OFFSET = 0.08;
 	//double jnt_pos[ARM_JNT];
 public:
+	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
+	dReal x1 = 0.5, y1 = -1.2, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
+	
 	std::vector<cParts*> finger;
 	//指先のカプセル
 	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
@@ -465,8 +466,10 @@ public:
 	void saveData();
 	void saveInfo();
 	void saveGraph();
-
+	
+	
 	//debug用　kawaharaが追加
+	void setNums(int step);		//出力用配列に各種センサ値を格納
 	void printInfo();
 
 	////Finger classの中に移勁E
@@ -498,7 +501,7 @@ public:
 	//	void setPosition(const dVector3 pos) {
 	
 	//指１の初期位置と初期姿勢
-	void setPosition() {
+	void setPosition(double x0,double y0) {
 		finger[0]->setPosition(x0, y0, 0.2);	// z:base->sides[CRD_Z]/2
 		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0*cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0*sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
 		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
@@ -664,7 +667,7 @@ public:
 	auto getSpace() const -> decltype(space) { return this->space; }
 //	void step(dReal time) { dWorldStep(this->world, time); }
 	static void nearCallback(void *data, dGeomID o1, dGeomID o2);
-	static void nearCallbackF2(void* data, dGeomID o1, dGeomID o2);
+	static void nearCallback2(void* data, dGeomID o1, dGeomID o2);
 
 };
 
@@ -690,11 +693,8 @@ public:
 
 	void setup() {
 		constexpr auto OBJ_RADIUS = 0.10;
-		//double init_jnt_pos[2] = { 4 * PI / 4.0, PI/ 4.0 };
 
 		//各関節の初期姿勢(角度)
-		//double init_jnt_pos[2] = {   init_jnt_pos[0], init_jnt_pos[1] };
-		//double init_jnt_posF2[2] = { init_jnt_posF2[0], init_jnt_posF2[1] };			//二本目の指
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
 
@@ -724,7 +724,7 @@ public:
 	void destroyObject() {	pObj.reset(); } // インスタンスの破壊	// 対象破壊（ボディ・ジオメトリ）
 	void update() {		// シミュレーションを１ステップ進行
 		dSpaceCollide(this->getSpace(), 0, &this->nearCallback);		// 衝突判定
-		dSpaceCollide(this->getSpace(), 0, &this->nearCallbackF2);		// 衝突判定
+		//dSpaceCollide(this->getSpace(), 0, &this->nearCallback2);		// 衝突判定
 
 		dWorldStep(this->getWorld(), SIM_CYCLE_TIME);	// 1ステップ進める
 		dJointGroupEmpty(this->contactgroup); // ジョイントグループを空にする
@@ -737,6 +737,108 @@ public:
 	auto getObj2() { return pObj2; }
 	void setAddForceObj(dReal fx, dReal fy, dReal fz) { dBodyAddForce(pObj->getBody(), fx, fy, fz); }
 };
+
+
+
+
+//センサの値を記録
+void cFinger::outputForce() {
+	forceOutOfs.open(forceOutFilename);
+	for (int k = 0; k < DATA_CNT_NUM; k++) {
+		forceOutOfs << k + 1 << ",";
+		for (int i = 0; i < 2; i++) {
+			forceOutOfs << saveForce[k][i] << ",";
+		}
+		forceOutOfs << std::endl;
+	}
+	forceOutOfs.close();
+
+}
+
+//センサの値を記録
+void cFinger::outputJntAngle() {
+	std::ofstream outfile;
+	if (fingerID == 1) {
+		outfile.open(jntAngleOutfilename1);
+	}
+	else {
+		outfile.open(jntAngleOutfilename2);
+	}
+	/*outfile <<"step" << ",";
+	outfile << "第1関節[rad]" << ",";
+	outfile << "第1関節[rad/s]" << ",";
+
+	outfile << "第2関節[rad]" << ",";
+	outfile << "第2関節[rad/s]" << ",";
+
+	outfile << "第1関節[度]" << ",";
+	outfile << "第1関節[度/s]" << ",";
+
+	outfile << "第2関節[度]" << ",";
+	outfile << "第2関節[度/s]" << ",";
+
+	outfile << "Fx[N]" << ",";
+	outfile << "Fy[N]" << ",";
+
+	outfile << "手先位置x" << ",";
+	outfile << "手先位置y" << ",";
+
+	*/
+
+
+	for (int k = 0; k < DATA_CNT_NUM; k++) {
+		outfile << k << ",";
+		//各関節について
+		for (int i = 0; i < 2; i++) {
+			outfile << save_jnt_vel[k][i] << ",";			//関節角度[rad]
+			outfile << radToAng(save_jnt_vel[k][i]) << ",";	//関節角度[度]
+
+			outfile << save_jnt_dq[k][i] << ",";			//関節速度[rad/s]
+			outfile << radToAng(save_jnt_dq[k][i]) << ",";	//関節速度[度/s]
+
+			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
+			outfile << save_jnt_force[k][i] << ",";		//対象の関節に抱える力
+
+			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
+			//outfile << ",";
+		}
+		outfile << std::endl;
+	}
+	outfile.close();
+}
+
+void cFinger::setNums(int step) {
+	for (int i = 0; i < 2; i++) {
+		//	力覚センサの値
+		//_this->saveForce[sim->step - 1][i] = _this->var.F.el[i][0];
+		//_this2->saveForce[sim->step - 1][i] = _this2->var.F.el[i][0];
+		//	力覚センサの値
+		saveForce[step - 1][i] = eff_force[i];
+
+		//	関節角度
+		save_jnt_vel[step - 1][i] = var.q.el[i][0];
+
+		//	関節速度
+		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
+		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
+
+#if useContactPoint
+		//  手先位置を取得する
+		const dReal* finger1TopPos = dBodyGetPosition(_this->forceContactPoint.getBody());
+		const dReal* finger2TopPos = dBodyGetPosition(_this2->forceContactPoint.getBody());
+		_this->save_eff_pos[sim->step - 1][i] = finger1TopPos[i];
+		_this2->save_eff_pos[sim->step - 1][i] = finger2TopPos[i];
+#else
+		save_eff_pos[step - 1][i] = var.r.el[i][0];
+		save_eff_pos[step - 1][i] = var.r.el[i][0];
+#endif
+
+
+		save_jnt_force[step - 1][i] = jnt_force[i];
+		save_jnt_force[step - 1][i] = jnt_force[i];
+
+	}
+}
 
 ////////////////////////////////////////////////////////
 
