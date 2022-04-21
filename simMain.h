@@ -587,7 +587,7 @@ public:
 	void addExtForce2();	// 外力
 
 	void outputForce();		//デバッグ用	外力をcsv出力する
-	void outputJntAngle();	//関節角情報を出力する
+	void outputJntAngle(int end);	//関節角情報を出力する
 	//kawaharaが追加
 	int calcDist();
 	int ctrlMaxwell(Matrix* tau);
@@ -756,7 +756,9 @@ void cFinger::outputForce() {
 }
 
 //センサの値を記録
-void cFinger::outputJntAngle() {
+void cFinger::outputJntAngle(int end) {
+	//auto entity = EntityManager::get();
+	
 	std::ofstream outfile;
 	if (fingerID == 1) {
 		outfile.open(jntAngleOutfilename1);
@@ -764,7 +766,8 @@ void cFinger::outputJntAngle() {
 	else {
 		outfile.open(jntAngleOutfilename2);
 	}
-	/*outfile <<"step" << ",";
+	/*
+	outfile <<"step" << ",";
 	outfile << "第1関節[rad]" << ",";
 	outfile << "第1関節[rad/s]" << ",";
 
@@ -786,7 +789,7 @@ void cFinger::outputJntAngle() {
 	*/
 
 
-	for (int k = 0; k < DATA_CNT_NUM; k++) {
+	for (int k = 0; k < end; k++) {
 		outfile << k << ",";
 		//各関節について
 		for (int i = 0; i < 2; i++) {
@@ -800,6 +803,8 @@ void cFinger::outputJntAngle() {
 			outfile << save_jnt_force[k][i] << ",";		//対象の関節に抱える力
 
 			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
+
+			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標一
 			//outfile << ",";
 		}
 		outfile << std::endl;
@@ -830,7 +835,7 @@ void cFinger::setNums(int step) {
 		_this2->save_eff_pos[sim->step - 1][i] = finger2TopPos[i];
 #else
 		save_eff_pos[step - 1][i] = var.r.el[i][0];
-		save_eff_pos[step - 1][i] = var.r.el[i][0];
+		save_ref_eff_pos[step - 1][i] = var_init.r.el[i][0];
 #endif
 
 
