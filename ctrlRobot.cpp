@@ -873,16 +873,35 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 		Matrix Offset(2, 1);
 		Offset.el[0][0] = 0;//x軸なので0
 		Offset.el[1][0] = -OFFSET_VAL;
-
-		matSub(&var_init.r, &var_init.r, &Offset);
+		matSub(&var_init.r, &var_init.r, &Offset);	//平衡位置からオフセットの分をずらしておく
 	}
+	//ゲインを変更してみるとき
+	//imp.K.el[0][0] = 60;
+	//imp.K.el[1][1] = 60;
 	// 前処理
 	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
-	printf("finger1 re=\n");
-	matPrint(&re);
-	printf("finger1 dre=\n");
-	matPrint(&dre);
+	
+
+	//平衡点を移動させる処理
+	Matrix tmp_now, tmp_prev, tmp_diff;
+	auto finger2=entity->getFinger2();
+
+	//力センサ値の大小で押されている方向を判定する
+	//if (1 ||(std::abs(var.F.el[1][0]) > std::abs(finger2->var.F.el[1][0]))) {
+	//	//Finger1が押されて変位しているとき
+	//	tmp_now = var.r;
+	//	tmp_prev = var_prev.r;
+	//}
+	//else {
+	//	//Finger2が押されて変位しているとき
+	//	tmp_now = finger2->var.r;
+	//	tmp_prev = finger2->var_prev.r;
+	//}
+	tmp_now = var.r;
+	tmp_prev = var_prev.r;
+	matSub(&tmp_diff, &tmp_now, &tmp_prev);				// 指１の1ステップ分の手先位置変位を取得
+	if(entity->step > 300 )var_init.r.el[1][0] += tmp_diff.el[1][0];			// 初期位置(平衡位置)を移動
 
 #if 1
 	//Matrix F1 = EntityManager::get()->getFinger()->var.F;
@@ -941,8 +960,12 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 		Offset.el[1][0] = OFFSET_VAL;
 
 		matSub(&var_init.r, &var_init.r, &Offset);
-
+		printf("initialized ! \n");
+		
 	}
+	//ゲインを変更するとき
+	//imp.K.el[0][0] = 10;
+	//imp.K.el[1][1] = 10;
 #if  0//通常
 
 	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
@@ -968,21 +991,31 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	dre.el[1][0] = -dre.el[1][0];			// x軸について符号反転
 	dre.el[0][0] = -dre.el[0][0];				//y軸について符号反転
 #else 
+	//平衡点を移動させる処理
 	Matrix tmp_now, tmp_prev, tmp_diff;
+	//if (1 || (std::abs(Finger1->var.F.el[1][0]) > std::abs(var.F.el[1][0]))) {
+	//	//Finger1が押されて変位しているとき
+	//	tmp_now = Finger1->var.r;
+	//	tmp_prev = Finger1->var_prev.r;
+	//}
+	//else {
+	//	//Finger2が押されて変位しているとき
+	//	tmp_now = var.r;
+	//	tmp_prev = var_prev.r;
+	//}
 	tmp_now = Finger1->var.r;
 	tmp_prev = Finger1->var_prev.r;
-
 	matSub(&tmp_diff, &tmp_now, &tmp_prev);				// 指１の1ステップ分の手先位置変位を取得
-
-	printf("mat print tmp_diff\n");
-	matPrint(&tmp_diff);
-	var_init.r.el[1][0] += tmp_diff.el[1][0];			// 初期位置(平衡位置)を移動
+	//両方とも物体と接しているとき
+	if (entity->step>300 )var_init.r.el[1][0] += tmp_diff.el[1][0];			// y軸方向について　初期位置(平衡位置)を移動
 #endif
 	//指1の変位の分ずらす
 	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
 
-
+	//比例ゲインを出力
+	printf("impedance K=\n");
+	matPrint(&imp.K);
 
 #if  1
 
