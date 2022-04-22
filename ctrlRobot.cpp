@@ -872,6 +872,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 		Matrix Offset(2, 1);
 		Offset.el[0][0] = 0;//x軸なので0
 		Offset.el[1][0] = -OFFSET_VAL;
+		
 		matSub(&var_init.r, &var_init.r, &Offset);
 	}
 	// 前処理
@@ -935,9 +936,11 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
 		Matrix Offset(2, 1);
-		Offset.el[0][0] = -0;//x軸なので0
+		Offset.el[0][0] = 0;//x軸なので0
 		Offset.el[1][0] = OFFSET_VAL;
+
 		matSub(&var_init.r, &var_init.r, &Offset);
+
 	}
 #if  0//通常
 	
@@ -964,19 +967,16 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	dre.el[1][0] = -dre.el[1][0];			// x軸について符号反転
 	dre.el[0][0] = -dre.el[0][0];				//y軸について符号反転
 #else 
-	Matrix tmp, tmp_init, tmp_diff;
-	tmp = Finger1->var.dr;
-	tmp_init = Finger1->var_init.dr;
-	if (entity->step > 100) {
-		matSub(&tmp_diff, &tmp, &tmp_init);					// 手先位置変位
-		//matAdd(&var_init.r, &var_init.r, &tmp_diff);		// 初期位置(平衡位置)を移動
-		var_init.r.el[1][0] += tmp_diff.el[1][0];
-	}
-
-
-
-#endif
+	Matrix tmp_now, tmp_prev, tmp_diff;
+	tmp_now = Finger1->var.r;
+	tmp_prev = Finger1->var_prev.r;
 	
+	matSub(&tmp_diff, &tmp_now, &tmp_prev);				// 指１の1ステップ分の手先位置変位を取得
+
+	printf("mat print tmp_diff\n");
+	matPrint(&tmp_diff);
+	var_init.r.el[1][0] += tmp_diff.el[1][0];			// 初期位置(平衡位置)を移動
+#endif
 	//指1の変位の分ずらす
 	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位

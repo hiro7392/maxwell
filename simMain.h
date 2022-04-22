@@ -804,7 +804,9 @@ void cFinger::outputJntAngle(int end) {
 
 			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
 
-			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標一
+			outfile << save_eff_vel[k][i] << ",";
+
+			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標位置(平衡位置)
 			//outfile << ",";
 		}
 		outfile << std::endl;
@@ -835,6 +837,7 @@ void cFinger::setNums(int step) {
 		_this2->save_eff_pos[sim->step - 1][i] = finger2TopPos[i];
 #else
 		save_eff_pos[step - 1][i] = var.r.el[i][0];
+		save_eff_vel[step - 1][i] = var.dr.el[i][0];
 		save_ref_eff_pos[step - 1][i] = var_init.r.el[i][0];
 #endif
 
