@@ -510,11 +510,11 @@ void DrawStuff::simLoop(int pause)
 
 		//x座標を記録
 		//plateの端に外力を加える
-		if (sim->step > 10 && sim->step<=500) {
+		if (true &&sim->step > 10 && sim->step<=500) {
 
 			static int duty = 1500;	//外力の向きの周期
 			static int forceVal = 5;
-			int forceDir = (sim->step % duty <= duty/2) ? -1 : 1;
+			int forceDir = (sim->step % duty <= duty/2) ? 1 : -1;
 			//double  forceDir = sin(sim->step*((double)2.0*PI/duty));
 			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
 			//int forceDir = -1;
@@ -525,7 +525,7 @@ void DrawStuff::simLoop(int pause)
 			//dBodyAddForceAtPos(plateToGrasp.body, forceVal / 2.0 * forceDirX, forceVal* forceDir, 0.0, nowPos[0] + distFromCenter, nowPos[1], nowPos[2]);
 			//printf("forceDir = %lf\n", forceDir);
 			dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
-			drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
+			//drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 		}
 #endif
 
@@ -572,8 +572,6 @@ void DrawStuff::simLoop(int pause)
 	std::cout << "F2 initial position r= "<< std::endl;
 	matPrint(&_this2->var_init.r);
 	
-	
-
 	//力覚センサの出力用
 	if (sim->step < DATA_CNT_NUM) {
 		_this->setNums(sim->step);
@@ -584,14 +582,10 @@ void DrawStuff::simLoop(int pause)
 		_this2->outputForce();
 
 		//関節角を出力
-		_this->outputJntAngle();
-		_this2->outputJntAngle();
+		_this->outputJntAngle(DATA_CNT_NUM);
+		_this2->outputJntAngle(DATA_CNT_NUM);
 	}
 	
-	
-
-
-
 	std::cout << "step:" << sim->step << std::endl;
 
 #if SIM_OBJ_IMPACT
@@ -610,7 +604,7 @@ void DrawStuff::simLoop(int pause)
 	}
 #endif
 #if	FLAG_SAVE_VIDEO
-	if (_this->step % SAVE_VIDEO_RATE == 0)	save_video();
+	if (sim->step % SAVE_VIDEO_RATE == 0)	save_video();
 #endif
 	//衝突している物体の集合を空にする
 	//dJointGroupEmpty(contactgroup);
@@ -653,7 +647,13 @@ void DrawStuff::command(int cmd) {
 //			case 'u':	dBodyAddForce(_this->getObj()->getBody(), 500.0, 0.0, 0.0);	break;
 	case 'u':	_this->setAddForceObj(500.0, 0.0, 0.0);	break;
 	case 'r':	restart();	break;
-	case 'q':	dsStop();	break;
+	case 'q': {
+		//各変数を出力する
+		_this->getFinger()->outputJntAngle(_this->step);
+		_this->getFinger2()->outputJntAngle(_this->step);
+		
+		dsStop();	break;
+	}
 	default: std::cout << "key missed" << std::endl; break;
 	}
 }
