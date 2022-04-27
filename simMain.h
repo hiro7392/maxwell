@@ -125,7 +125,7 @@ constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
-constexpr double    OFFSET_VAL = -0.5;
+constexpr double    OFFSET_VAL = -0.3;
 
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
@@ -596,6 +596,10 @@ public:
 	//制約条件つきMaxwellモデル
 	int RestrictedCtrlMaxwell(Matrix* tau);
 	int RestrictedCtrlMaxwell2(Matrix* tau);	//kawaharaが追記　二本目の指用
+
+	int moveEqPointCtrlMaxwell(Matrix* tau);	//maxwell制御+把持の平衡点を移動する
+	int moveEqPointCtrlMaxwell2(Matrix* tau);
+
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { 

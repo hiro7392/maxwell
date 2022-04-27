@@ -118,10 +118,13 @@ void cFinger::control() {
 	if (fingerID == 1) {
 		//ctrlMaxwell(&tau);
 		RestrictedCtrlMaxwell(&tau);
+		//moveEqPointCtrlMaxwell(&tau);
 	}
 	else {
 		//ctrlMaxwell2(&tau);
 		RestrictedCtrlMaxwell2(&tau);
+		//moveEqPointCtrlMaxwell2(&tau);
+
 	}
 
 

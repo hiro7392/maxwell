@@ -487,8 +487,8 @@ void DrawStuff::simLoop(int pause)
 		//plateの端に外力を加える
 		if (true &&sim->step > 300 && sim->step<=800) {
 			static int duty = 30000;	//外力の向きの周期
-			static int forceVal = 1.5;
-			int forceDir = 1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
+			static int forceVal = 5;
+			int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
 			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
 			double distFromCenter = 0.0;
 			// distFromCenter = 0.2; duty=100,forceVal=30,1点のみについて力を加える
