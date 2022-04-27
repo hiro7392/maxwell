@@ -241,7 +241,8 @@ void cFinger::setJoint() {
 //把持物体の初期位置
 dReal capX = -1.2, capY = -0.60, capZ = 0.3;
 //把持物体の大きさ
-const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
+const dReal plateX = 1.5, plateY = 0.25, plateZ = 0.4;
+// const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 
 
 //二本目の指の初期位置設定
@@ -485,7 +486,7 @@ void DrawStuff::simLoop(int pause)
 
 		//x座標を記録
 		//plateの端に外力を加える
-		if (true &&sim->step > 300 && sim->step<=800) {
+		if (true &&sim->step > 1000 && sim->step<=1500) {
 			static int duty = 30000;	//外力の向きの周期
 			static int forceVal = 5;
 			int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;

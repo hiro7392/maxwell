@@ -992,7 +992,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
 		Matrix Offset(2, 1);
-		Offset.el[0][0] = 0;//x軸なので0
+		Offset.el[0][0] = -0.1;//x軸なので0
 		Offset.el[1][0] = -OFFSET_VAL;
 		matSub(&var_init.r, &var_init.r, &Offset);	//平衡位置からオフセットの分をずらしておく
 	}
@@ -1071,7 +1071,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
 		Matrix Offset(2, 1);
-		Offset.el[0][0] = 0;//x軸なので0
+		Offset.el[0][0] = -0.1;//x軸なので0
 		Offset.el[1][0] = OFFSET_VAL;
 
 		matSub(&var_init.r, &var_init.r, &Offset);
