@@ -1,3 +1,4 @@
+#pragma once
 #include "simMain.h"
 #include "ctrlRobot.h"
 #include "setRobot.h"

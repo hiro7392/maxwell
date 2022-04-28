@@ -241,7 +241,7 @@ void cFinger::setJoint() {
 //把持物体の初期位置
 dReal capX = -1.2, capY = -0.60, capZ = 0.3;
 //把持物体の大きさ
-const dReal plateX = 1.5, plateY = 0.25, plateZ = 0.4;
+const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 // const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 
 
@@ -319,12 +319,24 @@ void cFinger::setJoint2() {
 // 描画設定
 // main関数
 ////////////////////////////////////////////////////////
+
 int main(int argc, char *argv[])
 {
 	auto sim = EntityManager::init();
 #if FLAG_DRAW_SIM
 //	setDrawStuff();		//ドロースタッフ
 #endif
+	/*int n = 1000;
+	std::vector<double> x(n), y(n);
+
+	for (int i = 0; i < n; ++i) {
+		x[i] = i;
+		y[i] = sin(0.1 * i);
+	}
+
+	plt::plot(x, y);
+	plt::show();*/
+
 	// 環境設定
 	sim->setEnv();
 	
@@ -430,9 +442,11 @@ void DrawStuff::simLoop(int pause)
 #endif
 		for (int crd = 0; crd < DIM3; crd++) {
 			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+			_this->eff_force[crd] += sdlab_normal(0, 4);			//平均0,標準偏差0.5のガウス分布のノイズを付加
 #if finger2_use
-			_this2->eff_force[crd] = -_this2->p_force->f1[crd];
-#endif
+			_this2->eff_force[crd] = -_this2->p_force->f1[crd];		
+#endif		_this2->eff_force[crd] += sdlab_normal(0, 4);			//平均0,標準偏差0.5のガウス分布のノイズを付加
+
 		}
 		auto entity = EntityManager::get();
 		// 距離計算	//

@@ -1,7 +1,10 @@
+#ifndef _INCCOMMAND_
+#define _INCCOMMAND_
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <direct.h>
+
 #include "command.h"
 
 using namespace std;
@@ -292,3 +295,5 @@ int saveGraph2(int trial_num)
 	_pclose(gp);
 	return 0;
 }
+
+#endif
