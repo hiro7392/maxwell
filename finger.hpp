@@ -1,3 +1,6 @@
+#ifndef _H_FINGER_
+#define _H_FINGER_
+
 #include "makeRobot.h"
 #include "command.h"
 #include "matBase.h"
@@ -22,13 +25,14 @@
 #include "video.h"
 #endif
 
+
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
 #define finger2_use 1				//二本目の指を使うとき
 #define print_debug 0
-#define usePlateToGrasp 1			//把持するプレートを置くとき
+#define usePlateToGrasp 0			//把持するプレートを置くとき
 #define useForceContactPoint 0		//力の接触点を利用するとき
 
 //カプセル用
@@ -52,7 +56,7 @@ float DrawStuff::hpr[3];
 
 // 初期設定変数
 //double	init_jnt_pos[ARM_JNT] = {3*PI/4.0, PI/2.0};	// ロボット初期姿勢
-double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0-PI/7, PI / 3.0 };	// ロボット初期姿勢
+double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
 double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
 #if SIM_OBJ_CASE1
 double	init_obj_pos[DIM3] = { -0.8 - 2 * 0.75 / sqrt(2.0), -0.035, OBJ_RADIUS };	// 対象初期位置
@@ -118,10 +122,13 @@ void cFinger::control() {
 	if (fingerID == 1) {
 		//ctrlMaxwell(&tau);
 		RestrictedCtrlMaxwell(&tau);
+		//moveEqPointCtrlMaxwell(&tau);
 	}
 	else {
 		//ctrlMaxwell2(&tau);
 		RestrictedCtrlMaxwell2(&tau);
+		//moveEqPointCtrlMaxwell2(&tau);
+
 	}
 
 
@@ -194,4 +201,20 @@ void cFinger::control() {
 	//指の姿勢がによって向きを変化
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
 }
+//[0,1)の一様分布の乱数を出力する関数
+double sdlab_uniform()
+{
+	double ret = ((double)rand() + 1.0) / ((double)RAND_MAX + 2.0);
+	return ret;
+}
 
+//平均mu,標準偏差digmaの正規分布の乱数を生成する関数
+double sdlab_normal(double mu, double sigma)
+{
+	double  z = sqrt(-2.0 * log(sdlab_uniform())) *
+		sin(2.0 * M_PI * sdlab_uniform());
+
+	return mu + sigma * z;
+}
+
+#endif

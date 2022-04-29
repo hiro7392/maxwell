@@ -498,7 +498,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDoubleDLL|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\opencv4.3.0\build\install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv4.3.0\build\install\include;C:\Users\k_hir\AppData\Local\Programs\Python\Python38\include;C:\Users\k_hir\AppData\Local\Programs\Python\Python38\Lib\site-packages\numpy\core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;dDOUBLE;WIN32;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -517,7 +517,7 @@
     <Link>
       <AdditionalDependencies>ode_doubled.lib;drawstuffd.lib;user32.lib;winmm.lib;gdi32.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>C:\ode-0.16.1\lib\DebugDoubleDLL;C:\Users\k_hir\Documents\wam_simulation\wam_simulation\lib\3rd\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\ode-0.16.1\lib\DebugDoubleDLL;C:\Users\k_hir\Documents\wam_simulation\wam_simulation\lib\3rd\freeglut\lib;C:\Users\k_hir\AppData\Local\Programs\Python\Python38\libs;C:\Users\k_hir\AppData\Local\Programs\Python\Python38;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -529,7 +529,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDoubleDLL|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\k_hir\AppData\Local\Programs\Python\Python38\include;C:\opencv4.3.0\build\install\include;C:\Users\k_hir\Documents\wam_simulation\wam_simulation\lib\3rd\ode-0.15.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;dDOUBLE;WIN32;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -548,7 +548,7 @@
     <Link>
       <AdditionalDependencies>user32.lib;winmm.lib;gdi32.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>C:\Users\k_hir\Documents\wam_simulation\wam_simulation\lib\3rd\ode-0.15.2\lib\Release;C:\Users\k_hir\Documents\wam_simulation\wam_simulation\lib\3rd\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\k_hir\Documents\wam_simulation\wam_simulation\lib\3rd\ode-0.15.2\lib\Release;C:\Users\k_hir\Documents\wam_simulation\wam_simulation\lib\3rd\freeglut\lib;C:\Users\k_hir\AppData\Local\Programs\Python\Python38\libs;C:\ode-0.16.1\lib\DebugDoubleDLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(ProjectName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -763,6 +763,7 @@
     <ClInclude Include="graphic.h" />
     <ClInclude Include="makeRobot.h" />
     <ClInclude Include="matBase.h" />
+    <ClInclude Include="matplotlibcpp.h" />
     <ClInclude Include="setEnv.h" />
     <ClInclude Include="setRobot.h" />
     <ClInclude Include="simMain.h" />

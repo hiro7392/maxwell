@@ -1,4 +1,5 @@
-﻿#ifndef _INC_SIMMAIN
+﻿
+#ifndef _INC_SIMMAIN
 #define _INC_SIMMAIN
 
 #include <vector>
@@ -10,6 +11,13 @@
 #include "setRobot.h"
 #include "matBase.h"
 #include "texturepath.h"
+
+
+//matplotlibでグラフ描画用
+//#include <iostream>
+//#include <cmath>
+//#include "matplotlibcpp.h"
+//namespace plt = matplotlibcpp;
 
 #ifdef dDOUBLE
 #define dsDrawBox dsDrawBoxD
@@ -68,7 +76,7 @@
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	1500	// データ保存カウント数
+#define DATA_CNT_NUM	5000	// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
 // 文字列定義
@@ -125,7 +133,7 @@ constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
-constexpr double    OFFSET_VAL = -0.5;
+constexpr double    OFFSET_VAL = -0.0;			//　実験では-0.3
 
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
@@ -596,6 +604,10 @@ public:
 	//制約条件つきMaxwellモデル
 	int RestrictedCtrlMaxwell(Matrix* tau);
 	int RestrictedCtrlMaxwell2(Matrix* tau);	//kawaharaが追記　二本目の指用
+
+	int moveEqPointCtrlMaxwell(Matrix* tau);	//maxwell制御+把持の平衡点を移動する
+	int moveEqPointCtrlMaxwell2(Matrix* tau);
+
 	void control();		// 制御
 	void destroy() { for (auto &x : finger) { x->destroy(); } }
 	void draw() { 
@@ -689,7 +701,8 @@ public:
 	int FingerNum=0;
 	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
 	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
-
+	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 7,-PI/7 };	// ロボット初期姿勢
+	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, +PI/7};	// ロボット初期姿勢
 
 	void setup() {
 		constexpr auto OBJ_RADIUS = 0.10;
