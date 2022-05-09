@@ -25,14 +25,19 @@
 #include "video.h"
 #endif
 
+//センサのノイズ生成用
+#include "generateNoise.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
+
+
+
 #define finger2_use 1				//二本目の指を使うとき
 #define print_debug 0
-#define usePlateToGrasp 0			//把持するプレートを置くとき
+#define usePlateToGrasp 1			//把持するプレートを置くとき
 #define useForceContactPoint 0		//力の接触点を利用するとき
 
 //カプセル用
@@ -216,5 +221,4 @@ double sdlab_normal(double mu, double sigma)
 
 	return mu + sigma * z;
 }
-
 #endif

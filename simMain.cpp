@@ -440,14 +440,17 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 		_this2->p_force = dJointGetFeedback(_this2->sensor2FingerTop);
 #endif
+
+#if addSensorNoise
 		for (int crd = 0; crd < DIM3; crd++) {
 			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
-			_this->eff_force[crd] += sdlab_normal(0, 4);			//平均0,標準偏差0.5のガウス分布のノイズを付加
+			_this->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);			//平均0,標準偏差0.5のガウス分布のノイズを付加
 #if finger2_use
 			_this2->eff_force[crd] = -_this2->p_force->f1[crd];		
-#endif		_this2->eff_force[crd] += sdlab_normal(0, 4);			//平均0,標準偏差0.5のガウス分布のノイズを付加
-
+		_this2->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);			//平均0,標準偏差0.5のガウス分布のノイズを付加
+#endif
 		}
+#endif		
 		auto entity = EntityManager::get();
 		// 距離計算	//
 		_this->calcDist();
