@@ -744,6 +744,7 @@
     <ClCompile Include="command.cpp" />
     <ClCompile Include="ctrlRobot.cpp" />
     <ClCompile Include="ctrlRobot2.cpp" />
+    <ClCompile Include="filter.cpp" />
     <ClCompile Include="finger.cpp" />
     <ClCompile Include="finger.hpp" />
     <ClCompile Include="generateNoise.cpp" />
@@ -761,6 +762,7 @@
     <ClInclude Include="BMP.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="ctrlRobot.h" />
+    <ClInclude Include="filter.h" />
     <ClInclude Include="generateNoise.h" />
     <ClInclude Include="graphic.h" />
     <ClInclude Include="makeRobot.h" />

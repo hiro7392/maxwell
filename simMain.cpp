@@ -1,5 +1,6 @@
 
 #include"finger.hpp"
+#include"filter.h"
 ////////////////////////////////////////////////////////
 // シミュレーションリスタート
 ////////////////////////////////////////////////////////
@@ -322,6 +323,7 @@ void cFinger::setJoint2() {
 
 int main(int argc, char *argv[])
 {
+	filterTest();
 	auto sim = EntityManager::init();
 #if FLAG_DRAW_SIM
 //	setDrawStuff();		//ドロースタッフ
