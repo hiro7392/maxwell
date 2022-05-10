@@ -8,5 +8,7 @@
 
 constexpr double NOISE_AVES[3] = { 2.25094e-5,0.000118618,0.000105 };
 constexpr double NOISE_DISTRIBUTES[3] = { -0.00349,0.0040747,-0.00049};
-
+double sdlab_uniform();
+//•½‹Ïmu,•W€•Î·digma‚Ì³‹K•ª•z‚Ì—”‚ğ¶¬‚·‚éŠÖ”
+double sdlab_normal(double mu, double sigma);
 #endif
