@@ -2,6 +2,9 @@
 
 #ifndef _INC_NOISE
 #define _INC_NOISE
+#include<cmath>
+#define _USE_MATH_DEFINES
+#include<math.h>
 #define addSensorNoise 1
 #define NOISE_AVE -0.000349443
 #define NOISE_DISTRIBUTE 2.25e-5

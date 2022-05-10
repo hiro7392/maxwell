@@ -746,6 +746,7 @@
     <ClCompile Include="ctrlRobot2.cpp" />
     <ClCompile Include="finger.cpp" />
     <ClCompile Include="finger.hpp" />
+    <ClCompile Include="generateNoise.cpp" />
     <ClCompile Include="graphic.cpp" />
     <ClCompile Include="makeRobot.cpp" />
     <ClCompile Include="matBase.cpp" />
@@ -760,6 +761,7 @@
     <ClInclude Include="BMP.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="ctrlRobot.h" />
+    <ClInclude Include="generateNoise.h" />
     <ClInclude Include="graphic.h" />
     <ClInclude Include="makeRobot.h" />
     <ClInclude Include="matBase.h" />
