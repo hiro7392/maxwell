@@ -1,5 +1,6 @@
 
 #include"finger.hpp"
+#include"filter.h"
 ////////////////////////////////////////////////////////
 // シミュレーションリスタート
 ////////////////////////////////////////////////////////
@@ -322,6 +323,7 @@ void cFinger::setJoint2() {
 
 int main(int argc, char *argv[])
 {
+	filterTest();
 	auto sim = EntityManager::init();
 #if FLAG_DRAW_SIM
 //	setDrawStuff();		//ドロースタッフ
@@ -416,7 +418,7 @@ void DrawStuff::simLoop(int pause)
 	if (!pause) {
 		auto sensor = _this->getParts()[3];
 		auto sensor2 = _this2->getParts()[3];
-	
+
 		// 状態取得
 		for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(_this->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
@@ -433,21 +435,27 @@ void DrawStuff::simLoop(int pause)
 		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
 		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
 #endif
-		
+
 		//関節にかかるトルクを取得する
 		//_this->p_force = dJointGetFeedback(_this->f2_joint);	//参考: もともとのmaxwell制御
 		_this->p_force = dJointGetFeedback(_this->sensor2FingerTop);
 #if finger2_use
 		_this2->p_force = dJointGetFeedback(_this2->sensor2FingerTop);
 #endif
+
+
 		for (int crd = 0; crd < DIM3; crd++) {
 			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
-			_this->eff_force[crd] += sdlab_normal(0, 4);			//平均0,標準偏差0.5のガウス分布のノイズを付加
 #if finger2_use
-			_this2->eff_force[crd] = -_this2->p_force->f1[crd];		
-#endif		_this2->eff_force[crd] += sdlab_normal(0, 4);			//平均0,標準偏差0.5のガウス分布のノイズを付加
-
+			_this2->eff_force[crd] = -_this2->p_force->f1[crd];
+#endif
 		}
+#if addSensorNoise
+		for (int crd = 0; crd < DIM3; crd++) {
+			_this->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);			//平均0,標準偏差0.5のガウス分布のノイズを付加
+			_this2->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);			//平均0,標準偏差0.5のガウス分布のノイズを付加
+		}
+#endif		
 		auto entity = EntityManager::get();
 		// 距離計算	//
 		_this->calcDist();
