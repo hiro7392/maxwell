@@ -409,7 +409,7 @@ void DrawStuff::simLoop(int pause)
 
 #if usePlateToGrasp
 	// 把持対象のプレートの描画
-	dsSetColorAlpha(1, 1, 1, 1);
+	dsSetColorAlpha(0.3, 0.3, 0.5, 1);
 	pos2 = dBodyGetPosition(plateToGrasp.body);
 	R2 = dBodyGetRotation(plateToGrasp.body);
 	dReal sides[3] = { plateX,plateY,plateZ };
@@ -452,8 +452,11 @@ void DrawStuff::simLoop(int pause)
 		}
 #if addSensorNoise
 		for (int crd = 0; crd < DIM3; crd++) {
-			_this->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);			//平均0,標準偏差0.5のガウス分布のノイズを付加
-			_this2->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);			//平均0,標準偏差0.5のガウス分布のノイズを付加
+			//_this->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);			
+			//_this2->eff_force[crd] += sdlab_normal(NOISE_AVES[crd], NOISE_DISTRIBUTES[crd]);		//qガウス分布のノイズを付加
+			_this->eff_force[crd] += sdlab_normal(0,6);			//平均0,標準偏差0.5のガウス分布のノイズを付加
+			_this2->eff_force[crd] += sdlab_normal(0,6);		//平均0,標準偏差0.5のガウス分布のノイズを付加
+
 		}
 #endif		
 		auto entity = EntityManager::get();
@@ -508,7 +511,8 @@ void DrawStuff::simLoop(int pause)
 
 		//x座標を記録
 		//plateの端に外力を加える
-		if (true &&sim->step > 1000 && sim->step<=1500) {
+
+		if(ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500) {
 			static int duty = 30000;	//外力の向きの周期
 			static int forceVal = 5;
 			int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
@@ -609,8 +613,8 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -1.2;	xyz[1] =-0.5;	xyz[2] = 3.5;
-	hpr[0] = 0.0;	hpr[1] = -90.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
+	xyz[0] = -2.0;	xyz[1] =-0.5;	xyz[2] = 3.0;
+	hpr[0] = 180.0;	hpr[1] = -120.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
 	dsSetSphereQuality(3);					// 球の品質設定

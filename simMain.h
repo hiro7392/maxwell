@@ -50,7 +50,7 @@
 #define	FLAG_SAVE_IMAGE		0		// 画像保存
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
 
-
+#define ADD_EXT_FORCE 0
 ////////////////////////////////////////////////////////
 // define定義
 ////////////////////////////////////////////////////////
@@ -71,6 +71,7 @@
 #define	AXIS_X	0
 #define	AXIS_Y	1
 #define	AXIS_Z	2
+
 
 #define DIR_LONG_AXIS_Z	3	// 長軸方向(dMassSetCylinderTotalなどに利用)
 // 定数定義
@@ -341,7 +342,7 @@ public:
 
 // 指
 class cFinger {
-
+	//二次元での実験時　	cPartsBox	base{ 14.0, Vec3(0.3, 0.5, 0.4)};
 	cPartsBox	base{ 14.0, Vec3(0.3, 0.5, 0.4)};
 
 	cPartsCylinder	link1{ ARM_LINK1_MASS, ARM_LINK1_LEN, ARM_LINK1_RAD };
@@ -367,6 +368,10 @@ class cFinger {
 public:
 	dReal x0 = 0.5, y0 = 0.0, z0 = 1.5;			//	書き換えた後1本目の指の土台の位置　kawahara
 	dReal x1 = 0.5, y1 = -1.2, z1 = 1.5;		//	書き換えた後2本目の指の土台の位置　kawahara
+
+	dReal senkai_base_x0 = 0.5, senkai_base_y0 = 0.3, senkai_base_z1 = 1.5;		//	旋回関節の土台
+
+	dReal senkai_base_x1 = 0.5, senkai_base_y1 = -0.9, senkai_base_z1 = 1.5;		//	旋回関節の土台
 	
 	std::vector<cParts*> finger;
 	//指先のカプセル
@@ -510,11 +515,12 @@ public:
 	
 	//指１の初期位置と初期姿勢
 	void setPosition(double x0,double y0) {
-		finger[0]->setPosition(x0, y0, 0.2);	// z:base->sides[CRD_Z]/2
-		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0*cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0*sin(jnt_pos[ARM_M1]), 0.4 / 2.0 - Z_OFFSET);
-		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		double z_base_pos = 1.2;
+		finger[0]->setPosition(x0, y0, z_base_pos);	// z:base->sides[CRD_Z]/2
+		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0*cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0*sin(jnt_pos[ARM_M1]), z_base_pos - Z_OFFSET);
+		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos - Z_OFFSET);
 		//センサ
-		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0)*cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + sensorLength / 2.0)*sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos - Z_OFFSET);
 
 #if 0
 		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]),
@@ -522,7 +528,7 @@ public:
 #else
 
 		//指先のカプセル　センサと同じ位置
-		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
+		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]),z_base_pos - Z_OFFSET);
 #if forceContactPoint
 		//力の作用点を指先端に固定
 		forceContactPoint.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1+ fingerTopCapsuleLen/2.0+ARM_LINK2_RAD+ forceContactPointThickness /2) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1+ fingerTopCapsuleLen / 2.0 + ARM_LINK2_RAD+ forceContactPointThickness/2) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET);
