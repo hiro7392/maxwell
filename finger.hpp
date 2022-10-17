@@ -91,7 +91,7 @@ void cFinger::control() {
 	if (entity->step == 0) {
 
 		// 初期化
-		ctrlInitErr();		// パラメータ誤差を追加
+		ctrlInitErr();		// パラメータ誤差を追加	今は何もやっていないので無視
 		// 初期値保存
 		for (int crd = 0; crd < DIM2; crd++) {
 			var_init.q.el[crd][0] = jnt_pos[crd]; var_init.dq.el[crd][0] = jnt_vel[crd] = 0.0;
@@ -120,6 +120,7 @@ void cFinger::control() {
 
 	matSetValDiag(&imp.M, impM); matSetValDiag(&imp.C, impC); matSetValDiag(&imp.K, impK); matSetValDiag(&imp.K0, impK0);	// ゲイン設定
 
+	//K_pなどの逆行列の計算
 	ctrlPreProcessing();
 
 
@@ -197,6 +198,8 @@ void cFinger::control() {
 	// 返り値に代入
 	jnt_force[ARM_M1] = tau.el[ARM_M1][0];
 	jnt_force[ARM_M2] = tau.el[ARM_M2][0];
+	std::cout << "eff_force " << std::endl;
+	std::cout << eff_force[0] << " " << eff_force[1] << std::endl;
 
 		//if(entity->step == IMP_SWITCH_STEP){	jnt_force[ARM_M1] = 0.0;	jnt_force[ARM_M2] = 0.0;}
 		// //駆動力制限
@@ -205,6 +208,9 @@ void cFinger::control() {
 
 	//指の姿勢がによって向きを変化
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
+	//dJointAddHingeTorque(senkai_link_joint, (fingerID == 1 ? 1.0:-1.0 )*5.0* sin((entity->step / 100.0) * 2 * PI));
+	dJointAddHingeTorque(senkai_link_joint, (fingerID == 1 ? 1.0 : -1.0) * 0.3);
+
 }
 
 #endif

@@ -6,7 +6,7 @@ double sdlab_uniform()
 	return ret;
 }
 
-//平均mu,標準偏差digmaの正規分布の乱数を生成する関数
+//平均mu,標準偏差sigmaの正規分布の乱数を生成する関数
 double sdlab_normal(double mu, double sigma)
 {
 	double  z = sqrt(-2.0 * log(sdlab_uniform())) *
