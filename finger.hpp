@@ -208,6 +208,9 @@ void cFinger::control() {
 
 	//指の姿勢がによって向きを変化
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
+	//dJointAddHingeTorque(senkai_link_joint, (fingerID == 1 ? 1.0:-1.0 )*5.0* sin((entity->step / 100.0) * 2 * PI));
+	dJointAddHingeTorque(senkai_link_joint, (fingerID == 1 ? 1.0 : -1.0) * 0.3);
+
 }
 
 #endif

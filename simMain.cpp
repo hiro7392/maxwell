@@ -192,10 +192,10 @@ void cFinger::setJoint() {
 
 	auto sim = EntityManager::get();
 
-	// 固定ジョイント
-	f_joint = dJointCreateFixed(sim->getWorld(), 0);
-	dJointAttach(f_joint, finger[0]->getBody(), 0);
-	dJointSetFixed(f_joint);
+	//// 固定ジョイント
+	//f_joint = dJointCreateFixed(sim->getWorld(), 0);
+	//dJointAttach(f_joint, finger[0]->getBody(), 0);
+	//dJointSetFixed(f_joint);
 
 	// ヒンジジョイント1
 	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
@@ -226,6 +226,23 @@ void cFinger::setJoint() {
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(sensor2FingerTop, &force);
 
+	//	指旋回関節の土台
+	senkai_base_joint = dJointCreateFixed(sim->getWorld(), 0);
+	dJointAttach(senkai_base_joint, senkai_base.getBody(), 0);
+	dJointSetFixed(senkai_base_joint);
+
+	// ヒンジジョイント	指旋回関節
+	senkai_link_joint = dJointCreateHinge(sim->getWorld(), 0);
+	dJointAttach(senkai_link_joint, senkai_link.getBody(),senkai_base.getBody());
+	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x0, senkai_base_y0, senkai_base_z0);
+	dJointSetHingeAxis(senkai_link_joint, 1, 0, 0);
+	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI/2.0);
+	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI/2.0);
+
+	// 固定ジョイント 指旋回関節のリンク->指根本関節
+	senkai_link2finger_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(senkai_link2finger_joint, finger[0]->getBody(), senkai_link.getBody());
+	dJointSetFixed(senkai_link2finger_joint);
 #if useForceContactPoint
 	//指先カプセルとセンサを接続	//固定ジョイント
 	FingerTop2ForcePoint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
@@ -267,13 +284,6 @@ void cFinger::setJoint2() {
 #endif
 	auto sim = EntityManager::get();
 
-	
-
-	// 固定ジョイント
-	f_joint = dJointCreateFixed(sim->getWorld(), 0);
-	dJointAttach(f_joint, finger[0]->getBody(), 0);
-	dJointSetFixed(f_joint);
-
 	// ヒンジジョイント1
 	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
@@ -303,6 +313,24 @@ void cFinger::setJoint2() {
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(sensor2FingerTop, &force);
 
+	//	指旋回関節の土台
+	senkai_base_joint = dJointCreateFixed(sim->getWorld(), 0);
+	dJointAttach(senkai_base_joint, senkai_base.getBody(), 0);
+	dJointSetFixed(senkai_base_joint);
+
+	// ヒンジジョイント	指旋回関節
+	senkai_link_joint = dJointCreateHinge(sim->getWorld(), 0);
+	dJointAttach(senkai_link_joint, senkai_link.getBody(), senkai_base.getBody());
+	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x1, senkai_base_y1, senkai_base_z1);
+	dJointSetHingeAxis(senkai_link_joint, 1, 0, 0);
+	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI/2.0);
+	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI/2.0);
+
+	// 固定ジョイント 指旋回関節のリンク->指根本関節
+	senkai_link2finger_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
+	dJointAttach(senkai_link2finger_joint, finger[0]->getBody(), senkai_link.getBody());
+	dJointSetFixed(senkai_link2finger_joint);
+
 #if useForceContactPoint
 	//指先カプセルとセンサを接続	//固定ジョイント
 	FingerTop2ForcePoint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
@@ -328,16 +356,6 @@ int main(int argc, char *argv[])
 #if FLAG_DRAW_SIM
 //	setDrawStuff();		//ドロースタッフ
 #endif
-	/*int n = 1000;
-	std::vector<double> x(n), y(n);
-
-	for (int i = 0; i < n; ++i) {
-		x[i] = i;
-		y[i] = sin(0.1 * i);
-	}
-
-	plt::plot(x, y);
-	plt::show();*/
 
 	// 環境設定
 	sim->setEnv();
@@ -614,6 +632,7 @@ void DrawStuff::start() {
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
 	xyz[0] = -2.0;	xyz[1] =-0.5;	xyz[2] = 3.0;
+	//xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
 	hpr[0] = 180.0;	hpr[1] = -120.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
