@@ -763,13 +763,17 @@
     <ClInclude Include="command.h" />
     <ClInclude Include="ctrlRobot.h" />
     <ClInclude Include="filter.h" />
+    <ClInclude Include="fingerDef.h" />
     <ClInclude Include="generateNoise.h" />
     <ClInclude Include="graphic.h" />
     <ClInclude Include="makeRobot.h" />
     <ClInclude Include="matBase.h" />
     <ClInclude Include="matplotlibcpp.h" />
+    <ClInclude Include="RestrictedMaxwell.h" />
     <ClInclude Include="setEnv.h" />
+    <ClInclude Include="setJoint.h" />
     <ClInclude Include="setRobot.h" />
+    <ClInclude Include="simCmd.h" />
     <ClInclude Include="simMain.h" />
     <ClInclude Include="simMode.h" />
     <ClInclude Include="texturepath.h" />

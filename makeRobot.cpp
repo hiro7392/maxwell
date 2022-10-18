@@ -218,10 +218,6 @@ int drawExtForce() {
 	cParts* sensor2 = _this->getFinger2()->getParts()[3];		//センサから取得する場合
 	drawForceCylinder(sensor2, dJointGetFeedback(_this->getFinger2()->sensor2FingerTop));
 
-	//	指先について
-	//cPartsCylinder& forcePoint2 = _this->getFinger2()->forceContactPoint;			//外力との接触点(指先円柱)から取得する場合
-	//drawForceFingerTop(forcePoint2, dJointGetFeedback(_this->getFinger2()->sensor2FingerTop));
-
 	return	0;
 }
 
@@ -241,7 +237,7 @@ void drawForceCylinder(cParts* sensor,dJointFeedback* p_force) {
 	for (int crd = 0; crd < DIM3; crd++)	ext_f[crd] = -p_force->f1[crd];	// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 	p_s[CRD_Z] += sensor->getr(); //腕の上に表示
 	for (int crd = 0; crd < DIM3; crd++)	p_e[crd] = p_s[crd] - k1 * ext_f[crd];
-	drawArrowOriginal(p_s, p_e, ext_f);	//センサに関してかかる力を描画
+	drawArrowOriginal(p_s, p_e, ext_f);		//センサに関してかかる力を描画
 }
 
 void drawForceFingerTop(cPartsCylinder& sensor, dJointFeedback* p_force) {
