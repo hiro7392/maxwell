@@ -102,8 +102,8 @@ void DrawStuff::simLoop(int pause)
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
 #if finger2_use
 			//追加 kawahara
-			_this2->jnt_pos[jnt] = dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
-			_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
+			_this2->jnt_pos[jnt] = -dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
+			_this2->jnt_vel[jnt] = -dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
 #endif
 		}
 		//　旋回関節角の角度と角速度を取得
@@ -192,15 +192,14 @@ void DrawStuff::simLoop(int pause)
 		
 		static double beforeXpos; 
 		if(sim->step==0)beforeXpos=nowPos[0];
-		//速度,角度
+		//	速度,角度
 		dBodySetQuaternion(plateToGrasp.body, quat);
 		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
 		dBodySetPosition(plateToGrasp.body, beforeXpos, nowPos[1], capZ);
 		beforeXpos = nowPos[0];
 
-		//x座標を記録
-		//plateの端に外力を加える
-
+		//	x座標を記録
+		//	plateの端に外力を加える
 		if(ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500) {
 			static int duty = 30000;	//外力の向きの周期
 			static int forceVal = 5;

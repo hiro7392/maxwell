@@ -102,13 +102,6 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 		printf("initialized ! \n");
 
 	}
-	//ゲインを変更するとき
-	//imp.K.el[0][0] = 10;
-	//imp.K.el[1][1] = 10;
-	//比例ゲインを出力
-	//printf("impedance K=\n");
-	//matPrint(&imp.K);
-
 	matSub(&re, &var.r, &var_init.r);			// 手先位置変位
 	matSub(&dre, &var.dr, &var_init.dr);		// 手先速度変位
 
@@ -171,8 +164,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	if (entity->step == 0) {
 		allMass = senkai_link.getMass() + base.getMass() + link1.getMass() + link2.getMass() + sensor.getMass() + fingerTopCapsule.getMass();
 		allVolume = senkai_link.getVolume() + base.getVolume() + link1.getVolume() + link2.getVolume() + fingerTopCapsule.getVolumeHalfSquare();
-		rotImp.Iq = 1.0;//allMass / allVolume;
-		rotImp.Id = 1.0;
+		rotImp.Iq = 5.0;//allMass / allVolume;
 	}
 	// Erの値がおかしいので修正する
 	double mu1, mu2, mu_ave;
@@ -184,6 +176,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	static double Integ=0.0;
 	Integ +=(mu_ave*SIM_CYCLE_TIME);
 	printf("Integ = %lf\n", Integ);
+	rotImp.h = senkai_base_vel;
 	double dphi = sankai_base_jnt_init - senkai_base_jnt;
 
 	static double tauNC, tauPL, tauIN, tauVE, Er;

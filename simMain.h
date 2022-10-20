@@ -255,14 +255,14 @@ struct  Impedance {
 
 struct RotImpedance {
 	//double K = 2.0, C = 4.0, lg = 0.03;
-	double K = 40.0, C = 4.0, lg = 0.03;
-	double Id = PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
+	double K = 40.0, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
+	double Id = PLATE_MASS / PLATE_Y_LEN; //PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
 	//	ロボットの慣性モーメント
 	double Iq = (ARM_LINK1_MASS + ARM_LINK2_MASS + ARM_BASE_MASS +/*指先のセンサ部分*/+(SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS)/*先端のカプセル部分*/ + ARM_LINK2_MASS)/(SENKAI_LINK_LEN);		
 	//	コリオリ遠心力
 	double Ja = 1.0;
 	//	慣性H
-	double h = 1.0;		//適当なので後で変更する
+	double h = 10.0;		//適当なので後で変更する
 	
 	
 };

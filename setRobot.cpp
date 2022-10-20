@@ -233,6 +233,9 @@ int cFinger::armDynPara()
 	matTrans(&this->kine.Jt, &this->kine.J);		// J^{T}
 	matInv(&this->kine.Jinv, NULL, &this->kine.J);		// J^{-1}（正則の場合のみ対応）
 	
+	// 旋回関節の動的パラメータ
+
+
 	return	0;
 }
 
