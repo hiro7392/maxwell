@@ -86,6 +86,7 @@ void cFinger::control() {
 	auto entity = EntityManager::get();
 
 	Matrix	tau;
+	double rotTau=0.0;
 	matInit(&tau, 2, 1);
 	// 初期化
 	if (entity->step == 0) {
@@ -128,17 +129,13 @@ void cFinger::control() {
 	if (fingerID == 1) {
 		//ctrlMaxwell(&tau);
 		RestrictedCtrlMaxwell(&tau);
-		//moveEqPointCtrlMaxwell(&tau);
+		RotRestrictedCtrlMaxwell(&rotTau);
 	}
 	else {
 		//ctrlMaxwell2(&tau);
 		RestrictedCtrlMaxwell2(&tau);
-		//moveEqPointCtrlMaxwell2(&tau);
-
+		RotRestrictedCtrlMaxwell(&rotTau);
 	}
-
-
-	//	ctrlMaxwellWithoutInertiaShaping(_this, &tau);
 #elif 0
 	//	ctrlMaxwellConv(_this, &tau);
 	ctrlMaxwellConvInnerLoop(_this, &tau);
@@ -156,9 +153,6 @@ void cFinger::control() {
 	//	ctrlMaxwellVar2(_this, &tau, &_this->dyn.Mq, &_this->dyn.h, &_this->kine.J, &_this->kine.dJ, &_this->var.q, &_this->var.dq, &re, &dre, &_this->var.F, &_this->imp.M, &_this->imp.C, &_this->imp.K);
 	//	ctrlMaxwellVar(_this, &tau);
 #elif SIM_CTRL_MODE_MAXWELL & SIM_OBJ_IMPACT
-//		_this->imp.m_d[CRD_X] = 0.5;	_this->imp.m_d[CRD_Y] = 0.5;	// 慣性
-//		_this->imp.c_d[CRD_X] = 1.0;	_this->imp.c_d[CRD_Y] = 1.0;	// 粘性
-//		_this->imp.k_d[CRD_X] = 10.0;	_this->imp.k_d[CRD_Y] = 10.0;	// 弾性
 	_this->imp.M.el[CRD_X][CRD_X] = 0.5;	_this->imp.M.el[CRD_Y][CRD_Y] = 0.5;	// 慣性
 	_this->imp.C.el[CRD_X][CRD_X] = 0.8;	_this->imp.C.el[CRD_Y][CRD_Y] = 0.8;	// 粘性
 	_this->imp.K.el[CRD_X][CRD_X] = 5.2;	_this->imp.K.el[CRD_Y][CRD_Y] = 5.2;	// 弾性
@@ -201,16 +195,15 @@ void cFinger::control() {
 	std::cout << "eff_force " << std::endl;
 	std::cout << eff_force[0] << " " << eff_force[1] << std::endl;
 
-		//if(entity->step == IMP_SWITCH_STEP){	jnt_force[ARM_M1] = 0.0;	jnt_force[ARM_M2] = 0.0;}
-		// //駆動力制限
-		//for(int jnt=0;jnt<ARM_JNT;jnt++)	if(jnt_force[jnt] > 100 || jnt_force[jnt] < -100)	jnt_force[jnt] = 0.0;
-		// //駆動力入力をODEに設定
-
-	//指の姿勢がによって向きを変化
-	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上E書きではなくインクリメントされることに注意
-	//dJointAddHingeTorque(senkai_link_joint, (fingerID == 1 ? 1.0:-1.0 )*5.0* sin((entity->step / 100.0) * 2 * PI));
-	dJointAddHingeTorque(senkai_link_joint, (fingerID == 1 ? 1.0 : -1.0) * 0.3);
-
+	// 指の姿勢によって向きを変化
+	// 旋回関節を試す間コメントアウト
+	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+	
+	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
+	if (rotTau > 300 )rotTau = 500.0;
+	if (rotTau < -300)rotTau = -500.0;
+	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
+	dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:rotTau);
 }
 
 #endif

@@ -112,8 +112,8 @@ void DrawStuff::simLoop(int pause)
 
 		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint);
 		_this2->senkai_base_vel = dJointGetHingeAngleRate(_this2->senkai_link_joint);
-		printf("fingerID =%d senkai_angle=%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt));
-		printf("fingerID =%d senkai_angle=%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt));
+		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt),radToAng(_this->senkai_base_vel));
+		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));
 
 		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
 		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
@@ -128,7 +128,11 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 		_this2->p_force = dJointGetFeedback(_this2->sensor2FingerTop);
 #endif
-
+		//	旋回関節にかかっているトルクを取得する
+		_this->senkai_p_force = dJointGetFeedback(_this->senkai_base_joint);
+		_this2->senkai_p_force = dJointGetFeedback(_this2->senkai_base_joint);
+		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this->fingerID,_this->senkai_p_force->t1[0], _this->senkai_p_force->t1[1],_this->senkai_p_force->t1[2]);
+		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this2->fingerID, _this2->senkai_p_force->t1[0], _this2->senkai_p_force->t1[1], _this2->senkai_p_force->t1[2]);
 
 		for (int crd = 0; crd < DIM3; crd++) {
 			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
@@ -242,12 +246,6 @@ void DrawStuff::simLoop(int pause)
 #if usePlateToGrasp
 	_this2->plate.draw();
 #endif
-	//初期位置を出力(制約条件付きでは平衡点として扱う)
-	/*std::cout << "F1 initial position r= " << std::endl;
-	matPrint(&_this->var_init.r);
-
-	std::cout << "F2 initial position r= "<< std::endl;
-	matPrint(&_this2->var_init.r);*/
 	
 	//力覚センサの出力用
 	if (sim->step < DATA_CNT_NUM) {

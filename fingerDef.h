@@ -9,7 +9,7 @@ class cFinger {
 
 
 	dReal px1 = -20, py1 = -20, pz1 = 0;
-	double Z_OFFSET = 0.08;
+	double Z_OFFSET = 0.0;// 0.08
 
 public:
 	std::vector<cParts*> finger;
@@ -39,16 +39,13 @@ public:
 	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
 	cPartsBox	plate{PLATE_MASS, Vec3(px1,py1,pz1),Vec3(PLATE_X_LEN,PLATE_Y_LEN,PLATE_Z_LEN) };
 
-	dJointFeedback force, * p_force;		//力センサ用
+	dJointFeedback force, * p_force,senkai_force, *senkai_p_force;		//力センサ用
 	dJointFeedback fingerTop2ForcePoint_joint;
 
 	dJointID senkai_link_joint, senkai_base_joint, senkai_link2finger_joint;						//  旋回関節->指土台->指根本の結合点
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint;	//	固定関節と回転関節
 	dJointID sensor2FingerTop;						//	センサの先端用　先端のカプセルとセンサの結合点
 	dJointID FingerTop2ForcePoint;					//	指先カプセルと力の作用点をつなぐ関節
-
-
-
 	dJointID graspObj; 								//把持対象のプレート kawahara
 
 	// 指の制御用変数
@@ -92,7 +89,7 @@ public:
 	// インピーダンス変数
 	Impedance	imp;
 	// 回転運動用の変数
-
+	RotImpedance rotImp;
 
 	// 保存用データ変数
 	int save_state_contact[DATA_CNT_NUM] = {};
@@ -117,6 +114,7 @@ public:
 	double senkai_base_jnt = 0.0;
 	double senkai_base_vel = 0.0;
 	double senkai_base_ddq = 0.0;
+	double sankai_base_jnt_init = 0.0;
 
 	// 保存用ファイル名変数
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
@@ -128,6 +126,7 @@ public:
 	int armWithoutInertiaShaping();
 	int ctrlPreProcessing();
 	int armDynPara();
+	int senkaiDynPara();			//	旋回関節のパラメータ
 	int armInvKine(Kinematics* kine, Variable* var);
 	int armJacob(Kinematics* kine, Variable* var);
 	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
@@ -182,8 +181,8 @@ public:
 	void setPosition(double x0, double y0, double senkai_base_x0, double senkai_base_y0, double senkai_base_z0) {
 
 		finger[0]->setPosition(x0, y0, z_base_pos);	// z:base->sides[CRD_Z]/2
-		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), z_base_pos - Z_OFFSET);
-		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos - Z_OFFSET);
+		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), z_base_pos);
+		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos);
 		//	センサ
 		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos - Z_OFFSET);
 		//　旋回関節
@@ -257,7 +256,10 @@ public:
 		auto i = color.begin();
 		int cnt = 0;
 		//fingerTopCapsule->setColor((*i).x, (*i).y, (*i).z);	//指先のカプセル用
-		senkai_base.setColor((*i).x, (*i).y, (*i).z);
+		if(fingerID==1)senkai_base.setColor((*i).x, (*i).y, (*i).z);
+		else {
+			senkai_base.setColor((*(i + 1)).x, (*(i + 1)).y, (*(i + 1)).z);
+		}
 		senkai_link.setColor((*(i + 1)).x, (*(i + 1)).y, (*(i + 1)).z);
 		for (auto j = finger.begin(); j != finger.end(); ++j, ++i) {
 

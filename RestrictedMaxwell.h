@@ -82,8 +82,6 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	return	0;
 }
 
-
-
 int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 {
 
@@ -154,7 +152,8 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}∫Fdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
 
-
+	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
+	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, &imp.M.el[0][0]);
 	// デバッグ
 #if 1//print_debug
 	std::cout << "fingerID : " << fingerID << " tau = " << std::endl;
@@ -164,3 +163,39 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	return	0;
 }
 
+int cFinger::RotRestrictedCtrlMaxwell(double* tau)
+{
+	auto entity = EntityManager::get();
+	static double allMass = 0.0;
+	static double allVolume = 0.0;
+	if (entity->step == 0) {
+		allMass = senkai_link.getMass() + base.getMass() + link1.getMass() + link2.getMass() + sensor.getMass() + fingerTopCapsule.getMass();
+		allVolume = senkai_link.getVolume() + base.getVolume() + link1.getVolume() + link2.getVolume() + fingerTopCapsule.getVolumeHalfSquare();
+		rotImp.Iq = 1.0;//allMass / allVolume;
+		rotImp.Id = 1.0;
+	}
+	// Erの値がおかしいので修正する
+	double mu1, mu2, mu_ave;
+	auto Finger1 = EntityManager::get()->getFinger();
+	auto Finger2 = EntityManager::get()->getFinger2();
+	mu1 = Finger1->senkai_p_force->t1[0]; mu2 = Finger2->senkai_p_force->t1[0];
+	mu_ave = (fingerID == 1 ? ((mu1 - mu2)/2.0) : ((mu2 - mu1)/2.0));
+	printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
+	static double Integ=0.0;
+	Integ +=(mu_ave*SIM_CYCLE_TIME);
+	printf("Integ = %lf\n", Integ);
+	double dphi = sankai_base_jnt_init - senkai_base_jnt;
+
+	static double tauNC, tauPL, tauIN, tauVE, Er;
+	printf("allMass = %lf allVolume = %lf \n", allMass, allVolume);
+	Er = (rotImp.Iq / rotImp.Ja) * rotImp.Id;
+	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id);
+	tauNC = rotImp.h - rotImp.Iq * rotImp.Ja * 0.0 * senkai_base_vel;
+	tauPL = ((Er * rotImp.lg * rotImp.K) / (rotImp.C * rotImp.lg))*Integ;
+	tauIN = Er * mu_ave - rotImp.Ja * (fingerID == 1 ? mu1 : mu2);
+	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (sankai_base_jnt_init));
+	printf("tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC, tauPL, tauIN, tauVE);
+	*tau = tauNC + tauPL + tauIN + tauVE;
+	
+	return 0;
+}

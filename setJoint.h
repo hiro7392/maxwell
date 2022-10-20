@@ -60,12 +60,6 @@ cPartsCylinder::cPartsCylinder(dReal m, Vec3 init_pos, dReal l, dReal r) : cPart
 void cFinger::setJoint() {
 
 	auto sim = EntityManager::get();
-
-	//// 固定ジョイント
-	//f_joint = dJointCreateFixed(sim->getWorld(), 0);
-	//dJointAttach(f_joint, finger[0]->getBody(), 0);
-	//dJointSetFixed(f_joint);
-
 	// ヒンジジョイント1
 	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
@@ -95,10 +89,14 @@ void cFinger::setJoint() {
 	// センサ設定（力とトルクの取得に必要）
 	dJointSetFeedback(sensor2FingerTop, &force);
 
+
 	//	指旋回関節の土台
 	senkai_base_joint = dJointCreateFixed(sim->getWorld(), 0);
 	dJointAttach(senkai_base_joint, senkai_base.getBody(), 0);
 	dJointSetFixed(senkai_base_joint);
+
+	//	駆動しているトルクを測定
+	dJointSetFeedback(senkai_base_joint, &senkai_force);
 
 	// ヒンジジョイント	指旋回関節
 	senkai_link_joint = dJointCreateHinge(sim->getWorld(), 0);
@@ -186,6 +184,9 @@ void cFinger::setJoint2() {
 	senkai_base_joint = dJointCreateFixed(sim->getWorld(), 0);
 	dJointAttach(senkai_base_joint, senkai_base.getBody(), 0);
 	dJointSetFixed(senkai_base_joint);
+
+	// 駆動しているトルクを測定
+	dJointSetFeedback(senkai_base_joint, &senkai_force);
 
 	// ヒンジジョイント	指旋回関節
 	senkai_link_joint = dJointCreateHinge(sim->getWorld(), 0);

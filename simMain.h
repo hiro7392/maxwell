@@ -141,7 +141,7 @@ constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
 constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
 constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
-constexpr double	ARM_BASE_MASS = 14.0;
+constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
 
 constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
@@ -254,12 +254,16 @@ struct  Impedance {
 };
 
 struct RotImpedance {
-	double K = 2.0, C = 4.0, lg = 0.03;
-	double Id = PLATE_MASS / PLATE_Y_LEN;	//把持物体の慣性モーメント
+	//double K = 2.0, C = 4.0, lg = 0.03;
+	double K = 40.0, C = 4.0, lg = 0.03;
+	double Id = PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
 	//	ロボットの慣性モーメント
-	double Iq = (ARM_LINK1_MASS + ARM_LINK2_MASS + ARM_BASE_MASS +/*指先のセンサ部分*/+SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS/*先端のカプセル部分*/ + ARM_LINK2_MASS)/SENKAI_LINK_LEN;		
+	double Iq = (ARM_LINK1_MASS + ARM_LINK2_MASS + ARM_BASE_MASS +/*指先のセンサ部分*/+(SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS)/*先端のカプセル部分*/ + ARM_LINK2_MASS)/(SENKAI_LINK_LEN);		
 	//	コリオリ遠心力
-	double Ja;
+	double Ja = 1.0;
+	//	慣性H
+	double h = 1.0;		//適当なので後で変更する
+	
 	
 };
 
@@ -284,6 +288,7 @@ public:
 	~cParts() { dBodyDestroy(this->body); dGeomDestroy(this->geom);	std::cout << "destroy" << std::endl; }
 	dBodyID getBody() { return this->body; }
 	dGeomID getGeom() { return this->geom; }
+	dReal getMass() { return this->m;}	//kawaharaが追加
 	// 位置を設定
 	void setPosition(double x, double y, double z) { dBodySetPosition(getBody(), x, y, z); }
 	// 位置を取得
@@ -305,7 +310,7 @@ public:
 	// 回転を取得
 	//	Quaternion getRotation() const;
 	// サイズを取得
-	//	Vec3 getSize() const { return this->size; }
+	//Vec3 getSize() const { return this->size; }
 	void destroy() { dBodyDestroy(getBody()); dGeomDestroy(getGeom()); }
 	// 仮想関数
 	virtual dReal getl() { return 0; }	// 取りあえずreturnで0を返している
@@ -320,6 +325,7 @@ public:
 	cPartsBox(dReal m, Vec3 l);
 	cPartsBox(dReal m, Vec3 init_pos, Vec3 l);
 	~cPartsBox() {}		// デストラクタ
+	dReal getVolume() { return sides[0]*sides[1]*sides[2]; }	//体積を返す
 	// 描画
 	auto get() { return this->sides; }
 	// 描画
@@ -336,6 +342,7 @@ public:
 	cPartsCylinder(dReal m, dReal l, dReal r);
 	cPartsCylinder(dReal m, Vec3 init_pos, dReal l, dReal r);
 	~cPartsCylinder() {}		// デストラクタ
+	dReal getVolume() { return r * r * PI * l; }	//体積を返す
 	dReal getl() { return l; }
 	dReal getr() { return r; }
 	void draw() {
@@ -349,6 +356,7 @@ class cPartsCapsule : public cParts {
 public:
 	cPartsCapsule(dReal m, dReal l, dReal r);
 	cPartsCapsule(dReal m, Vec3 init_pos,dReal l, dReal r);
+	dReal getVolumeHalfSquare() { return ((4.0/3.0)*PI*r*r*r)/2.0; }	//先端の半球部分の体積を返す
 	~cPartsCapsule() {}		// デストラクタ
 	dReal getl() { return l; }
 	dReal getr() { return r; }
@@ -426,17 +434,11 @@ public:
 };
 
 class EntityODE : public ODE {
-//	std::unique_ptr<cFinger> pFinger;
-//	std::unique_ptr<cPartsCylinder> pObj;
+
 	std::shared_ptr<cFinger> pFinger;
-	//std::shared_ptr<cFinger> pFinger;
-
-
 	std::shared_ptr<cFinger> pFinger2;	//二本目の指　kawahara
 
-
 	std::shared_ptr<cPartsCylinder> pObj;
-
 	std::shared_ptr<cPartsCylinder> pObj2;
 
 public:
@@ -521,28 +523,6 @@ void cFinger::outputJntAngle(int end) {
 	else {
 		outfile.open(jntAngleOutfilename2);
 	}
-	/*
-	outfile <<"step" << ",";
-	outfile << "第1関節[rad]" << ",";
-	outfile << "第1関節[rad/s]" << ",";
-
-	outfile << "第2関節[rad]" << ",";
-	outfile << "第2関節[rad/s]" << ",";
-
-	outfile << "第1関節[度]" << ",";
-	outfile << "第1関節[度/s]" << ",";
-
-	outfile << "第2関節[度]" << ",";
-	outfile << "第2関節[度/s]" << ",";
-
-	outfile << "Fx[N]" << ",";
-	outfile << "Fy[N]" << ",";
-
-	outfile << "手先位置x" << ",";
-	outfile << "手先位置y" << ",";
-
-	*/
-
 
 	for (int k = 0; k < end; k++) {
 		outfile << k << ",";
@@ -559,7 +539,7 @@ void cFinger::outputJntAngle(int end) {
 
 			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
 
-			outfile << save_eff_vel[k][i] << ",";
+			outfile << save_eff_vel[k][i] << ",";		//対象の手先速度
 
 			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標位置(平衡位置)
 			//outfile << ",";
@@ -571,15 +551,11 @@ void cFinger::outputJntAngle(int end) {
 
 void cFinger::setNums(int step) {
 	for (int i = 0; i < 2; i++) {
-		//	力覚センサの値
-		//_this->saveForce[sim->step - 1][i] = _this->var.F.el[i][0];
-		//_this2->saveForce[sim->step - 1][i] = _this2->var.F.el[i][0];
+		
 		//	力覚センサの値
 		saveForce[step - 1][i] = eff_force[i];
-
 		//	関節角度
 		save_jnt_vel[step - 1][i] = var.q.el[i][0];
-
 		//	関節速度
 		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
 		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
@@ -595,11 +571,8 @@ void cFinger::setNums(int step) {
 		save_eff_vel[step - 1][i] = var.dr.el[i][0];
 		save_ref_eff_pos[step - 1][i] = var_init.r.el[i][0];
 #endif
-
-
 		save_jnt_force[step - 1][i] = jnt_force[i];
 		save_jnt_force[step - 1][i] = jnt_force[i];
-
 	}
 }
 
@@ -636,6 +609,4 @@ using EntityManager = Manager<SIM>;
 ////////////////////////////////////////////////////////
 static void restart();
 int exeCmd(int argc, char *argv[]);
-
-
 #endif
