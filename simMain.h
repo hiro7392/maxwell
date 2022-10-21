@@ -134,8 +134,8 @@ constexpr double	PLATE_Y_LEN = 0.5;
 constexpr double	PLATE_Z_LEN = 0.5;
 
 //	旋回関節とそのリンク
-constexpr double SENKAI_LINK_LEN = 0.3;
-constexpr double SENSOR_LEN = 0.01;	//センサの長さ等について設定
+constexpr double	SENKAI_LINK_LEN = 0.3;
+constexpr double	SENSOR_LEN = 0.01;	//センサの長さ等について設定
 
 constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
 constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
@@ -165,6 +165,11 @@ T angToRad(T ang) {
 template <typename T>
 T radToAng(T rad) {
 	return (rad / (2 * PI)) * 360.0;
+}
+//	平面上の２点間の距離を返す
+template <typename T>
+T getDistPlain(T x1, T y1, T x2, T y2) {
+	return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
 ////////////////////////////////////////////////////////
@@ -255,12 +260,13 @@ struct  Impedance {
 
 struct RotImpedance {
 	//double K = 2.0, C = 4.0, lg = 0.03;
-	double K = 40.0, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
+	//double K = 50.0, C = 4.0, lg = SENKAI_LINK_LEN / 2.0;	3次元で重力に対して水平維持
+	double K = 45, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
 	double Id = PLATE_MASS / PLATE_Y_LEN; //PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
 	//	ロボットの慣性モーメント
 	double Iq = (ARM_LINK1_MASS + ARM_LINK2_MASS + ARM_BASE_MASS +/*指先のセンサ部分*/+(SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS)/*先端のカプセル部分*/ + ARM_LINK2_MASS)/(SENKAI_LINK_LEN);		
 	//	コリオリ遠心力
-	double Ja = 1.0;
+	double Ja = 1.0;	// omega = Ja*dq なのでこの場合は1.0
 	//	慣性H
 	double h = 10.0;		//適当なので後で変更する
 	

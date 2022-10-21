@@ -124,9 +124,9 @@ void cFinger::setJoint() {
 
 }
 //”c•¨‘Ì‚Ì‰ŠúˆÊ’u
-dReal capX = -1.2, capY = -0.60, capZ = 0.3;
+dReal capX = -1.2, capY = -0.60, capZ = 0.3;//0.3(“ñŸŒ³) z=1.5(3ŸŒ³)
 //”c•¨‘Ì‚Ì‘å‚«‚³
-const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
+const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2
 // const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 
 

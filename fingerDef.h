@@ -21,7 +21,7 @@ public:
 	//旋回関節の土台部分
 	dReal senkai_base_x0 = 0.5, senkai_base_y0 = -0.3, senkai_base_z0 = z_base_pos;		//	旋回関節の土台
 	dReal senkai_base_x1 = 0.5, senkai_base_y1 = -0.9, senkai_base_z1 = z_base_pos;		//	旋回関節の土台
-	double senkai_init_jnt = 0.0;
+	double senkai_init_jnt = PI/4.0;	///水平になる位置は0.0
 	
 	//指先のカプセル
 	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
@@ -177,7 +177,7 @@ public:
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
 
-	//指１の初期位置と初期姿勢
+	//指１の初期位置と初期姿勢	指1と指2で共通
 	void setPosition(double x0, double y0, double senkai_base_x0, double senkai_base_y0, double senkai_base_z0) {
 
 		finger[0]->setPosition(x0, y0, z_base_pos);	// z:base->sides[CRD_Z]/2
@@ -195,7 +195,6 @@ public:
 		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]),
 			y0 + (ARM_LINK1_LEN)*sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 0.4 / 2.0 - Z_OFFSET),//指先のカプセル
 #else
-
 		//指先のカプセル　センサと同じ位置
 		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos - Z_OFFSET);
 #if forceContactPoint
@@ -211,8 +210,9 @@ public:
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 
 		//旋回関節
-		senkai_base.setRotation(PI / 2.0);
-		senkai_link.setRotation(fingerID == 1 ? PI / 2.0 : -PI / 2.0);
+		senkai_base.setRotation(0);
+		senkai_link.setRotation(fingerID == 1 ? PI / -2.0 : -PI / 2.0);
+		
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 #if forceContactPoint
 		forceContactPoint.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
@@ -244,9 +244,9 @@ public:
 		finger[1]->setRotation(jnt_pos[ARM_M1]);
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+
 		senkai_base.setRotation(0);
 		senkai_link.setRotation(0);
-
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 #if useForceContactPoint
 		forceContactPoint.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);

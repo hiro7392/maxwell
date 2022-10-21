@@ -164,7 +164,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	if (entity->step == 0) {
 		allMass = senkai_link.getMass() + base.getMass() + link1.getMass() + link2.getMass() + sensor.getMass() + fingerTopCapsule.getMass();
 		allVolume = senkai_link.getVolume() + base.getVolume() + link1.getVolume() + link2.getVolume() + fingerTopCapsule.getVolumeHalfSquare();
-		rotImp.Iq = 5.0;//allMass / allVolume;
+		//rotImp.Iq = 5.0;//allMass / allVolume;
 	}
 	// Er‚Ì’l‚ª‚¨‚©‚µ‚¢‚Ì‚ÅC³‚·‚é
 	double mu1, mu2, mu_ave;
