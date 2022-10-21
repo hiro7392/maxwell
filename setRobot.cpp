@@ -234,7 +234,7 @@ int cFinger::armDynPara()
 	matInv(&this->kine.Jinv, NULL, &this->kine.J);		// J^{-1}（正則の場合のみ対応）
 	
 	// 旋回関節の動的パラメータ
-	const dReal* senaki_base_pos = dBodyGetPosition(this->senkai_base.getBody());
+	const dReal* senkai_base_pos = dBodyGetPosition(this->senkai_base.getBody());
 
 	//	リンク1の重心位置
 	const dReal* link1_pos = dBodyGetPosition(this->link1.getBody());
@@ -249,10 +249,10 @@ int cFinger::armDynPara()
 	const dReal* sensor_pos = dBodyGetPosition(this->sensor.getBody());
 
 	static double link1_dist, link2_dist,capsule_dist,sensor_dist;
-	link1_dist =	getDistPlain(senaki_base_pos[0], link1_pos[0], senaki_base_pos[1], link1_pos[1]);
-	link2_dist =	getDistPlain(senaki_base_pos[0], link2_pos[0], senaki_base_pos[1], link2_pos[1]);
-	capsule_dist =	getDistPlain(senaki_base_pos[0], capsule_pos[0], senaki_base_pos[1], capsule_pos[1]);
-	sensor_dist =	getDistPlain(senaki_base_pos[0], sensor_pos[0], senaki_base_pos[1], sensor_pos[1]);
+	link1_dist =	getDistPlain(senkai_base_pos[0], link1_pos[0], senkai_base_pos[1], link1_pos[1]);
+	link2_dist =	getDistPlain(senkai_base_pos[0], link2_pos[0], senkai_base_pos[1], link2_pos[1]);
+	capsule_dist =	getDistPlain(senkai_base_pos[0], capsule_pos[0], senkai_base_pos[1], capsule_pos[1]);
+	sensor_dist =	getDistPlain(senkai_base_pos[0], sensor_pos[0], senkai_base_pos[1], sensor_pos[1]);
 
 	static double senkai_link_Ix,base_Ix,link1_Ix, link2_Ix, capsule_Ix, sensor_Ix;
 	senkai_link_Ix	= senkai_link.getMass() * SENKAI_LINK_LEN / 2.0;

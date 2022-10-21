@@ -7,7 +7,6 @@ class cFinger {
 	cPartsCylinder	link1{ ARM_LINK1_MASS, ARM_LINK1_LEN, ARM_LINK1_RAD };
 	cPartsCylinder	link2{ ARM_LINK2_MASS, ARM_LINK2_LEN, ARM_LINK2_RAD };
 
-
 	dReal px1 = -20, py1 = -20, pz1 = 0;
 	double Z_OFFSET = 0.0;// 0.08
 
@@ -111,10 +110,11 @@ public:
 	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
 
 	// 旋回関節角
-	double senkai_base_jnt = 0.0;
+	double sankai_base_jnt_init = senkai_init_jnt;
+	double senkai_base_jnt = senkai_init_jnt;
 	double senkai_base_vel = 0.0;
 	double senkai_base_ddq = 0.0;
-	double sankai_base_jnt_init = 0.0;
+	
 
 	// 保存用ファイル名変数
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
@@ -180,16 +180,24 @@ public:
 	//指１の初期位置と初期姿勢	指1と指2で共通
 	void setPosition(double x0, double y0, double senkai_base_x0, double senkai_base_y0, double senkai_base_z0) {
 
-		finger[0]->setPosition(x0, y0, z_base_pos);	// z:base->sides[CRD_Z]/2
-		finger[1]->setPosition(x0 + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), y0 + ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]), z_base_pos);
-		finger[2]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos);
+		double x0_senkai, y0_senkai, z0_senkai;
+		x0_senkai = senkai_base_x0;
+		y0_senkai = fingerID == 1 ? (senkai_base_y0 + SENKAI_LINK_LEN * cos(senkai_init_jnt)): (senkai_base_y0 - SENKAI_LINK_LEN * cos(senkai_init_jnt));
+		z0_senkai = fingerID==1 ? (senkai_base_z0 - SENKAI_LINK_LEN * sin(senkai_init_jnt)): (senkai_base_z0 - SENKAI_LINK_LEN * sin(senkai_init_jnt));
+		double link1_y = y0_senkai +/* (fingerID == 1 ? 1 : -1)*/  cos(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
+		double link1_z = z0_senkai + (fingerID == 1 ? -1 : 1)*sin(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
+		finger[0]->setPosition(x0_senkai, y0_senkai, z0_senkai);	// z:base->sides[CRD_Z]/2
+		finger[1]->setPosition(x0_senkai + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]), link1_y, link1_z);
+		finger[2]->setPosition(x0_senkai + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), 
+			link1_y + cos(senkai_base_jnt)*(ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2])), 
+			link1_z +(fingerID == 1 ? -1 : 1) * sin(senkai_base_jnt)* (ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2])));
 		//	センサ
-		finger[3]->setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos - Z_OFFSET);
+		finger[3]->setPosition(x0_senkai + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), y0 + ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]), z_base_pos - Z_OFFSET);
 		//　旋回関節
 		senkai_base.setPosition(senkai_base_x0, senkai_base_y0, senkai_base_z0);	// z:base->sides[CRD_Z]/2
-		if (fingerID == 1)senkai_link.setPosition(senkai_base_x0, senkai_base_y0 + SENKAI_LINK_LEN / 2.0 * cos(senkai_init_jnt), senkai_base_z0 + SENKAI_LINK_LEN / 2.0 * sin(senkai_init_jnt));
+		if (fingerID == 1)senkai_link.setPosition(senkai_base_x0, senkai_base_y0 + SENKAI_LINK_LEN / 2.0 * cos(senkai_init_jnt), senkai_base_z0 - SENKAI_LINK_LEN / 2.0 * sin(senkai_init_jnt));
 		else {
-			senkai_link.setPosition(senkai_base_x0, senkai_base_y0 - SENKAI_LINK_LEN / 2.0 * cos(senkai_init_jnt), senkai_base_z0 + SENKAI_LINK_LEN / 2.0 * sin(senkai_init_jnt));
+			senkai_link.setPosition(senkai_base_x0, senkai_base_y0 - SENKAI_LINK_LEN / 2.0 * cos(senkai_init_jnt), senkai_base_z0 - SENKAI_LINK_LEN / 2.0 * sin(senkai_init_jnt));
 		}
 #if 0
 		fingerTopCapsule.setPosition(x0 + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.3) / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]),
@@ -204,14 +212,15 @@ public:
 #endif
 
 #endif
+		//　ここにｘ軸周りの回転をくわえるものを追加する
 		finger[0]->setRotation(0);
-		finger[1]->setRotation(jnt_pos[ARM_M1]);
-		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
-		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+		finger[1]->setRotation(jnt_pos[ARM_M1]); //finger[1]->setRotationAroundX(senkai_base_jnt);
+		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]); //finger[2]->setRotationAroundX(senkai_base_jnt);
+		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]); // finger[3]->setRotationAroundX(senkai_base_jnt);
 
 		//旋回関節
-		senkai_base.setRotation(0);
-		senkai_link.setRotation(fingerID == 1 ? PI / -2.0 : -PI / 2.0);
+		senkai_base.setRotationAroundX(0);
+		senkai_link.setRotationAroundX(fingerID == 1 ? (senkai_init_jnt) : (-senkai_init_jnt ));
 		
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 #if forceContactPoint
@@ -245,8 +254,8 @@ public:
 		finger[2]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		finger[3]->setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 
-		senkai_base.setRotation(0);
-		senkai_link.setRotation(0);
+		senkai_base.setRotationAroundX(0);
+		senkai_link.setRotationAroundX(0);
 		fingerTopCapsule.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 #if useForceContactPoint
 		forceContactPoint.setRotation(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);

@@ -312,6 +312,12 @@ public:
 		dRFromAxisAndAngle(R, -1,0,0, PI);
 		dBodySetRotation(getBody(), R);	//Bodyに回転行列Rを設定する
 	}
+	//	旋回関節用　x軸周りに回転させるとき	川原
+	void setRotationAroundX(double ang) {
+		dMatrix3	R;
+		dRFromAxisAndAngle(R, 0,cos(ang), -sin(ang), PI / 2);
+		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
+	}
 	void setColor(float r, float g, float b) { color[0] = r; color[1] = g; color[2] = b; }
 	// 回転を取得
 	//	Quaternion getRotation() const;
