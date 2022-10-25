@@ -106,14 +106,11 @@ void DrawStuff::simLoop(int pause)
 			_this2->jnt_vel[jnt] = -dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
 #endif
 		}
-		printf("fingerID =%d link1_ang=%lf link2_ang =%lf\n", _this->fingerID, radToAng(_this->jnt_pos[0]), radToAng(_this->jnt_pos[1]));
-		printf("fingerID =%d link1_ang=%lf link2_ang =%lf\n", _this2->fingerID, radToAng(_this2->jnt_pos[0]), radToAng(_this2->jnt_pos[1]));
-		
 		//　旋回関節角の角度と角速度を取得
-		_this->senkai_base_jnt = dJointGetHingeAngle(_this->senkai_link_joint);
+		_this->senkai_base_jnt = dJointGetHingeAngle(_this->senkai_link_joint)+_this->sankai_base_jnt_init;
 		_this->senkai_base_vel = dJointGetHingeAngleRate(_this->senkai_link_joint);
 
-		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint);
+		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint) + _this->sankai_base_jnt_init;
 		_this2->senkai_base_vel = dJointGetHingeAngleRate(_this2->senkai_link_joint);
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt),radToAng(_this->senkai_base_vel));
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));

@@ -303,54 +303,26 @@ public:
 	void setRotation(double ang) {
 		dMatrix3	R;
 		//dRFromAxisAndAngle(dQuaternion q,dReal ax,dReal ay,aReal az,dReal angle)
-		//=回転軸ベクトル(ax,ay,az)4を中心にangle[rad]回転させたときの回転行列を取得する
-		dRFromAxisAndAngle(R, -sin(ang), cos(ang), 0,PI/2.0);
-		printf(" setRotationZ  R = {\n");
-		for (int i = 0; i < 3; i++) {
-			for (int k = 0; k < 4; k++) {
-				printf("%lf ", R[i * 4 + k]);
-			}
-			printf("\n");
-		}
+		//=回転軸ベクトル(ax,ay,az)を中心にangle[rad]回転させたときの回転行列を取得する
+		dRFromAxisAndAngle(R, -sin(ang), cos(ang), 0, PI / 2);
+		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
+	}
+	void setRotationSenkai(double ang,double angZ) {
+
+		dMatrix3	R;
+		//dRFromAxisAndAngle(dQuaternion q,dReal ax,dReal ay,aReal az,dReal angle)
+		//=回転軸ベクトル(ax,ay,az)を中心にangle[rad]回転させたときの回転行列を取得する
+		//dRFromAxisAndAngle(R, -sin(0.0), cos(0.0), 0, PI/2.0);
+		
+		//dRFromAxisAndAngle(R, -sin(ang), cos(ang), sin(angZ), PI/2.0);
+		dRFromAxisAndAngle(R, -sin(ang), cos(ang), 0, PI / 2.0+angZ);
+
 		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
 	}
 	void setRotation2(double ang) {
 		dMatrix3	R;
 		dRFromAxisAndAngle(R, -1,0,0, PI);
 		dBodySetRotation(getBody(), R);	//Bodyに回転行列Rを設定する
-	}
-	//	旋回関節用　x軸周りに回転させるとき	川原
-	void setRotationAroundX(double ang) {
-		dMatrix3	R;
-		dRFromAxisAndAngle(R, 0,cos(ang), -sin(ang), PI / 2);
-		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
-	}
-	//	川原が作成　指旋回関節がついた時のシミュレーション用
-	//	旋回関節がx軸周りに回転、その他のリンクがz軸周りに回転する
-	void setRotationAroundXZ(double angX,double angZ) {
-		dMatrix3	R,Rx,Rz;
-		//dRFromAxisAndAngle(Rx, -sin(angZ), cos(angZ), 0, 0.0);
-		//dRFromAxisAndAngle(Rz, 0, cos(angX), -sin(angX), PI/2.0);
-		//dMultiply0(R,Rz, Rx,3,3,3);
-		//printf(" setRotationXZ  R = {\n");
-		//for (int i = 0; i < 3; i++) {
-		//	for(int k = 0; k < 3; k++) {
-		//		printf("%lf ", R[i * 3 + k]);
-		//	}
-		//	printf("\n");
-		//}
-		//dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
-		dRFromAxisAndAngle(R, -sin(angZ), cos(angZ), 0, PI/2.0);
-		printf(" setRotationZ  R = {\n");
-		//	Rは3x4の回転行列
-		for (int i = 0; i < 3; i++) {
-			for (int k = 0; k < 4; k++) {
-				printf("%lf ", R[i * 4 + k]);
-			}
-			printf("\n");
-		}
-		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
-		
 	}
 	void setColor(float r, float g, float b) { color[0] = r; color[1] = g; color[2] = b; }
 	// 回転を取得
