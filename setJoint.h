@@ -197,8 +197,8 @@ void cFinger::setJoint2() {
 	dJointAttach(senkai_link_joint, senkai_link.getBody(), senkai_base.getBody());
 	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x1, senkai_base_y1, senkai_base_z1);
 	dJointSetHingeAxis(senkai_link_joint, 1, 0, 0);
-	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI / 2.0);
-	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI / 2.0);
+	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI / 4.0);
+	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI / 4.0);
 
 	// 固定ジョイント 指旋回関節のリンク->指根本関節
 	senkai_link2finger_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント

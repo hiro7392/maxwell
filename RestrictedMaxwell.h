@@ -177,7 +177,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	Integ +=(mu_ave*SIM_CYCLE_TIME);
 	printf("Integ = %lf\n", Integ);
 	rotImp.h = senkai_base_vel;
-	double dphi = sankai_base_jnt_init - senkai_base_jnt;
+	double dphi = senkai_base_jnt_init - senkai_base_jnt;
 
 	static double tauNC, tauPL, tauIN, tauVE, Er;
 	printf("allMass = %lf allVolume = %lf \n", allMass, allVolume);
@@ -186,7 +186,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	tauNC = rotImp.h - rotImp.Iq * rotImp.Ja * 0.0 * senkai_base_vel;
 	tauPL = ((Er * rotImp.lg * rotImp.K) / (rotImp.C * rotImp.lg))*Integ;
 	tauIN = Er * mu_ave - rotImp.Ja * (fingerID == 1 ? mu1 : mu2);
-	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (sankai_base_jnt_init));
+	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (senkai_base_jnt_init));
 	printf("tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC, tauPL, tauIN, tauVE);
 	*tau = tauNC + tauPL + tauIN + tauVE;
 	

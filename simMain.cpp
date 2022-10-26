@@ -31,6 +31,10 @@ int main(int argc, char *argv[])
 	for (int crd = 0; crd < DIM3; crd++) {
 		Finger1->init_obj_pos[crd] = Finger1->init_obj_pos[crd];
 		for (int axis = 0; axis < DIM3; axis++)	Finger1->init_obj_att[axis][crd] = Finger1->init_obj_att[axis][crd];
+		// 旋回関節について初期化
+		Finger1->senkai_base_jnt = (Finger1->fingerID == 1) ? Finger1->senkai_init_jnt : Finger1->senkai_init_jnt2;
+		Finger1->senkai_base_jnt_init = (Finger1->fingerID == 1) ? Finger1->senkai_init_jnt : Finger1->senkai_init_jnt2;
+
 	}
 
 	//パラメータ設定 指2
@@ -39,6 +43,8 @@ int main(int argc, char *argv[])
 	for (int crd = 0; crd < DIM3; crd++) {
 		Finger2->init_obj_pos[crd] = Finger2->init_obj_pos[crd];
 		for (int axis = 0; axis < DIM3; axis++)	Finger2->init_obj_att[axis][crd] = init_obj_att[axis][crd];
+		Finger2->senkai_base_jnt = (Finger2->fingerID == 1) ? Finger2->senkai_init_jnt : Finger2->senkai_init_jnt2;
+		Finger2->senkai_base_jnt_init = (Finger2->fingerID == 1) ? Finger2->senkai_init_jnt : Finger2->senkai_init_jnt2;
 	}
 	sim->createRobot();
 	sim->createObject();
@@ -108,10 +114,10 @@ void DrawStuff::simLoop(int pause)
 #endif
 		}
 		//　旋回関節角の角度と角速度を取得
-		_this->senkai_base_jnt = dJointGetHingeAngle(_this->senkai_link_joint)+_this->sankai_base_jnt_init;
+		_this->senkai_base_jnt = dJointGetHingeAngle(_this->senkai_link_joint)+_this->senkai_base_jnt_init;
 		_this->senkai_base_vel = dJointGetHingeAngleRate(_this->senkai_link_joint);
 
-		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint) + _this2->sankai_base_jnt_init;
+		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint) + _this2->senkai_base_jnt_init;
 		_this2->senkai_base_vel = dJointGetHingeAngleRate(_this2->senkai_link_joint);
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt),radToAng(_this->senkai_base_vel));
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));
@@ -295,9 +301,10 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -2.0;	xyz[1] =-0.5;	xyz[2] = 3.0;
+	xyz[0] = -2.5;	xyz[1] =-0.5;	xyz[2] = 1.5;
+	//xyz[0] = -2.0;	xyz[1] = -0.5;	xyz[2] = 1.5;
 	//xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
-	hpr[0] = 180.0;	hpr[1] = -120.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
+	hpr[0] = 180.0;	hpr[1] = -180.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
 	dsSetSphereQuality(3);					// 球の品質設定
