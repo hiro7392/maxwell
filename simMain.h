@@ -313,10 +313,13 @@ public:
 		//dRFromAxisAndAngle(dQuaternion q,dReal ax,dReal ay,aReal az,dReal angle)
 		//=回転軸ベクトル(ax,ay,az)を中心にangle[rad]回転させたときの回転行列を取得する
 		//dRFromAxisAndAngle(R, -sin(0.0), cos(0.0), 0, PI/2.0);
-		
-		//dRFromAxisAndAngle(R, -sin(ang), cos(ang), sin(angZ), PI/2.0);
 		dRFromAxisAndAngle(R, -sin(ang), cos(ang), 0, PI / 2.0+angZ);
+		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
+	}
+	void setRotationFrom2Points(double x1,double y1,double z1, double x2, double y2, double z2) {
 
+		dMatrix3	R;
+		dRFromZAxis(R, x1-x2, y1-y2, z1-z2);
 		dBodySetRotation(getBody(), R);//Bodyに回転行列Rを設定する
 	}
 	void setRotation2(double ang) {
@@ -472,7 +475,6 @@ public:
 		//各関節の初期姿勢(角度)
 		Vec3 obj_pos = { Vec3(-0.8 / sqrt(2.0) - 2 * 0.75 / sqrt(2.0), -0.8 / sqrt(2.0), OBJ_RADIUS) };
 		
-
 		//1本目の指
 		this->pFinger = std::make_shared<cFinger>(init_jnt_pos,forceOutfilename1);
 		this->pFinger->fingerID = ++FingerNum;

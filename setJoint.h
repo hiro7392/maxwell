@@ -102,7 +102,7 @@ void cFinger::setJoint() {
 	senkai_link_joint = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(senkai_link_joint, senkai_link.getBody(), senkai_base.getBody());
 	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x0, senkai_base_y0, senkai_base_z0);
-	dJointSetHingeAxis(senkai_link_joint, 1, 0, 0);
+	dJointSetHingeAxis(senkai_link_joint, -1, 0, 0);
 	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI / 2.0);
 	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI / 2.0);
 
@@ -151,6 +151,10 @@ void cFinger::setJoint2() {
 #endif
 	auto sim = EntityManager::get();
 
+	double base_x = senkai_base_x0;
+	double base_y = senkai_base_y0 + (fingerID == 1 ? 1 : -1) * SENKAI_LINK_LEN * cos(senkai_init_jnt);
+	double base_z = senkai_base_z0 - SENKAI_LINK_LEN * sin(senkai_init_jnt);
+		
 	// ヒンジジョイント1
 	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());

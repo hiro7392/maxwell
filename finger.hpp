@@ -80,8 +80,6 @@ double	init_obj_att[DIM3][DIM3] = { {sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0}, {0.0, 0
 // 戻り値：関節一般化力（直動関節では力，回転関節ではトルク）
 ////////////////////////////////////////////////////////
 
-
-
 void cFinger::control() {
 	auto entity = EntityManager::get();
 

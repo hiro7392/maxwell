@@ -92,6 +92,7 @@ void DrawStuff::simLoop(int pause)
 	dReal sides[3] = { plateX,plateY,plateZ };
 	dsDrawBox(pos2, R2, sides);  // plateの描画
 #endif
+
 	if (!pause) {
 		auto sensor = _this->getParts()[3];
 		auto sensor2 = _this2->getParts()[3];
@@ -110,7 +111,7 @@ void DrawStuff::simLoop(int pause)
 		_this->senkai_base_jnt = dJointGetHingeAngle(_this->senkai_link_joint)+_this->sankai_base_jnt_init;
 		_this->senkai_base_vel = dJointGetHingeAngleRate(_this->senkai_link_joint);
 
-		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint) + _this->sankai_base_jnt_init;
+		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint) + _this2->sankai_base_jnt_init;
 		_this2->senkai_base_vel = dJointGetHingeAngleRate(_this2->senkai_link_joint);
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt),radToAng(_this->senkai_base_vel));
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));

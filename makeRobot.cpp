@@ -505,12 +505,10 @@ int destroyObject(SIM* sim)
 ////////////////////////////////////////////////////////
 void EntityODE::createRobot() {
 
-	this->pFinger->setPosition(this->pFinger->x0, this->pFinger->y0,
-		this->pFinger->senkai_base_x0, this->pFinger->senkai_base_y0, this->pFinger->senkai_base_z0);
+	this->pFinger->setPosition(this->pFinger->senkai_base_x0, this->pFinger->senkai_base_y0, this->pFinger->senkai_base_z0);
 	this->pFinger->setJoint();
 
-	this->pFinger2->setPosition(this->pFinger->x1, this->pFinger->y1,
-		this->pFinger2->senkai_base_x1, this->pFinger2->senkai_base_y1, this->pFinger2->senkai_base_z1);
+	this->pFinger2->setPosition(this->pFinger2->senkai_base_x1, this->pFinger2->senkai_base_y1, this->pFinger2->senkai_base_z1);
 	this->pFinger2->setJoint2();
 
 }
