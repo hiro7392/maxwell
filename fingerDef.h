@@ -20,8 +20,8 @@ public:
 	//ù‰ñŠÖß‚Ì“y‘ä•”•ª
 	dReal senkai_base_x0 = 0.5, senkai_base_y0 = -0.3, senkai_base_z0 = z_base_pos;		//	ù‰ñŠÖß‚Ì“y‘ä
 	dReal senkai_base_x1 = 0.5, senkai_base_y1 = -0.9, senkai_base_z1 = z_base_pos;		//	ù‰ñŠÖß‚Ì“y‘ä
-	double senkai_init_jnt = -PI / 2.0;// PI / 4.0;	///…•½‚É‚È‚éˆÊ’u‚Í0.0
-	double senkai_init_jnt2 = -PI / 2.0;	//Žw2‚Í”½‘Î‚ÌŽp¨‚ð‚Æ‚é
+	double senkai_init_jnt = PI/6.0;// PI / 4.0;	///…•½‚É‚È‚éˆÊ’u‚Í0.0
+	double senkai_init_jnt2 = -PI/6.0;	//Žw2‚Í”½‘Î‚ÌŽp¨‚ð‚Æ‚é
 
 	//Žwæ‚ÌƒJƒvƒZƒ‹
 	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
@@ -187,12 +187,12 @@ public:
 		
 		//	ƒŠƒ“ƒN‚P
 		double link1_x = base_x + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]);
-		double link1_y = base_y +  cos(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
+		double link1_y = base_y +  abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		double link1_z = base_z -  sin(senkai_base_jnt) * abs(ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		finger[1]->setPosition(link1_x, link1_y, link1_z);
 
 		double link1_top_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]);
-		double link1_top_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
+		double link1_top_y = base_y + abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 		double link1_top_z = base_z - sin(senkai_base_jnt) * abs(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 		
 		//	ƒŠƒ“ƒN2
