@@ -69,7 +69,7 @@ void cFinger::setJoint() {
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M1], base_x,base_y,base_z);
 	//dJointSetHingeAxis(r_joint[ARM_M1], 0, 0, 1);
-	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(senkai_base_jnt) * (fingerID == 1 ? -1 : -1), cos(senkai_base_jnt));	//xy•½–Êã‚Å‰ñ“]‚·‚é‚Æ‚«
+	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(-senkai_base_jnt), cos(-senkai_base_jnt));	//xy•½–Êã‚Å‰ñ“]‚·‚é‚Æ‚«
 
 	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
@@ -82,7 +82,7 @@ void cFinger::setJoint() {
 	r_joint[ARM_M2] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M2], finger[2]->getBody(), finger[1]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M2], link1_top_x,link1_top_y, link1_top_z);
-	dJointSetHingeAxis(r_joint[ARM_M2], 0, -sin(senkai_base_jnt) * (fingerID == 1 ? -1 : -1), cos(senkai_base_jnt));	//xy•½–Êã‚Å‰ñ“]‚·‚é‚Æ‚«
+	dJointSetHingeAxis(r_joint[ARM_M2], 0, -sin(-senkai_base_jnt), cos(-senkai_base_jnt));	//xy•½–Êã‚Å‰ñ“]‚·‚é‚Æ‚«
 
 	//dJointSetHingeAxis(r_joint[ARM_M2], 0, 0, 1);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
@@ -162,16 +162,16 @@ void cFinger::setJoint2() {
 	dGeomSetBody(geomBodyPlate, plateToGrasp.body);
 #endif	
 	auto sim = EntityManager::get();
-	double base_x = senkai_base_x0;
-	double base_y = senkai_base_y0 + (fingerID == 1 ? 1 : -1) * SENKAI_LINK_LEN * cos(senkai_base_jnt);
-	double base_z = senkai_base_z0 - SENKAI_LINK_LEN * sin(senkai_base_jnt);
+	double base_x = senkai_base_x1;
+	double base_y = senkai_base_y1 + (fingerID == 1 ? 1 : -1) * SENKAI_LINK_LEN * cos(senkai_base_jnt);
+	double base_z = senkai_base_z1 - SENKAI_LINK_LEN * sin(senkai_base_jnt);
 
 	// ƒqƒ“ƒWƒWƒ‡ƒCƒ“ƒg1
 	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M1], base_x, base_y, base_z);
 	//	ù‰ñŠÖß‚Ì•ªAx²’†S‚É‰ñ“]
-	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(-senkai_base_jnt), cos(-senkai_base_jnt));
+	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(senkai_base_jnt), cos(senkai_base_jnt));
 	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
 
@@ -184,7 +184,7 @@ void cFinger::setJoint2() {
 	dJointAttach(r_joint[ARM_M2], finger[2]->getBody(), finger[1]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M2], link1_top_x, link1_top_y, link1_top_z);
 	//	ù‰ñŠÖß‚Ì•ªAx²’†S‚É‰ñ“]
-	dJointSetHingeAxis(r_joint[ARM_M2], 0, -sin(-senkai_base_jnt), cos(-senkai_base_jnt));
+	dJointSetHingeAxis(r_joint[ARM_M2], 0, -sin(senkai_base_jnt), cos(senkai_base_jnt));
 	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
 

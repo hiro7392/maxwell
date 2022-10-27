@@ -109,8 +109,8 @@ void DrawStuff::simLoop(int pause)
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
 #if finger2_use
 			//追加 kawahara
-			_this2->jnt_pos[jnt] = -dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
-			_this2->jnt_vel[jnt] = -dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
+			_this2->jnt_pos[jnt] = dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
+			_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
 #endif
 		}
 		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this->fingerID, radToAng(_this->jnt_pos[0]), radToAng(_this->jnt_pos[1]));
@@ -304,10 +304,10 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -2.5;	xyz[1] =-0.5;	xyz[2] = 1.5;
+	xyz[0] = -2.0;	xyz[1] =-0.5;	xyz[2] = 3.0;
 	//xyz[0] = -2.0;	xyz[1] = -0.5;	xyz[2] = 1.5;
 	//xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
-	hpr[0] = 180.0;	hpr[1] = -180.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
+	hpr[0] = 180.0;	hpr[1] = -110.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
 	dsSetSphereQuality(3);					// 球の品質設定

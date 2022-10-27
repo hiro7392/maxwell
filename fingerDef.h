@@ -186,20 +186,22 @@ public:
 		finger[0]->setPosition(base_x, base_y, base_z);
 		
 		//	リンク１
-		double link1_x = base_x + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]);
-		double link1_y = base_y +  abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
+		double link1_x = base_x + (ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]));
+		double link1_y = base_y +  cos(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		double link1_z = base_z -  sin(senkai_base_jnt) * abs(ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		finger[1]->setPosition(link1_x, link1_y, link1_z);
 
 		double link1_top_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]);
-		double link1_top_y = base_y + abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
+		double link1_top_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 		double link1_top_z = base_z - sin(senkai_base_jnt) * abs(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 		
 		//	リンク2
-		double link2_x = link1_top_x + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+		double link2_x = link1_top_x + (ARM_LINK2_LEN / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		//double link2_y = base_y +abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		double link2_y = link1_top_y + abs(cos(senkai_base_jnt)) * (ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		double link2_z = base_z - sin(senkai_base_jnt) * abs(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
+		//printf("setposition fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", fingerID, radToAng(jnt_pos[0]), radToAng(jnt_pos[1]));
+
 		finger[2]->setPosition(link2_x, link2_y, link2_z);
 
 		//	センサ
