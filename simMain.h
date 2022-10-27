@@ -137,8 +137,13 @@ constexpr double	PLATE_Z_LEN = 0.5;
 constexpr double	SENKAI_LINK_LEN = 0.3;
 constexpr double	SENSOR_LEN = 0.01;	//センサの長さ等について設定
 
-constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
-constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
+//constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
+//constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
+constexpr double	ARM_LINK1_RAD = 0.06;		// リンク半径
+constexpr double	ARM_LINK2_RAD = 0.06;		// リンク半径
+
+//constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
+//constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0

@@ -136,9 +136,13 @@ void cFinger::setJoint() {
 
 }
 //把持物体の初期位置
-dReal capX = -1.2, capY = -0.60, capZ = 0.3;//0.3(二次元) z=1.5(3次元)
+//dReal capX = -1.2, capY = -0.60, capZ = 0.3;//0.3(二次元) z=1.5(3次元)
+dReal capX = -1.0, capY = -0.60, capZ = 1.5;//(3次元)
+
 //把持物体の大きさ
-const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2
+//const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2 // xy平面上
+const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.2;//	3次元シミュ用
+
 // const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 
 
@@ -214,8 +218,8 @@ void cFinger::setJoint2() {
 	dJointAttach(senkai_link_joint, senkai_link.getBody(), senkai_base.getBody());
 	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x1, senkai_base_y1, senkai_base_z1);
 	dJointSetHingeAxis(senkai_link_joint, 1, 0, 0);
-	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI / 4.0);
-	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI / 4.0);
+	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI / 2.0);
+	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI / 2.0);
 
 	// 固定ジョイント 指旋回関節のリンク->指根本関節
 	senkai_link2finger_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント
