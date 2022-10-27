@@ -156,6 +156,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	return	0;
 }
 
+//ù‰ñŠÖß‚É‚Â‚¢‚Ä§–ñ•t‚«maxwell§Œä
 int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 {
 	auto entity = EntityManager::get();
@@ -170,14 +171,15 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	double mu1, mu2, mu_ave;
 	auto Finger1 = EntityManager::get()->getFinger();
 	auto Finger2 = EntityManager::get()->getFinger2();
-	mu1 = Finger1->senkai_p_force->t1[0]; mu2 = Finger2->senkai_p_force->t1[0];
+	double scale = 100.0;
+	mu1 = Finger1->senkai_p_force->t1[0]/scale; mu2 = Finger2->senkai_p_force->t1[0]/scale;
 	mu_ave = (fingerID == 1 ? ((mu1 - mu2)/2.0) : ((mu2 - mu1)/2.0));
 	printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	static double Integ=0.0;
 	Integ +=(mu_ave*SIM_CYCLE_TIME);
 	printf("Integ = %lf\n", Integ);
 	rotImp.h = senkai_base_vel;
-	double dphi = senkai_base_jnt_init - senkai_base_jnt;
+	double dphi =  senkai_base_jnt-senkai_base_jnt_init;
 
 	static double tauNC, tauPL, tauIN, tauVE, Er;
 	printf("allMass = %lf allVolume = %lf \n", allMass, allVolume);
@@ -186,7 +188,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	tauNC = rotImp.h - rotImp.Iq * rotImp.Ja * 0.0 * senkai_base_vel;
 	tauPL = ((Er * rotImp.lg * rotImp.K) / (rotImp.C * rotImp.lg))*Integ;
 	tauIN = Er * mu_ave - rotImp.Ja * (fingerID == 1 ? mu1 : mu2);
-	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (senkai_base_jnt_init));
+	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (dphi));
 	printf("tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC, tauPL, tauIN, tauVE);
 	*tau = tauNC + tauPL + tauIN + tauVE;
 	

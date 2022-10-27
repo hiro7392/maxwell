@@ -198,8 +198,9 @@ void cFinger::control() {
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 	
 	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
-	if (rotTau > 300 )rotTau = 500.0;
-	if (rotTau < -300)rotTau = -500.0;
+	double MAX = 10000.0, MIN = -10000.0;
+	if (rotTau > MAX )rotTau = MAX;
+	if (rotTau < MIN)rotTau = MIN;
 	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
 	dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:rotTau);
 }

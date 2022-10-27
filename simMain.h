@@ -260,9 +260,12 @@ struct  Impedance {
 
 struct RotImpedance {
 	//double K = 2.0, C = 4.0, lg = 0.03;
-	//double K = 50.0, C = 4.0, lg = SENKAI_LINK_LEN / 2.0;	3次元で重力に対して水平維持
-	double K = 45, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
-	double Id = PLATE_MASS / PLATE_Y_LEN; //PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
+	//double K = 50.0, C = 4.0, lg = SENKAI_LINK_LEN / 2.0;	//3次元で重力に対して水平維持
+	double K =  55.0, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
+	// 把持物体の慣性モーメント
+	double Id = (PLATE_MASS / 3.0) * (PLATE_Y_LEN * PLATE_Y_LEN + PLATE_Z_LEN * PLATE_Z_LEN);
+	//double Id = (PLATE_MASS/PLATE_X_LEN) / PLATE_Y_LEN; //PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
+	
 	//	ロボットの慣性モーメント
 	double Iq = (ARM_LINK1_MASS + ARM_LINK2_MASS + ARM_BASE_MASS +/*指先のセンサ部分*/+(SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS)/*先端のカプセル部分*/ + ARM_LINK2_MASS)/(SENKAI_LINK_LEN);		
 	//	コリオリ遠心力
