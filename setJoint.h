@@ -141,7 +141,7 @@ dReal capX = -1.0, capY = -0.60, capZ = 1.5;//(3次元)
 
 //把持物体の大きさ
 //const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2 // xy平面上
-const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.2;//	3次元シミュ用
+const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.1;//	3次元シミュ用
 
 // const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 

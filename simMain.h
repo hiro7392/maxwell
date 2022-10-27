@@ -122,8 +122,8 @@ constexpr int	ARM_N2 = 1;	// アーム番号
 constexpr int	ARM_JNT = 2;	// アーム関節数
 constexpr int	ARM_M1 = 0;	// アーム関節番号
 constexpr int	ARM_M2 = 1;	// アーム関節番号
-constexpr double	ARM_LINK1_LEN = 0.75;		// リンク長
-constexpr double	ARM_LINK2_LEN = 0.75;		// リンク長
+constexpr double	ARM_LINK1_LEN = 0.65;		// リンク長 0.75
+constexpr double	ARM_LINK2_LEN = 0.55;		// リンク長
 
 constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// 質量中心
 constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// 質量中心
@@ -137,13 +137,8 @@ constexpr double	PLATE_Z_LEN = 0.5;
 constexpr double	SENKAI_LINK_LEN = 0.3;
 constexpr double	SENSOR_LEN = 0.01;	//センサの長さ等について設定
 
-//constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
-//constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
-constexpr double	ARM_LINK1_RAD = 0.06;		// リンク半径
-constexpr double	ARM_LINK2_RAD = 0.06;		// リンク半径
-
-//constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
-//constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
+constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
+constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
 constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
@@ -266,7 +261,7 @@ struct  Impedance {
 struct RotImpedance {
 	//double K = 2.0, C = 4.0, lg = 0.03;
 	//double K = 50.0, C = 4.0, lg = SENKAI_LINK_LEN / 2.0;	//3次元で重力に対して水平維持
-	double K =  55.0, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
+	double K =  50.0, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
 	// 把持物体の慣性モーメント
 	double Id = (PLATE_MASS / 3.0) * (PLATE_Y_LEN * PLATE_Y_LEN + PLATE_Z_LEN * PLATE_Z_LEN);
 	//double Id = (PLATE_MASS/PLATE_X_LEN) / PLATE_Y_LEN; //PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント

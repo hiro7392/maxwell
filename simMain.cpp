@@ -193,21 +193,26 @@ void DrawStuff::simLoop(int pause)
 
 		quat_ptr = dBodyGetQuaternion(plateToGrasp.body);
 		quat[0] = quat_ptr[0];
-		quat[1] = 0.0;
+		quat[1] = quat_ptr[1];;
 		quat[2] = 0.0;
 		quat[3] = 0.0;// quat_ptr[3];	//外力による回転を無視したいので0にする
 		
 		//現在の位置
 		const dReal* nowPos = dBodyGetPosition(plateToGrasp.body);
 		
-		static double beforeXpos; 
-		if(sim->step==0)beforeXpos=nowPos[0];
+		static double beforeXpos, beforeYpos, beforeZpos;
+		
+		if (sim->step == 0) {
+			beforeXpos = nowPos[0];
+			beforeYpos = nowPos[1];
+			beforeZpos = nowPos[2];
+ 		}
 		//	速度,角度
 		dBodySetQuaternion(plateToGrasp.body, quat);
-		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
-		dBodySetPosition(plateToGrasp.body, beforeXpos, nowPos[1], capZ);
+		dBodySetAngularVel(plateToGrasp.body, rot[0], 0, 0);
+		dBodySetPosition(plateToGrasp.body, beforeXpos, beforeYpos, capZ);
 		beforeXpos = nowPos[0];
-
+		beforeYpos = nowPos[1];
 		//	x座標を記録
 		//	plateの端に外力を加える
 		if(ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500) {
@@ -215,10 +220,12 @@ void DrawStuff::simLoop(int pause)
 			static int forceVal = 5;
 			int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
 			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
-			double distFromCenter = 0.0;
+			double distFromCenter = 0.3;
 			// distFromCenter = 0.2; duty=100,forceVal=30,1点のみについて力を加える
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
-			dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
+			//dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
+			dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, -5.0, nowPos[0], nowPos[1]-distFromCenter, nowPos[2]);
+
 			dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
 			//drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 		}
@@ -304,10 +311,10 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -2.0;	xyz[1] =-0.5;	xyz[2] = 3.0;
+	xyz[0] = -3.0;	xyz[1] =-0.5;	xyz[2] = 2.0;
 	//xyz[0] = -2.0;	xyz[1] = -0.5;	xyz[2] = 1.5;
 	//xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
-	hpr[0] = 180.0;	hpr[1] = -110.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
+	hpr[0] = 180.0;	hpr[1] = -150.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
 	dsSetSphereQuality(3);					// 球の品質設定
