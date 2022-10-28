@@ -178,6 +178,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	static double Integ=0.0;
 	Integ +=(mu_ave*SIM_CYCLE_TIME);
 	printf("Integ = %lf\n", Integ);
+
 	rotImp.h = senkai_base_vel;
 	double dphi =  senkai_base_jnt-senkai_base_jnt_init;
 

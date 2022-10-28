@@ -143,7 +143,7 @@ constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
 
-constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
+constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数	//XY平面上で実験字は　1.0
 constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
 constexpr double    OFFSET_VAL = -0.3;			//　実験では-0.3
 

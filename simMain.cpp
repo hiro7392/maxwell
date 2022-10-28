@@ -125,12 +125,17 @@ void DrawStuff::simLoop(int pause)
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt),radToAng(_this->senkai_base_vel));
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));
 
-		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
-		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
-#if finger2_use
-		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
-		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
-#endif
+		//_this->eff_pos[0]=
+//		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
+//		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
+//#if finger2_use
+//		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
+//		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
+//#endif
+		_this->setEffPos(); 
+		_this2->setEffPos();
+		printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
+		printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
 
 		//関節にかかるトルクを取得する
 		//_this->p_force = dJointGetFeedback(_this->f2_joint);	//参考: もともとのmaxwell制御
@@ -192,8 +197,8 @@ void DrawStuff::simLoop(int pause)
 		dReal quat[4], quat_len;
 
 		quat_ptr = dBodyGetQuaternion(plateToGrasp.body);
-		quat[0] = quat_ptr[0];
-		quat[1] = quat_ptr[1];;
+		quat[0] = PI/2.0;
+		quat[1] = quat_ptr[1];
 		quat[2] = 0.0;
 		quat[3] = 0.0;// quat_ptr[3];	//外力による回転を無視したいので0にする
 		
@@ -216,18 +221,21 @@ void DrawStuff::simLoop(int pause)
 		//	x座標を記録
 		//	plateの端に外力を加える
 		if(ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500) {
-			static int duty = 30000;	//外力の向きの周期
-			static int forceVal = 5;
-			int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
-			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
 			double distFromCenter = 0.3;
-			// distFromCenter = 0.2; duty=100,forceVal=30,1点のみについて力を加える
-			//外力ベクトル(x,y,z),加える位置(x,y,z)
-			//dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
-			dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, -5.0, nowPos[0], nowPos[1]-distFromCenter, nowPos[2]);
+			//static int duty = 30000;	//外力の向きの周期
+			//static int forceVal = 5;
+			//int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
+			//int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
+			//
+			//// distFromCenter = 0.2; duty=100,forceVal=30,1点のみについて力を加える
+			////外力ベクトル(x,y,z),加える位置(x,y,z)
+			////dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
 
-			dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
-			//drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
+			//dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
+			////drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
+			// 回転運動用
+			dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, -5.0, nowPos[0], nowPos[1] - distFromCenter, nowPos[2]);
+
 		}
 #endif
 		// 過去データとして代入
@@ -311,10 +319,13 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	xyz[0] = -3.0;	xyz[1] =-0.5;	xyz[2] = 2.0;
+	//xyz[0] = -3.0;	xyz[1] =-0.5;	xyz[2] = 2.0;	//正面から見るとき
+	xyz[0] = -0.5;	xyz[1] = 2.0;	xyz[2] = 1.5;	//ハンドを側面から見るとき
+
 	//xyz[0] = -2.0;	xyz[1] = -0.5;	xyz[2] = 1.5;
 	//xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
-	hpr[0] = 180.0;	hpr[1] = -150.0;	hpr[2] = 180;	// +zからの視点(右が+x,上が+y)
+	//hpr[0] = 180.0;	hpr[1] = -150.0;	hpr[2] = 180;	//	正面から見るとき			+zからの視点(右が+x,上が+y)
+	hpr[0] = 90.0;	hpr[1] = -180.0;	hpr[2] = 180;	//	側面から見るとき	
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
 	dsSetSphereQuality(3);					// 球の品質設定

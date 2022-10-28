@@ -160,6 +160,10 @@ void cFinger::setJoint2() {
 	dMassSetZero(&massPlate);
 	dMassSetBoxTotal(&massPlate, newMass, plateX, plateY, plateZ);
 	dBodySetPosition(plateToGrasp.body, capX, capY, capZ);	//位置 //x=-1.1
+	//	把持物体を立てるとき
+	dMatrix3	R;
+	dRFromAxisAndAngle(R, -sin(PI/2.0), cos(PI/2.0), 0, 0.0);
+	dBodySetRotation(plateToGrasp.body, R);//Bodyに回転行列Rを設定する
 	//ジオメトリの生成
 	auto geomBodyPlate = dCreateBox(EntityManager::get()->getSpace(), plateX, plateY, plateZ);
 	//	動力学Bodyと衝突計算ジオメトリの対応

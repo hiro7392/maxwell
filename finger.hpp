@@ -118,8 +118,11 @@ void cFinger::control() {
 	// インピーダンス設定
 	// 制御指令計算
 #if SIM_CTRL_MODE_MAXWELL & SIM_ADD_EXT_FORCE
-	double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };
+	//double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };		//xy平面上でシミュレーションする際
+	double	impM[] = { 2.0, 2.0 }, impC[] = { 20.0, 20.0 }, impK[] = { 300.0, 300.0 }, impK0[] = { 10.0, 10.0 };		//3次元でシミュレーションする際
 
+	//	重力方向の力を受ける際はkを大きくする
+	//for (int i = 0; i < 2; i++)impK[i] *= (1.0 + (senkai_base_jnt / (PI)));
 	matSetValDiag(&imp.M, impM); matSetValDiag(&imp.C, impC); matSetValDiag(&imp.K, impK); matSetValDiag(&imp.K0, impK0);	// ゲイン設定
 
 	//K_pなどの逆行列の計算

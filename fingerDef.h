@@ -20,8 +20,8 @@ public:
 	//旋回関節の土台部分
 	dReal senkai_base_x0 = 0.5, senkai_base_y0 = -0.3, senkai_base_z0 = z_base_pos;		//	旋回関節の土台
 	dReal senkai_base_x1 = 0.5, senkai_base_y1 = -0.9, senkai_base_z1 = z_base_pos;		//	旋回関節の土台
-	double senkai_init_jnt = PI/2.0;	///水平になる位置は0.0
-	double senkai_init_jnt2 = -PI/2.0;	//指2は反対の姿勢をとる
+	double senkai_init_jnt = PI / 2.0;	///水平になる位置は0.0
+	double senkai_init_jnt2 = -PI / 2.0;	//指2は反対の姿勢をとる
 
 	//指先のカプセル
 	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
@@ -34,7 +34,7 @@ public:
 	cPartsCylinder	sensor{ SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS, SENSOR_LEN, ARM_LINK2_RAD };	// アームと密度をそろえる
 
 	// 旋回関節の土台部分
-	cPartsBox	senkai_base{ 14.0, Vec3(0.22, 0.22, 0.22) };
+	cPartsBox	senkai_base{ 1.0, Vec3(0.22, 0.22, 0.22) };
 	cPartsCylinder	senkai_link{ ARM_LINK2_MASS / 2.0, SENKAI_LINK_LEN, ARM_LINK2_RAD / 2.0 };
 
 	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
@@ -177,6 +177,13 @@ public:
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
 
+	// エンドエフェクタの位置を計算
+	void setEffPos() {
+		//	x座標
+		eff_pos[0] = (fingerID==1?senkai_base_x0:senkai_base_x1)+ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+		eff_pos[1] = (fingerID == 1 ? senkai_base_y0 : senkai_base_y1)+ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+		eff_pos[2] = senkai_base_z0;
+	}
 	//指１の初期位置と初期姿勢	指1と指2で共通
 	void setPosition(double senkai_base_x0, double senkai_base_y0, double senkai_base_z0) {
 		//	リンク1の土台
