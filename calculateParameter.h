@@ -102,6 +102,7 @@ int cFinger::setMassCenterPosition(Matrix& mat,double mx, double my, double mz) 
 }
 int cFinger::calculateGravity() {
 
-	
+	imp.G_xyz.el[0][2] = 9.8;
+	MatPrintDebug4x1(imp.G_xyz, "G_xyz");
 	return 0;
 }
