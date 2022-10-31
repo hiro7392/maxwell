@@ -1,7 +1,7 @@
 #include "simMain.h"
 #include "setRobot.h"
 #include "setEnv.h"
-
+#include"calculateParameter.h"
 // シミュレーション変数
 //extern	SIM sim;
 
@@ -239,6 +239,10 @@ int cFinger::armDynPara()
 	// 
 	// 旋回関節の動的パラメータ
 	const dReal* senkai_base_pos = dBodyGetPosition(this->senkai_base.getBody());
+
+	//	旋回リンクの重心位置
+	const dReal* senkai_link_pos = dBodyGetPosition(this->senkai_link.getBody());
+
 	//	リンク1の重心位置
 	const dReal* link1_pos = dBodyGetPosition(this->link1.getBody());
 	//	リンク2の重心位置
@@ -269,14 +273,22 @@ int cFinger::armDynPara()
 	this->rotImp.Iq = senkai_link_Ix + base_Ix + link1_Ix + link2_Ix + capsule_Ix + sensor_Ix;
 	printf("rotImp.Iq =%lf\n ",this->rotImp.Iq);
 
+	//	同次行列の計算
+	setTransMatrix();
+
+	//	各リンクの質量中心を設定
+	setMassCenterPosition(imp.s1, link1_pos[0], link1_pos[1], link1_pos[2]);
+	setMassCenterPosition(imp.s2, link2_pos[0], link2_pos[1], link2_pos[2]);
+	setMassCenterPosition(imp.ss, senkai_link_pos[0], senkai_link_pos[1], senkai_link_pos[2]);
+
+	//	各関節について重力項を計算
+	calculateGravity();
+
 	return	0;
 }
 
-int cFinger::setGravityAndHMatrix() {
-	//	同次行列の計算
-	
-	return 0;
-}
+
+
 //
 int cFinger::senkaiDynPara()
 {

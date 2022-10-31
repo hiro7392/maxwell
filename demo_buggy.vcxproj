@@ -760,6 +760,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BMP.h" />
+    <ClInclude Include="calculateParameter.h" />
     <ClInclude Include="command.h" />
     <ClInclude Include="ctrlRobot.h" />
     <ClInclude Include="filter.h" />

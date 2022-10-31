@@ -126,13 +126,16 @@ public:
 	int armWithoutInertiaShaping();
 	int ctrlPreProcessing();
 	int armDynPara();
-	int setGravityAndHMatrix();
-	int senkaiDynPara();			//	旋回関節のパラメータ
+
 	int armInvKine(Kinematics* kine, Variable* var);
 	int armJacob(Kinematics* kine, Variable* var);
 	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
 
-
+	//	川原が作成	3次元のシミュレーション用
+	int setTransMatrix();
+	int setMassCenterPosition(Matrix& mat, double mx, double my, double mz);
+	int senkaiDynPara();			//	旋回関節のパラメータ
+	int calculateGravity();			//	重力項を計算
 	//kawaharaの変更以前からコメントアウト
 	////	int armInitMatVar(Variable *var);
 	////	int armInitMatKine(Kinematics *kine);
