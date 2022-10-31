@@ -7,7 +7,7 @@
 // 描画設定
 // main関数
 ////////////////////////////////////////////////////////
-
+bool addForce = false;
 int main(int argc, char *argv[])
 {
 	filterTest();
@@ -126,12 +126,16 @@ void DrawStuff::simLoop(int pause)
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));
 
 		//_this->eff_pos[0]=
-//		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
-//		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
+		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
+		dBodyGetRelPointVel(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_vel);			// 手先速度
 //#if finger2_use
-//		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
-//		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
+		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
+		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
 //#endif
+		printf("fingerID =%d endEffector world x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
+		printf("fingerID =%d endEffector world x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
+
+		//関
 		_this->setEffPos(); 
 		_this2->setEffPos();
 		printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
@@ -197,7 +201,7 @@ void DrawStuff::simLoop(int pause)
 		dReal quat[4], quat_len;
 
 		quat_ptr = dBodyGetQuaternion(plateToGrasp.body);
-		quat[0] = PI/2.0;
+		quat[0] = quat_ptr[0];
 		quat[1] = quat_ptr[1];
 		quat[2] = 0.0;
 		quat[3] = 0.0;// quat_ptr[3];	//外力による回転を無視したいので0にする
@@ -215,12 +219,12 @@ void DrawStuff::simLoop(int pause)
 		//	速度,角度
 		dBodySetQuaternion(plateToGrasp.body, quat);
 		dBodySetAngularVel(plateToGrasp.body, rot[0], 0, 0);
-		dBodySetPosition(plateToGrasp.body, beforeXpos, beforeYpos, capZ);
+		dBodySetPosition(plateToGrasp.body, beforeXpos, beforeYpos, nowPos[2]);
 		beforeXpos = nowPos[0];
 		beforeYpos = nowPos[1];
 		//	x座標を記録
 		//	plateの端に外力を加える
-		if(ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500) {
+		if(addForce/*ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500*/) {
 			double distFromCenter = 0.3;
 			//static int duty = 30000;	//外力の向きの周期
 			//static int forceVal = 5;
@@ -319,13 +323,13 @@ void DrawStuff::start() {
 	xyz[0] = 2.5;	xyz[1] = 0.2;	xyz[2] = 0.5;
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
-	//xyz[0] = -3.0;	xyz[1] =-0.5;	xyz[2] = 2.0;	//正面から見るとき
-	xyz[0] = -0.5;	xyz[1] = 2.0;	xyz[2] = 1.5;	//ハンドを側面から見るとき
+	//	xyz[0] = -3.0;	xyz[1] =-0.5;	xyz[2] = 1.5;	//正面から見るとき
+		xyz[0] = -0.5;	xyz[1] = 2.0;	xyz[2] = 1.5;	//ハンドを側面から見るとき
 
-	//xyz[0] = -2.0;	xyz[1] = -0.5;	xyz[2] = 1.5;
-	//xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
-	//hpr[0] = 180.0;	hpr[1] = -150.0;	hpr[2] = 180;	//	正面から見るとき			+zからの視点(右が+x,上が+y)
-	hpr[0] = 90.0;	hpr[1] = -180.0;	hpr[2] = 180;	//	側面から見るとき	
+	//	xyz[0] = -2.0;	xyz[1] = -0.5;	xyz[2] = 1.5;
+	//	xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
+	//	hpr[0] = 180.0;	hpr[1] = -150.0;	hpr[2] = 180;	//	正面から見るとき			+zからの視点(右が+x,上が+y)
+		hpr[0] = 90.0;	hpr[1] = -180.0;	hpr[2] = 180;	//	側面から見るとき	
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
 	dsSetSphereQuality(3);					// 球の品質設定
@@ -347,6 +351,7 @@ void DrawStuff::command(int cmd) {
 	case 'Y': xyz[1] -= 0.1; dsSetViewpoint(xyz, hpr);	break;		// -y方向
 	case 'z': xyz[2] += 0.1; dsSetViewpoint(xyz, hpr);	break;		// z方向
 	case 'Z': xyz[2] -= 0.1; dsSetViewpoint(xyz, hpr);	break;		// -z方向
+	case 'f': addForce = true; break;
 //			case 'u':	dBodyAddForce(_this->getObj()->getBody(), 500.0, 0.0, 0.0);	break;
 	case 'u':	_this->setAddForceObj(500.0, 0.0, 0.0);	break;
 	case 'r':	restart();	break;

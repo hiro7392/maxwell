@@ -6,7 +6,6 @@
 ////////////////////////////////////////////////////////
 int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 {
-
 	int	jnt, crd;
 
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2);
@@ -159,6 +158,8 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 //ù‰ñŠÖß‚É‚Â‚¢‚Ä§–ñ•t‚«maxwell§Œä
 int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 {
+	//	ŠÖß‚Ì”S«–€C‚ğ’Ç‰Á
+	senkaiDynPara();
 	auto entity = EntityManager::get();
 	static double allMass = 0.0;
 	static double allVolume = 0.0;

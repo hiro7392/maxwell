@@ -233,6 +233,8 @@ int cFinger::armDynPara()
 	matTrans(&this->kine.Jt, &this->kine.J);		// J^{T}
 	matInv(&this->kine.Jinv, NULL, &this->kine.J);		// J^{-1}（正則の場合のみ対応）
 	
+	//　重力項の計算
+	//  計算した重力項をhに足し合わせる
 	// 旋回関節の動的パラメータ
 	const dReal* senkai_base_pos = dBodyGetPosition(this->senkai_base.getBody());
 
@@ -270,7 +272,9 @@ int cFinger::armDynPara()
 //
 int cFinger::senkaiDynPara()
 {
-		// 
+	// 関節粘性摩擦力をhに追加
+	//for (jnt = 0; jnt < ARM_JNT; jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];
+	rotImp.h += senkai_base_vel * rotImp.V;
 	return 0;
 }
 

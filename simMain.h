@@ -128,7 +128,7 @@ constexpr double	ARM_LINK2_LEN = 0.55;		// リンク長
 constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// 質量中心
 constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// 質量中心
 
-constexpr double	PLATE_MASS = 10.0;
+constexpr double	PLATE_MASS = 8.0;
 constexpr double	PLATE_X_LEN = 1.5;
 constexpr double	PLATE_Y_LEN = 0.5;
 constexpr double	PLATE_Z_LEN = 0.5;
@@ -143,8 +143,8 @@ constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
 
-constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数	//XY平面上で実験字は　1.0
-constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
+constexpr double	ARM_JNT1_VISCOUS = 2.0;		// 粘性係数	//XY平面上で実験字は　1.0
+constexpr double	ARM_JNT2_VISCOUS = 2.0;		// 粘性係数
 constexpr double    OFFSET_VAL = -0.3;			//　実験では-0.3
 
 std::string forceOutfilename1 = "./data/force_finger1.csv";
@@ -248,7 +248,7 @@ struct  Impedance {
 	// 補足変数
 	Matrix	dM, dC, dK;	// 目標インピーダンス微分（手先座標）
 	Matrix	Minv, Cinv, Kinv;	// 逆行列
-
+	Matrix  G;			//重力項　川原が追加
 	Impedance() {
 		matInit(&M, DIM2, DIM2); matInit(&C, DIM2, DIM2); matInit(&K, DIM2, DIM2);
 		matInit(&Minv, DIM2, DIM2); matInit(&Cinv, DIM2, DIM2); matInit(&Kinv, DIM2, DIM2);
@@ -272,8 +272,11 @@ struct RotImpedance {
 	double Ja = 1.0;	// omega = Ja*dq なのでこの場合は1.0
 	//	慣性H
 	double h = 10.0;		//適当なので後で変更する
+	//	重力項
+	double g_senkai;
+
 	
-	
+	double V= ARM_JNT1_VISCOUS;	// 粘性摩擦係数
 };
 
 ////////////////////////////////////////////////////////
