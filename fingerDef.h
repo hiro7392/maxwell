@@ -126,6 +126,7 @@ public:
 	int armWithoutInertiaShaping();
 	int ctrlPreProcessing();
 	int armDynPara();
+	int setGravityAndHMatrix();
 	int senkaiDynPara();			//	旋回関節のパラメータ
 	int armInvKine(Kinematics* kine, Variable* var);
 	int armJacob(Kinematics* kine, Variable* var);
@@ -183,6 +184,7 @@ public:
 		eff_pos[0] = (fingerID==1?senkai_base_x0:senkai_base_x1)+ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		eff_pos[1] = (fingerID == 1 ? senkai_base_y0 : senkai_base_y1)+ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		eff_pos[2] = senkai_base_z0;
+		return;
 	}
 	//指１の初期位置と初期姿勢	指1と指2で共通
 	void setPosition(double senkai_base_x0, double senkai_base_y0, double senkai_base_z0) {

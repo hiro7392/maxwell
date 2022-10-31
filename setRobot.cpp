@@ -219,6 +219,7 @@ int cFinger::armDynPara()
 	this->dyn.h.el[1][0] = m2*l1*lg2*S2*this->var.dq.el[0][0]*this->var.dq.el[0][0];
 	// 関節粘性摩擦力をhに追加
 	for(jnt=0;jnt<ARM_JNT;jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];
+	rotImp.h += senkai_base_vel * rotImp.V;
 	// ヤコビアン
 	this->kine.J.el[0][0] = -(l1*S1+l2*S12);	this->kine.J.el[0][1] = -l2*S12;
 	this->kine.J.el[1][0] = l1*C1+l2*C12;	this->kine.J.el[1][1] = l2*C12;
@@ -235,27 +236,28 @@ int cFinger::armDynPara()
 	
 	//　重力項の計算
 	//  計算した重力項をhに足し合わせる
+	// 
 	// 旋回関節の動的パラメータ
 	const dReal* senkai_base_pos = dBodyGetPosition(this->senkai_base.getBody());
-
 	//	リンク1の重心位置
 	const dReal* link1_pos = dBodyGetPosition(this->link1.getBody());
-
 	//	リンク2の重心位置
 	const dReal* link2_pos = dBodyGetPosition(this->link2.getBody());
-
 	//	カプセルの重心位置
 	const dReal* capsule_pos = dBodyGetPosition(this->fingerTopCapsule.getBody());
-
 	//	センサの重心位置
 	const dReal* sensor_pos = dBodyGetPosition(this->sensor.getBody());
 
+	//	旋回関節角に関する慣性モーメント求める
+
+	//	旋回関節角からの距離を計算する
 	static double link1_dist, link2_dist,capsule_dist,sensor_dist;
 	link1_dist =	getDistPlain(senkai_base_pos[0], link1_pos[0], senkai_base_pos[1], link1_pos[1]);
 	link2_dist =	getDistPlain(senkai_base_pos[0], link2_pos[0], senkai_base_pos[1], link2_pos[1]);
 	capsule_dist =	getDistPlain(senkai_base_pos[0], capsule_pos[0], senkai_base_pos[1], capsule_pos[1]);
 	sensor_dist =	getDistPlain(senkai_base_pos[0], sensor_pos[0], senkai_base_pos[1], sensor_pos[1]);
 
+	// 各リンクの接点からの距離×質量
 	static double senkai_link_Ix,base_Ix,link1_Ix, link2_Ix, capsule_Ix, sensor_Ix;
 	senkai_link_Ix	= senkai_link.getMass() * SENKAI_LINK_LEN / 2.0;
 	base_Ix		=	base.getMass() * SENKAI_LINK_LEN;
@@ -266,15 +268,21 @@ int cFinger::armDynPara()
 	//	各関節について　(zy平面における距離r^2)*質量m を足し合わせる
 	this->rotImp.Iq = senkai_link_Ix + base_Ix + link1_Ix + link2_Ix + capsule_Ix + sensor_Ix;
 	printf("rotImp.Iq =%lf\n ",this->rotImp.Iq);
+
 	return	0;
 }
 
+int cFinger::setGravityAndHMatrix() {
+	//	同次行列の計算
+	
+	return 0;
+}
 //
 int cFinger::senkaiDynPara()
 {
 	// 関節粘性摩擦力をhに追加
 	//for (jnt = 0; jnt < ARM_JNT; jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];
-	rotImp.h += senkai_base_vel * rotImp.V;
+	
 	return 0;
 }
 

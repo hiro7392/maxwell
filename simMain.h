@@ -248,13 +248,17 @@ struct  Impedance {
 	// 補足変数
 	Matrix	dM, dC, dK;	// 目標インピーダンス微分（手先座標）
 	Matrix	Minv, Cinv, Kinv;	// 逆行列
-	Matrix  G;			//重力項　川原が追加
+	Matrix  G;				//重力項　川原が追加
+	Matrix  Ts, sT1, T12;	//	同時行列(4×4)	川原が追加
 	Impedance() {
 		matInit(&M, DIM2, DIM2); matInit(&C, DIM2, DIM2); matInit(&K, DIM2, DIM2);
 		matInit(&Minv, DIM2, DIM2); matInit(&Cinv, DIM2, DIM2); matInit(&Kinv, DIM2, DIM2);
 		matInit(&Gp, DIM2, DIM2); matInit(&Gv, DIM2, DIM2);
 		matInit(&dM, DIM2, DIM2); matInit(&dC, DIM2, DIM2); matInit(&dK, DIM2, DIM2);
 		matInit(&K0, DIM2, DIM2);
+		//	重力項の計算用
+		matInit(&Ts, 4, 4); matInit(&sT1, 4, 4); matInit(&T12, 4, 4);
+		matInit(&G, 1,3);
 	}
 };
 
