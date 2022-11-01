@@ -136,6 +136,7 @@ public:
 	int setMassCenterPosition(Matrix& mat, double mx, double my, double mz);
 	int senkaiDynPara();			//	旋回関節のパラメータ
 	int calculateGravity();			//	重力項を計算
+	int setTransMatrixDq();			//	同次行列の関節角による微分を計算
 	//kawaharaの変更以前からコメントアウト
 	////	int armInitMatVar(Variable *var);
 	////	int armInitMatKine(Kinematics *kine);
