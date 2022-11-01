@@ -274,7 +274,7 @@ int cFinger::armDynPara()
 	printf("rotImp.Iq =%lf\n ",this->rotImp.Iq);
 
 	//	同次行列の計算
-	setTransMatrix();
+	//setTransMatrix();
 
 	//	各リンクの質量中心を設定
 	setMassCenterPosition(imp.s1, link1_pos[0], link1_pos[1], link1_pos[2]);

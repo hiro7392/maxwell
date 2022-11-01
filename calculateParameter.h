@@ -10,9 +10,39 @@ void MatPrintDebug4x4(Matrix& mat, std::string name) {
 	return;
 }
 void MatPrintDebug4x1(Matrix& mat, std::string name) {
-	printf("%s = \n", &name);
+	printf("%s = \n", name);
 	for (int col = 0; col < 4; col++) {
 		for (int row = 0; row < 1; row++) {
+			printf("%lf ", mat.el[row][col]);
+		}
+		printf("\n");
+	}
+	return;
+}
+void MatPrintDebug1x4(Matrix& mat, std::string name) {
+	printf("%s = \n", name);
+	for (int col = 0; col < 1; col++) {
+		for (int row = 0; row < 4; row++) {
+			printf("%lf ", mat.el[row][col]);
+		}
+		printf("\n");
+	}
+	return;
+}
+void MatPrintDebug3x1(Matrix& mat, std::string name) {
+	std::cout << name << " = " << std::endl;
+	for (int col = 0; col < 3; col++) {
+		for (int row = 0; row < 1; row++) {
+			printf("%.5lf ", mat.el[row][col]);
+		}
+		printf("\n");
+	}
+	return;
+}
+void MatPrintDebugAll(Matrix& mat, std::string name,int Col,int Row) {
+	printf("%s = \n", &name);
+	for (int col = 0; col < Col; col++) {
+		for (int row = 0; row < Row; row++) {
 			printf("%lf ", mat.el[row][col]);
 		}
 		printf("\n");
@@ -95,18 +125,40 @@ int cFinger::setMassCenterPosition(Matrix& mat,double mx, double my, double mz) 
 	mat.el[0][2] = mz;
 	mat.el[0][3] = 0.0;
 #if 1 //デバッグ用
-	MatPrintDebug4x1(mat, "MassCenter=");
+	//MatPrintDebug4x1(mat, "MassCenter=");
 	
 #endif
 	return 0;
 }
 int cFinger::calculateGravity() {
 
-	imp.G_xyz.el[0][2] = 9.8;
-	MatPrintDebug4x1(imp.G_xyz, "G_xyz");
+	imp.G_xyz.el[2][0] = 9.8;
+	//MatPrintDebug4x1(imp.G_xyz, "G_xyz");
+	setTransMatrixDq();
+	//	重力項を求める
+	Matrix tmp;
+	matInit(&tmp, 1, 1);
+	//	旋回関節について
+	matMul3(&tmp, &imp.G_xyz, &imp.dqs_oTs, &imp.ss);
+	imp.G.el[0][0] += SENKAI_LINK_LEN * tmp.el[0][0];
+	matMul3(&tmp, &imp.G_xyz, &imp.dqs_oT1, &imp.s1);
+	imp.G.el[0][0] += ARM_LINK1_MASS * tmp.el[0][0];
+	matMul3(&tmp, &imp.G_xyz, &imp.dqs_oT2, &imp.s2);
+	imp.G.el[0][0] += ARM_LINK2_MASS * tmp.el[0][0];
+	
+	//	関節1について
+	matMul3(&tmp, &imp.G_xyz, &imp.dq1_oT1, &imp.s1);
+	imp.G.el[0][1] += ARM_LINK1_MASS * tmp.el[0][0];
+	matMul3(&tmp, &imp.G_xyz, &imp.dq1_oT2, &imp.s2);
+	imp.G.el[0][1] += ARM_LINK2_MASS * tmp.el[0][0];
 
-	//	同次行列の計算
+	//	関節２について
+	matMul3(&tmp, &imp.G_xyz, &imp.dq2_oT2, &imp.s2);
+	imp.G.el[0][2] += ARM_LINK2_MASS * tmp.el[0][0];
 
+	MatPrintDebug3x1(imp.G, "G");
+
+	matFree(&tmp);
 
 	return 0;
 }

@@ -266,6 +266,7 @@ struct  Impedance {
 		matInit(&dM, DIM2, DIM2); matInit(&dC, DIM2, DIM2); matInit(&dK, DIM2, DIM2);
 		matInit(&K0, DIM2, DIM2);
 		//	重力項の計算用
+		// matInit(row,col)//el[_row][_col] 
 		matInit(&oTs, 4, 4); matInit(&sT1, 4, 4); matInit(&T12, 4, 4);
 		matInit(&G, 1,3); matInit(&G_xyz, 4, 1);
 		matInit(&ss, 1, 4); matInit(&s1, 1, 4); matInit(&s2, 1, 4);
