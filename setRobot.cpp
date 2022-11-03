@@ -281,8 +281,15 @@ int cFinger::armDynPara()
 	setMassCenterPosition(imp.s2, link2_pos[0], link2_pos[1], link2_pos[2]);
 	setMassCenterPosition(imp.ss, senkai_link_pos[0], senkai_link_pos[1], senkai_link_pos[2]);
 
+	//MatPrintDebug4x1(imp.s1, "s1");
+	//MatPrintDebug4x1(imp.s2, "s2");
+	//MatPrintDebug4x1(imp.ss, "ss");
+
 	//	各関節について重力項を計算
 	calculateGravity();
+	//	重力項をhに足す
+	dyn.h.el[0][0]+= imp.G.el[0][1];
+	dyn.h.el[1][0] += imp.G.el[0][2];
 
 	return	0;
 }

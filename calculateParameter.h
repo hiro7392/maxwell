@@ -1,6 +1,7 @@
 #pragma once
 void MatPrintDebug4x4(Matrix& mat, std::string name) {
-	printf("%s = \n", &name);
+	std::cout << name << "= " << std::endl;
+
 	for (int col = 0; col < 4; col++) {
 		for (int row = 0; row < 4; row++) {
 			printf("%lf ", mat.el[row][col]);
@@ -10,7 +11,7 @@ void MatPrintDebug4x4(Matrix& mat, std::string name) {
 	return;
 }
 void MatPrintDebug4x1(Matrix& mat, std::string name) {
-	printf("%s = \n", name);
+	std::cout << name << "= " << std::endl;
 	for (int col = 0; col < 4; col++) {
 		for (int row = 0; row < 1; row++) {
 			printf("%lf ", mat.el[row][col]);
@@ -20,7 +21,8 @@ void MatPrintDebug4x1(Matrix& mat, std::string name) {
 	return;
 }
 void MatPrintDebug1x4(Matrix& mat, std::string name) {
-	printf("%s = \n", name);
+	std::cout << name << "= " << std::endl;
+
 	for (int col = 0; col < 1; col++) {
 		for (int row = 0; row < 4; row++) {
 			printf("%lf ", mat.el[row][col]);
@@ -40,7 +42,7 @@ void MatPrintDebug3x1(Matrix& mat, std::string name) {
 	return;
 }
 void MatPrintDebugAll(Matrix& mat, std::string name,int Col,int Row) {
-	printf("%s = \n", &name);
+	std::cout << name << " = " << std::endl;
 	for (int col = 0; col < Col; col++) {
 		for (int row = 0; row < Row; row++) {
 			printf("%lf ", mat.el[row][col]);
@@ -132,30 +134,54 @@ int cFinger::setMassCenterPosition(Matrix& mat,double mx, double my, double mz) 
 }
 int cFinger::calculateGravity() {
 
-	imp.G_xyz.el[2][0] = 9.8;
+	imp.G_xyz.el[2][0] = -9.8;
 	//MatPrintDebug4x1(imp.G_xyz, "G_xyz");
+
 	setTransMatrixDq();
+	for (int i = 0; i < 3; i++)imp.G.el[0][i] = 0.0;
 	//	重力項を求める
-	Matrix tmp;
-	matInit(&tmp, 1, 1);
+	Matrix tmp,tmp2;
+	matInit(&tmp, 1, 4); matInit(&tmp2, 1, 1);
 	//	旋回関節について
-	matMul3(&tmp, &imp.G_xyz, &imp.dqs_oTs, &imp.ss);
-	imp.G.el[0][0] += SENKAI_LINK_LEN * tmp.el[0][0];
-	matMul3(&tmp, &imp.G_xyz, &imp.dqs_oT1, &imp.s1);
-	imp.G.el[0][0] += ARM_LINK1_MASS * tmp.el[0][0];
-	matMul3(&tmp, &imp.G_xyz, &imp.dqs_oT2, &imp.s2);
-	imp.G.el[0][0] += ARM_LINK2_MASS * tmp.el[0][0];
+	matMul(&tmp, &imp.ss, &imp.dqs_oTs);
+	//	MatPrintDebug4x4(imp.dqs_oTs, "oTs");
+	//	MatPrintDebug4x1(imp.ss, "ss");
+	//	MatPrintDebug4x1(tmp, "tmp");
+	//	MatPrintDebugAll(imp.G_xyz, "G_xyz",1,4);
+	matMul(&tmp2, &tmp, &imp.G_xyz);
+	//	MatPrintDebugAll(tmp2, "tmp2",1,1);
+	imp.G.el[0][0] += (ARM_LINK2_MASS / 2.0) * tmp2.el[0][0];
+	//	printf("G[0][0] = %lf\n", imp.G.el[0][0]);
+
+	matMul(&tmp,  &imp.s1, &imp.dqs_oT1);
+	matMul(&tmp2, &tmp ,&imp.G_xyz);
+	//	MatPrintDebugAll(imp.G_xyz, "G_xyz", 1, 4);
+	//	MatPrintDebugAll(tmp2, "tmp2", 1, 1);
+	imp.G.el[0][0] += ARM_LINK1_MASS * tmp2.el[0][0];
+	//	printf("G[0][0] = %lf\n", imp.G.el[0][0]);
+
+	matMul(&tmp, &imp.s2 ,&imp.dqs_oT2);
+	matMul(&tmp2, &tmp, &imp.G_xyz);
+	//	MatPrintDebugAll(imp.G_xyz, "G_xyz", 1, 4);
+	//	MatPrintDebugAll(tmp2, "tmp2", 1, 1);
+	imp.G.el[0][0] += ARM_LINK2_MASS * tmp2.el[0][0];
+	//	printf("G[0][0] = %lf\n", imp.G.el[0][0]);
 	
+
 	//	関節1について
-	matMul3(&tmp, &imp.G_xyz, &imp.dq1_oT1, &imp.s1);
-	imp.G.el[0][1] += ARM_LINK1_MASS * tmp.el[0][0];
-	matMul3(&tmp, &imp.G_xyz, &imp.dq1_oT2, &imp.s2);
-	imp.G.el[0][1] += ARM_LINK2_MASS * tmp.el[0][0];
+	matMul(&tmp, &imp.s1, &imp.dq1_oT1);
+	matMul(&tmp2, &tmp ,&imp.G_xyz);
+	imp.G.el[0][1] += ARM_LINK1_MASS * tmp2.el[0][0];
 
+	matMul(&tmp, &imp.s2 ,&imp.dq1_oT2);
+	matMul(&tmp2, &tmp ,&imp.G_xyz);
+	imp.G.el[0][1] += ARM_LINK2_MASS * tmp2.el[0][0];
+	//printf("G[0][1] = %lf\n", imp.G.el[0][1]);
 	//	関節２について
-	matMul3(&tmp, &imp.G_xyz, &imp.dq2_oT2, &imp.s2);
-	imp.G.el[0][2] += ARM_LINK2_MASS * tmp.el[0][0];
-
+	matMul(&tmp, &imp.s2 ,&imp.dq2_oT2);
+	matMul(&tmp2, &tmp ,&imp.G_xyz);
+	imp.G.el[0][2] += ARM_LINK2_MASS * tmp2.el[0][0];
+	//printf("G[0][2] = %lf\n", imp.G.el[0][2]);
 	MatPrintDebug3x1(imp.G, "G");
 
 	matFree(&tmp);
@@ -277,12 +303,15 @@ int cFinger::setTransMatrixDq() {
 	imp.dq2_oT2.el[2][2] = 0.0;
 	imp.dq2_oT2.el[3][2] = 2.0 * ARM_LINK2_LEN * sin(senkai_base_jnt) * cos(2 * jnt_pos[0] + jnt_pos[1]);
 
-
 	//	旋回根元からの変換行列を計算
 	matMul(&imp.oT1, &imp.oTs, &imp.sT1);	//原点からリンク1の同次変換
 	matMul(&imp.oT2, &imp.oT1, &imp.T12);	//原点からリンク2の同次変換
-	//	MatPrintDebug4x4(imp.oT1, "oT1");
-	//	MatPrintDebug4x4(imp.oT2, "oT2");
+	//MatPrintDebug4x4(imp.dq1_oT1, "dq1_oT1");
+	//MatPrintDebug4x4(imp.dq1_oT2, "dq1_oT2");
+	//MatPrintDebug4x4(imp.dq2_oT1, "dq2_oT1");
+	//MatPrintDebug4x4(imp.dq2_oT2, "dq2_oT2");
+	//MatPrintDebug4x4(imp.dqs_oTs, "dqs_oTs");
+	
 
 
 	return 0;

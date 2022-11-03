@@ -143,6 +143,8 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}ÅÁFdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
+	tau->el[0][0] += imp.G.el[0][1];
+	tau->el[0][0] += imp.G.el[0][2];
 
 	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
 	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, &imp.M.el[0][0]);
@@ -192,7 +194,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	tauIN = Er * mu_ave - rotImp.Ja * (fingerID == 1 ? mu1 : mu2);
 	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (dphi));
 	printf("tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC, tauPL, tauIN, tauVE);
-	*tau = tauNC + tauPL + tauIN + tauVE;
+	*tau = tauNC + tauPL + tauIN + tauVE+imp.G.el[0][0];//èdóÕçÄÇë´Ç∑
 	
 	return 0;
 }
