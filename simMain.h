@@ -122,13 +122,13 @@ constexpr int	ARM_N2 = 1;	// アーム番号
 constexpr int	ARM_JNT = 2;	// アーム関節数
 constexpr int	ARM_M1 = 0;	// アーム関節番号
 constexpr int	ARM_M2 = 1;	// アーム関節番号
-constexpr double	ARM_LINK1_LEN = 0.75;		// リンク長
-constexpr double	ARM_LINK2_LEN = 0.75;		// リンク長
+constexpr double	ARM_LINK1_LEN = 0.65;		// リンク長 0.75
+constexpr double	ARM_LINK2_LEN = 0.55;		// リンク長
 
 constexpr double	ARM_LINK1_COG_LEN = ARM_LINK1_LEN / 2.0;		// 質量中心
 constexpr double	ARM_LINK2_COG_LEN = ARM_LINK2_LEN / 2.0;		// 質量中心
 
-constexpr double	PLATE_MASS = 10.0;
+constexpr double	PLATE_MASS = 8.0;
 constexpr double	PLATE_X_LEN = 1.5;
 constexpr double	PLATE_Y_LEN = 0.5;
 constexpr double	PLATE_Z_LEN = 0.5;
@@ -143,9 +143,11 @@ constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
 
-constexpr double	ARM_JNT1_VISCOUS = 1.0;		// 粘性係数
-constexpr double	ARM_JNT2_VISCOUS = 1.0;		// 粘性係数
-constexpr double    OFFSET_VAL = -0.3;			//　実験では-0.3
+constexpr double	ARM_JNT1_VISCOUS = 40.0;		// 粘性係数	//XY平面上で実験字は　1.0
+constexpr double	ARM_JNT2_VISCOUS = 40.0;		// 粘性係数
+constexpr double    OFFSET_VAL = -0.5;			//　実験では-0.3
+//constexpr double    OFFSET_VAL = -0.0001;			//　実験では-0.3
+constexpr double	OFFSET_VAL_SENKAI = PI / 8.0;	//旋回関節用のオフセット
 
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
@@ -249,28 +251,52 @@ struct  Impedance {
 	Matrix	dM, dC, dK;	// 目標インピーダンス微分（手先座標）
 	Matrix	Minv, Cinv, Kinv;	// 逆行列
 
+	//	3次元シミュレーション用の変数	川原が追加
+	Matrix  G,G_xyz;					//	重力項　
+	Matrix  oTs, sT1, T12;				//	同時行列(4×4)	
+	Matrix  ss, s1, s2;					//  質量中心位置を格納する(4×1)
+	Matrix  oT1, oT2;					//	旋回根元からの変換(同次)行列
+	Matrix	dqs_oTs, dqs_oT1, dqs_oT2;	//	同次行列の旋回角による微分
+	Matrix	dq1_oTs, dq1_oT1, dq1_oT2;	//	同次行列のリンク1による微分
+	Matrix	dq2_oTs, dq2_oT1, dq2_oT2;	//	同次行列のリンク2による微分
+
+
 	Impedance() {
 		matInit(&M, DIM2, DIM2); matInit(&C, DIM2, DIM2); matInit(&K, DIM2, DIM2);
 		matInit(&Minv, DIM2, DIM2); matInit(&Cinv, DIM2, DIM2); matInit(&Kinv, DIM2, DIM2);
 		matInit(&Gp, DIM2, DIM2); matInit(&Gv, DIM2, DIM2);
 		matInit(&dM, DIM2, DIM2); matInit(&dC, DIM2, DIM2); matInit(&dK, DIM2, DIM2);
 		matInit(&K0, DIM2, DIM2);
+		//	重力項の計算用
+		// matInit(row,col)//el[_row][_col] 
+		matInit(&oTs, 4, 4); matInit(&sT1, 4, 4); matInit(&T12, 4, 4);
+		matInit(&G, 1,3); matInit(&G_xyz, 4, 1);
+		matInit(&ss, 1, 4); matInit(&s1, 1, 4); matInit(&s2, 1, 4);
+		matInit(&oT1, 4, 4); matInit(&oT2, 1, 4);
+		//	関節角で微分した同次行列
+		matInit(&dqs_oTs, 4, 4); matInit(&dqs_oT1, 4, 4); matInit(&dqs_oT2, 4, 4);
+		matInit(&dq1_oTs, 4, 4); matInit(&dq1_oT1, 4, 4); matInit(&dq1_oT2, 4, 4);
+		matInit(&dq2_oTs, 4, 4); matInit(&dq2_oT1, 4, 4); matInit(&dq2_oT2, 4, 4);
 	}
 };
 
 struct RotImpedance {
 	//double K = 2.0, C = 4.0, lg = 0.03;
-	//double K = 50.0, C = 4.0, lg = SENKAI_LINK_LEN / 2.0;	3次元で重力に対して水平維持
-	double K = 45, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
-	double Id = PLATE_MASS / PLATE_Y_LEN; //PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
+	//double K = 50.0, C = 4.0, lg = SENKAI_LINK_LEN / 2.0;	//3次元で重力に対して水平維持
+	double K =  50.0, C = 4.0, lg = SENKAI_LINK_LEN/2.0;
+	// 把持物体の慣性モーメント
+	double Id = (PLATE_MASS / 3.0) * (PLATE_Y_LEN * PLATE_Y_LEN + PLATE_Z_LEN * PLATE_Z_LEN);
+	//double Id = (PLATE_MASS/PLATE_X_LEN) / PLATE_Y_LEN; //PLATE_MASS / (PLATE_Y_LEN* PLATE_X_LEN* PLATE_Z_LEN);	//把持物体の慣性モーメント
+	
 	//	ロボットの慣性モーメント
 	double Iq = (ARM_LINK1_MASS + ARM_LINK2_MASS + ARM_BASE_MASS +/*指先のセンサ部分*/+(SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS)/*先端のカプセル部分*/ + ARM_LINK2_MASS)/(SENKAI_LINK_LEN);		
 	//	コリオリ遠心力
 	double Ja = 1.0;	// omega = Ja*dq なのでこの場合は1.0
 	//	慣性H
 	double h = 10.0;		//適当なので後で変更する
-	
-	
+	//	重力項
+	double g_senkai;
+	double V= ARM_JNT1_VISCOUS;	// 粘性摩擦係数
 };
 
 ////////////////////////////////////////////////////////

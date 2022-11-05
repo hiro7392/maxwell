@@ -39,7 +39,7 @@
 #define print_debug 0
 #define usePlateToGrasp 1			//把持するプレートを置くとき
 #define useForceContactPoint 0		//力の接触点を利用するとき
-
+#define prepareTime 1000			//指が接触するまで待つ時間
 //カプセル用
 #define DENSITY (5.0)	// 密度
 // カプセル
@@ -61,8 +61,11 @@ float DrawStuff::hpr[3];
 
 // 初期設定変数
 //double	init_jnt_pos[ARM_JNT] = {3*PI/4.0, PI/2.0};	// ロボット初期姿勢
-double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
-double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
+//	xy平面上で実験を行った際
+double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 3, PI / 3.0 };	// ロボット初期姿勢
+double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 3, -PI / 3.0 };	// ロボット初期姿勢
+//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / .0 };	// ロボット初期姿勢
+//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
 #if SIM_OBJ_CASE1
 double	init_obj_pos[DIM3] = { -0.8 - 2 * 0.75 / sqrt(2.0), -0.035, OBJ_RADIUS };	// 対象初期位置
 double	init_obj_att[DIM3][DIM3] = { {1.0, 0.0, 0.0}, {0.0, 0.0, -1.0}, {0.0, 1.0, 0.0} };	// 回転軸がy方向
@@ -115,8 +118,11 @@ void cFinger::control() {
 	// インピーダンス設定
 	// 制御指令計算
 #if SIM_CTRL_MODE_MAXWELL & SIM_ADD_EXT_FORCE
-	double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };
+	//double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };		//xy平面上でシミュレーションする際
+	double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };		//3次元でシミュレーションする際
 
+	//	重力方向の力を受ける際はkを大きくする
+	//for (int i = 0; i < 2; i++)impK[i] *= (1.0 + (senkai_base_jnt / (PI)));
 	matSetValDiag(&imp.M, impM); matSetValDiag(&imp.C, impC); matSetValDiag(&imp.K, impK); matSetValDiag(&imp.K0, impK0);	// ゲイン設定
 
 	//K_pなどの逆行列の計算
@@ -198,10 +204,11 @@ void cFinger::control() {
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 	
 	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
-	if (rotTau > 300 )rotTau = 500.0;
-	if (rotTau < -300)rotTau = -500.0;
+	double MAX = 10000.0, MIN = -10000.0;
+	if (rotTau > MAX )rotTau = MAX;
+	if (rotTau < MIN)rotTau = MIN;
 	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
-	dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:rotTau);
+	if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? -10.0:3.0);
 }
 
 #endif

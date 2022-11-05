@@ -6,7 +6,6 @@
 ////////////////////////////////////////////////////////
 int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 {
-
 	int	jnt, crd;
 
 	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2);
@@ -144,9 +143,11 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}ÅÁFdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
+	tau->el[0][0] += imp.G.el[0][1];
+	tau->el[0][1] += imp.G.el[0][2];
 
 	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
-	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, &imp.M.el[0][0]);
+	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, imp.M.el[0][0]);
 	// ÉfÉoÉbÉO
 #if 1//print_debug
 	std::cout << "fingerID : " << fingerID << " tau = " << std::endl;
@@ -156,39 +157,41 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	return	0;
 }
 
+//ê˘âÒä÷êﬂÇ…Ç¬Ç¢ÇƒêßñÒïtÇ´maxwellêßå‰
 int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 {
+	//	ä÷êﬂÇÃîSê´ñÄéCÇí«â¡
+	senkaiDynPara();
 	auto entity = EntityManager::get();
-	static double allMass = 0.0;
-	static double allVolume = 0.0;
-	if (entity->step == 0) {
-		allMass = senkai_link.getMass() + base.getMass() + link1.getMass() + link2.getMass() + sensor.getMass() + fingerTopCapsule.getMass();
-		allVolume = senkai_link.getVolume() + base.getVolume() + link1.getVolume() + link2.getVolume() + fingerTopCapsule.getVolumeHalfSquare();
-		//rotImp.Iq = 5.0;//allMass / allVolume;
-	}
+	/*if (entity->step == 0) {
+		senkai_base_jnt_init -= (fingerID==1?1:-1)*OFFSET_VAL_SENKAI;
+	}*/
 	// ErÇÃílÇ™Ç®Ç©ÇµÇ¢ÇÃÇ≈èCê≥Ç∑ÇÈ
 	double mu1, mu2, mu_ave;
 	auto Finger1 = EntityManager::get()->getFinger();
 	auto Finger2 = EntityManager::get()->getFinger2();
-	mu1 = Finger1->senkai_p_force->t1[0]; mu2 = Finger2->senkai_p_force->t1[0];
+	double scale = 100.0;
+	mu1 = Finger1->senkai_p_force->t1[0]/scale; mu2 = Finger2->senkai_p_force->t1[0]/scale;
 	mu_ave = (fingerID == 1 ? ((mu1 - mu2)/2.0) : ((mu2 - mu1)/2.0));
 	printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	static double Integ=0.0;
 	Integ +=(mu_ave*SIM_CYCLE_TIME);
 	printf("Integ = %lf\n", Integ);
-	rotImp.h = senkai_base_vel;
-	double dphi = senkai_base_jnt_init - senkai_base_jnt;
+
+	//	ä÷êﬂÇÃîSê´ñÄéCóÕÇí«â¡
+	rotImp.h = senkai_base_vel * rotImp.V*(fingerID ==1?1:-1);
+	double dphi =  senkai_base_jnt-senkai_base_jnt_init+ (fingerID == 1 ? 1 : -1) * OFFSET_VAL_SENKAI;
 
 	static double tauNC, tauPL, tauIN, tauVE, Er;
-	printf("allMass = %lf allVolume = %lf \n", allMass, allVolume);
 	Er = (rotImp.Iq / rotImp.Ja) * rotImp.Id;
-	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id);
+	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf,dphi = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id,dphi);
 	tauNC = rotImp.h - rotImp.Iq * rotImp.Ja * 0.0 * senkai_base_vel;
 	tauPL = ((Er * rotImp.lg * rotImp.K) / (rotImp.C * rotImp.lg))*Integ;
 	tauIN = Er * mu_ave - rotImp.Ja * (fingerID == 1 ? mu1 : mu2);
-	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (senkai_base_jnt_init));
+	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (dphi));
 	printf("tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC, tauPL, tauIN, tauVE);
-	*tau = tauNC + tauPL + tauIN + tauVE;
+	*tau = tauNC + tauPL + tauIN + tauVE+imp.G.el[0][0];//èdóÕçÄÇë´Ç∑
+	//*tau = 2.0;
 	
 	return 0;
 }

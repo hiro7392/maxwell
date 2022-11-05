@@ -20,8 +20,8 @@ public:
 	//旋回関節の土台部分
 	dReal senkai_base_x0 = 0.5, senkai_base_y0 = -0.3, senkai_base_z0 = z_base_pos;		//	旋回関節の土台
 	dReal senkai_base_x1 = 0.5, senkai_base_y1 = -0.9, senkai_base_z1 = z_base_pos;		//	旋回関節の土台
-	double senkai_init_jnt = PI/6.0;// PI / 4.0;	///水平になる位置は0.0
-	double senkai_init_jnt2 = -PI/6.0;	//指2は反対の姿勢をとる
+	double senkai_init_jnt = PI / 2.0;	///水平になる位置は0.0
+	double senkai_init_jnt2 =-PI / 2.0;	//指2は反対の姿勢をとる
 
 	//指先のカプセル
 	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
@@ -34,7 +34,7 @@ public:
 	cPartsCylinder	sensor{ SENSOR_LEN / ARM_LINK2_LEN * ARM_LINK2_MASS, SENSOR_LEN, ARM_LINK2_RAD };	// アームと密度をそろえる
 
 	// 旋回関節の土台部分
-	cPartsBox	senkai_base{ 14.0, Vec3(0.22, 0.22, 0.22) };
+	cPartsBox	senkai_base{ 1.0, Vec3(0.22, 0.22, 0.22) };
 	cPartsCylinder	senkai_link{ ARM_LINK2_MASS / 2.0, SENKAI_LINK_LEN, ARM_LINK2_RAD / 2.0 };
 
 	//把持するプレート{質量,初期位置(x,y,z),大きさ(x,y,z)}
@@ -126,12 +126,17 @@ public:
 	int armWithoutInertiaShaping();
 	int ctrlPreProcessing();
 	int armDynPara();
-	int senkaiDynPara();			//	旋回関節のパラメータ
+
 	int armInvKine(Kinematics* kine, Variable* var);
 	int armJacob(Kinematics* kine, Variable* var);
 	int armInitMat(Variable* var, Kinematics* kine, Dynamics* dyn, Impedance* imp);
 
-
+	//	川原が作成	3次元のシミュレーション用
+	int setTransMatrix();
+	int setMassCenterPosition(Matrix& mat, double mx, double my, double mz);
+	int senkaiDynPara();			//	旋回関節のパラメータ
+	int calculateGravity();			//	重力項を計算
+	int setTransMatrixDq();			//	同次行列の関節角による微分を計算
 	//kawaharaの変更以前からコメントアウト
 	////	int armInitMatVar(Variable *var);
 	////	int armInitMatKine(Kinematics *kine);
@@ -177,6 +182,14 @@ public:
 	auto getParts() { return finger; }
 	//	void setPosition(const dVector3 pos) {
 
+	// エンドエフェクタの位置を計算
+	void setEffPos() {
+		//	x座標
+		eff_pos[0] = (fingerID==1?senkai_base_x0:senkai_base_x1)+ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+		eff_pos[1] = (fingerID == 1 ? senkai_base_y0 : senkai_base_y1)+ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+		eff_pos[2] = senkai_base_z0;
+		return;
+	}
 	//指１の初期位置と初期姿勢	指1と指2で共通
 	void setPosition(double senkai_base_x0, double senkai_base_y0, double senkai_base_z0) {
 		//	リンク1の土台
@@ -186,30 +199,33 @@ public:
 		finger[0]->setPosition(base_x, base_y, base_z);
 		
 		//	リンク１
-		double link1_x = base_x + ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]);
-		double link1_y = base_y +  abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
+		double link1_x = base_x + (ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]));
+		double link1_y = base_y +  cos(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		double link1_z = base_z -  sin(senkai_base_jnt) * abs(ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		finger[1]->setPosition(link1_x, link1_y, link1_z);
 
 		double link1_top_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]);
-		double link1_top_y = base_y + abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
+		double link1_top_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 		double link1_top_z = base_z - sin(senkai_base_jnt) * abs(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 		
 		//	リンク2
-		double link2_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
-		double link2_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
+		double link2_x = link1_top_x + (ARM_LINK2_LEN / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
+		//double link2_y = base_y +abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
+		double link2_y = link1_top_y + abs(cos(senkai_base_jnt)) * (ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		double link2_z = base_z - sin(senkai_base_jnt) * abs(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
+		//printf("setposition fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", fingerID, radToAng(jnt_pos[0]), radToAng(jnt_pos[1]));
+
 		finger[2]->setPosition(link2_x, link2_y, link2_z);
 
 		//	センサ
 		double sensor_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
-		double sensor_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
+		double sensor_y = base_y + abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + SENSOR_LEN / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		double sensor_z = base_z - sin(senkai_base_jnt) * abs(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]))+ sin(senkai_base_jnt)* abs((ARM_LINK2_LEN + SENSOR_LEN / 2.0) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		finger[3]->setPosition(sensor_x, sensor_y, sensor_z);
 		
 		//指先のカプセル　センサと同じ位置
 		double capsule_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN +0.1) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
-		double capsule_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
+		double capsule_y = base_y + abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + (ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		double capsule_z = base_z - sin(senkai_base_jnt) * abs(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1])) + sin(senkai_base_jnt) * abs((ARM_LINK2_LEN + 0.1) * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		fingerTopCapsule.setPosition(capsule_x, capsule_y, capsule_z);
 		//　旋回関節
