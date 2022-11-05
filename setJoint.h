@@ -115,7 +115,7 @@ void cFinger::setJoint() {
 	dJointAttach(senkai_link_joint, senkai_link.getBody(), senkai_base.getBody());
 	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x0, senkai_base_y0, senkai_base_z0);
 	dJointSetHingeAxis(senkai_link_joint, -1, 0, 0);
-	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI);
+	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -M_PI/2.0);
 	dJointSetHingeParam(senkai_link_joint, dParamHiStop, 0.0);
 
 	// 固定ジョイント 指旋回関節のリンク->指根本関節
@@ -143,7 +143,7 @@ dReal capX = -1.0, capY = -0.60, capZ = 1.5;// 1.35 + ARM_LINK2_RAD;//(3次元)
 //const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2 // xy平面上
 double intermit = abs(1.1 * sin(init_jnt_pos[0]-PI + init_jnt_pos[1]) - 1.3 * sin(init_jnt_pos[0]-PI))-ARM_LINK2_RAD*2.0;
 
-const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.1;// intermit;//	3次元シミュ用 plateZ=0.1
+const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.15;// intermit;//	3次元シミュ用 plateZ=0.1
 
 // const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 
@@ -225,7 +225,7 @@ void cFinger::setJoint2() {
 	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x1, senkai_base_y1, senkai_base_z1);
 	dJointSetHingeAxis(senkai_link_joint, 1, 0, 0);
 	dJointSetHingeParam(senkai_link_joint, dParamLoStop, 0.0);
-	dJointSetHingeParam(senkai_link_joint, dParamHiStop, M_PI);
+	dJointSetHingeParam(senkai_link_joint, dParamHiStop, PI/2.0);
 
 	// 固定ジョイント 指旋回関節のリンク->指根本関節
 	senkai_link2finger_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント

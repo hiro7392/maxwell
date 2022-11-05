@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
 		// 旋回関節について初期化
 		Finger1->senkai_base_jnt = (Finger1->fingerID == 1) ? Finger1->senkai_init_jnt : Finger1->senkai_init_jnt2;
 		Finger1->senkai_base_jnt_init = (Finger1->fingerID == 1) ? Finger1->senkai_init_jnt : Finger1->senkai_init_jnt2;
-
 	}
 
 	//パラメータ設定 指2
@@ -202,7 +201,7 @@ void DrawStuff::simLoop(int pause)
 
 		quat_ptr = dBodyGetQuaternion(plateToGrasp.body);
 		quat[0] = quat_ptr[0];
-		quat[1] = quat_ptr[1];
+		quat[1] = sim->step>prepareTime?(min(quat_ptr[1],PI/2.0)) : 0;
 		quat[2] = 0.0;
 		quat[3] = 0.0;// quat_ptr[3];	//外力による回転を無視したいので0にする
 		
@@ -210,7 +209,6 @@ void DrawStuff::simLoop(int pause)
 		const dReal* nowPos = dBodyGetPosition(plateToGrasp.body);
 		
 		static double beforeXpos, beforeYpos, beforeZpos;
-		
 		if (sim->step == 0) {
 			beforeXpos = nowPos[0];
 			beforeYpos = nowPos[1];
@@ -218,14 +216,14 @@ void DrawStuff::simLoop(int pause)
  		}
 		//	速度,角度
 		dBodySetQuaternion(plateToGrasp.body, quat);
-		dBodySetAngularVel(plateToGrasp.body, rot[0], 0, 0);
+		dBodySetAngularVel(plateToGrasp.body, sim->step > prepareTime ? rot[0]:0.1 , 0, 0);
 		dBodySetPosition(plateToGrasp.body, beforeXpos, beforeYpos, beforeZpos);
 		beforeXpos = nowPos[0];
 		beforeYpos = nowPos[1];
 		beforeZpos = nowPos[2];
 		//	x座標を記録
 		//	plateの端に外力を加える
-		if(addForce/*ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500*/) {
+		if(sim->step >prepareTime /*ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500*/) {
 			double distFromCenter = 0.3;
 			//static int duty = 30000;	//外力の向きの周期
 			//static int forceVal = 5;
@@ -239,8 +237,8 @@ void DrawStuff::simLoop(int pause)
 			//dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
 			////drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 			// 回転運動用
-			//dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, -5.0, nowPos[0], nowPos[1] - distFromCenter, nowPos[2]);
-
+			dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, -1.0, nowPos[0], nowPos[1] - distFromCenter, nowPos[2]);
+			dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, 1.0, nowPos[0], nowPos[1] + distFromCenter, nowPos[2]);
 		}
 #endif
 		// 過去データとして代入

@@ -163,9 +163,9 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	//	ä÷êﬂÇÃîSê´ñÄéCÇí«â¡
 	senkaiDynPara();
 	auto entity = EntityManager::get();
-	if (entity->step == 0) {
-		//senkai_base_jnt_init -= (fingerID==1?1:-1)*OFFSET_VAL_SENKAI;
-	}
+	/*if (entity->step == 0) {
+		senkai_base_jnt_init -= (fingerID==1?1:-1)*OFFSET_VAL_SENKAI;
+	}*/
 	// ErÇÃílÇ™Ç®Ç©ÇµÇ¢ÇÃÇ≈èCê≥Ç∑ÇÈ
 	double mu1, mu2, mu_ave;
 	auto Finger1 = EntityManager::get()->getFinger();
@@ -179,18 +179,19 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	printf("Integ = %lf\n", Integ);
 
 	//	ä÷êﬂÇÃîSê´ñÄéCóÕÇí«â¡
-	rotImp.h = senkai_base_vel * rotImp.V;
-	double dphi =  senkai_base_jnt-senkai_base_jnt_init;
+	rotImp.h = senkai_base_vel * rotImp.V*(fingerID ==1?1:-1);
+	double dphi =  senkai_base_jnt-senkai_base_jnt_init+ (fingerID == 1 ? 1 : -1) * OFFSET_VAL_SENKAI;
 
 	static double tauNC, tauPL, tauIN, tauVE, Er;
 	Er = (rotImp.Iq / rotImp.Ja) * rotImp.Id;
-	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id);
+	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf,dphi = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id,dphi);
 	tauNC = rotImp.h - rotImp.Iq * rotImp.Ja * 0.0 * senkai_base_vel;
 	tauPL = ((Er * rotImp.lg * rotImp.K) / (rotImp.C * rotImp.lg))*Integ;
 	tauIN = Er * mu_ave - rotImp.Ja * (fingerID == 1 ? mu1 : mu2);
 	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (dphi));
 	printf("tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC, tauPL, tauIN, tauVE);
 	*tau = tauNC + tauPL + tauIN + tauVE+imp.G.el[0][0];//èdóÕçÄÇë´Ç∑
+	//*tau = 2.0;
 	
 	return 0;
 }

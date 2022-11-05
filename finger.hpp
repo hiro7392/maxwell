@@ -39,7 +39,7 @@
 #define print_debug 0
 #define usePlateToGrasp 1			//把持するプレートを置くとき
 #define useForceContactPoint 0		//力の接触点を利用するとき
-
+#define prepareTime 1000			//指が接触するまで待つ時間
 //カプセル用
 #define DENSITY (5.0)	// 密度
 // カプセル
@@ -208,7 +208,7 @@ void cFinger::control() {
 	if (rotTau > MAX )rotTau = MAX;
 	if (rotTau < MIN)rotTau = MIN;
 	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
-	dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:rotTau);
+	if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? -10.0:3.0);
 }
 
 #endif

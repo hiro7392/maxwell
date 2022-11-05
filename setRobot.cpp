@@ -114,8 +114,8 @@ void ODE::nearCallback(void *data, dGeomID o1, dGeomID o2)
 				contact[cnt].surface.soft_erp = 0.2;   // 接触点のERP
 				contact[cnt].surface.soft_cfm = 0.0005; // 接触点のCFM
 #endif
-				contact[cnt].surface.mu = 0.5;			// 摩擦係数
-				contact[cnt].surface.bounce = 0.5;		// 反発係数
+				contact[cnt].surface.mu = 2.0;			// 摩擦係数	xy平面上での実験時は0.5
+				contact[cnt].surface.bounce = 0.5;		// 反発係数 xy平面上での実験時は0.5
 				c = dJointCreateContact(_this->world, _this->contactgroup, &contact[cnt]);
 				dJointAttach(c, dGeomGetBody(contact[cnt].geom.g1), dGeomGetBody(contact[cnt].geom.g2));
 			}
