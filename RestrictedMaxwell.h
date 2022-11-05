@@ -144,10 +144,10 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}çFdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
 	tau->el[0][0] += imp.G.el[0][1];
-	tau->el[0][0] += imp.G.el[0][2];
+	tau->el[0][1] += imp.G.el[0][2];
 
 	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
-	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, &imp.M.el[0][0]);
+	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, imp.M.el[0][0]);
 	// ƒfƒoƒbƒO
 #if 1//print_debug
 	std::cout << "fingerID : " << fingerID << " tau = " << std::endl;
@@ -163,12 +163,8 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	//	ŠÖß‚Ì”S«–€C‚ğ’Ç‰Á
 	senkaiDynPara();
 	auto entity = EntityManager::get();
-	static double allMass = 0.0;
-	static double allVolume = 0.0;
 	if (entity->step == 0) {
-		allMass = senkai_link.getMass() + base.getMass() + link1.getMass() + link2.getMass() + sensor.getMass() + fingerTopCapsule.getMass();
-		allVolume = senkai_link.getVolume() + base.getVolume() + link1.getVolume() + link2.getVolume() + fingerTopCapsule.getVolumeHalfSquare();
-		//rotImp.Iq = 5.0;//allMass / allVolume;
+		//senkai_base_jnt_init -= (fingerID==1?1:-1)*OFFSET_VAL_SENKAI;
 	}
 	// Er‚Ì’l‚ª‚¨‚©‚µ‚¢‚Ì‚ÅC³‚·‚é
 	double mu1, mu2, mu_ave;
@@ -182,11 +178,11 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	Integ +=(mu_ave*SIM_CYCLE_TIME);
 	printf("Integ = %lf\n", Integ);
 
-	rotImp.h = senkai_base_vel;
+	//	ŠÖß‚Ì”S«–€C—Í‚ğ’Ç‰Á
+	rotImp.h = senkai_base_vel * rotImp.V;
 	double dphi =  senkai_base_jnt-senkai_base_jnt_init;
 
 	static double tauNC, tauPL, tauIN, tauVE, Er;
-	printf("allMass = %lf allVolume = %lf \n", allMass, allVolume);
 	Er = (rotImp.Iq / rotImp.Ja) * rotImp.Id;
 	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id);
 	tauNC = rotImp.h - rotImp.Iq * rotImp.Ja * 0.0 * senkai_base_vel;

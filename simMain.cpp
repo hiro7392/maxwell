@@ -219,9 +219,10 @@ void DrawStuff::simLoop(int pause)
 		//	速度,角度
 		dBodySetQuaternion(plateToGrasp.body, quat);
 		dBodySetAngularVel(plateToGrasp.body, rot[0], 0, 0);
-		dBodySetPosition(plateToGrasp.body, beforeXpos, beforeYpos, nowPos[2]);
+		dBodySetPosition(plateToGrasp.body, beforeXpos, beforeYpos, beforeZpos);
 		beforeXpos = nowPos[0];
 		beforeYpos = nowPos[1];
+		beforeZpos = nowPos[2];
 		//	x座標を記録
 		//	plateの端に外力を加える
 		if(addForce/*ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500*/) {
@@ -238,7 +239,7 @@ void DrawStuff::simLoop(int pause)
 			//dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
 			////drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 			// 回転運動用
-			dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, -5.0, nowPos[0], nowPos[1] - distFromCenter, nowPos[2]);
+			//dBodyAddForceAtPos(plateToGrasp.body, 0.0, 0.0, -5.0, nowPos[0], nowPos[1] - distFromCenter, nowPos[2]);
 
 		}
 #endif
@@ -336,7 +337,7 @@ void DrawStuff::start() {
 #if	FLAG_SAVE_VIDEO
 	init_video();
 #endif
-	//capX = -1.2, capY = -0.50, capZ = 0.3;
+	
 }
 
 ////////////////////////////////////////////////////////

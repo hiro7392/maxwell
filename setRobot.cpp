@@ -218,8 +218,9 @@ int cFinger::armDynPara()
 	this->dyn.h.el[0][0] = -m2*l1*lg2*S2*(this->var.dq.el[1][0]*this->var.dq.el[1][0]+2*this->var.dq.el[0][0]*this->var.dq.el[1][0]);
 	this->dyn.h.el[1][0] = m2*l1*lg2*S2*this->var.dq.el[0][0]*this->var.dq.el[0][0];
 	// 関節粘性摩擦力をhに追加
-	for(jnt=0;jnt<ARM_JNT;jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];
-	rotImp.h += senkai_base_vel * rotImp.V;
+	//for(jnt=0;jnt<ARM_JNT;jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];	//オリジナル
+	for (jnt = 0; jnt < ARM_JNT; jnt++)	this->dyn.h.el[jnt][0] -= this->dyn.V[jnt] * this->jnt_vel[jnt];
+
 	// ヤコビアン
 	this->kine.J.el[0][0] = -(l1*S1+l2*S12);	this->kine.J.el[0][1] = -l2*S12;
 	this->kine.J.el[1][0] = l1*C1+l2*C12;	this->kine.J.el[1][1] = l2*C12;
@@ -274,7 +275,7 @@ int cFinger::armDynPara()
 	printf("rotImp.Iq =%lf\n ",this->rotImp.Iq);
 
 	//	同次行列の計算
-	//setTransMatrix();
+	setTransMatrix();
 
 	//	各リンクの質量中心を設定
 	setMassCenterPosition(imp.s1, link1_pos[0], link1_pos[1], link1_pos[2]);
@@ -287,10 +288,12 @@ int cFinger::armDynPara()
 
 	//	各関節について重力項を計算
 	calculateGravity();
+	printf("fingerID = %d\n", fingerID);
+	MatPrintDebug3x1(imp.G, "G");
 	//	重力項をhに足す
-	dyn.h.el[0][0]+= imp.G.el[0][1];
-	dyn.h.el[1][0] += imp.G.el[0][2];
-
+	dyn.h.el[0][0] += imp.G.el[0][0];
+	dyn.h.el[1][0] += imp.G.el[0][1];
+	rotImp.h += imp.G.el[0][2];
 	return	0;
 }
 

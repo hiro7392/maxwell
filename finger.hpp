@@ -62,8 +62,8 @@ float DrawStuff::hpr[3];
 // 初期設定変数
 //double	init_jnt_pos[ARM_JNT] = {3*PI/4.0, PI/2.0};	// ロボット初期姿勢
 //	xy平面上で実験を行った際
-double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
-double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
+double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 3, PI / 3.0 };	// ロボット初期姿勢
+double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 3, -PI / 3.0 };	// ロボット初期姿勢
 //double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / .0 };	// ロボット初期姿勢
 //double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
 #if SIM_OBJ_CASE1

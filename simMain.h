@@ -143,9 +143,11 @@ constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
 
-constexpr double	ARM_JNT1_VISCOUS = 2.0;		// 粘性係数	//XY平面上で実験字は　1.0
-constexpr double	ARM_JNT2_VISCOUS = 2.0;		// 粘性係数
+constexpr double	ARM_JNT1_VISCOUS = 40.0;		// 粘性係数	//XY平面上で実験字は　1.0
+constexpr double	ARM_JNT2_VISCOUS = 40.0;		// 粘性係数
 constexpr double    OFFSET_VAL = -0.3;			//　実験では-0.3
+//constexpr double    OFFSET_VAL = -0.0001;			//　実験では-0.3
+constexpr double	OFFSET_VAL_SENKAI = PI / 8.0;	//旋回関節用のオフセット
 
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
@@ -294,8 +296,6 @@ struct RotImpedance {
 	double h = 10.0;		//適当なので後で変更する
 	//	重力項
 	double g_senkai;
-
-	
 	double V= ARM_JNT1_VISCOUS;	// 粘性摩擦係数
 };
 

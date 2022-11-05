@@ -150,7 +150,7 @@ int cFinger::calculateGravity() {
 	//	MatPrintDebugAll(imp.G_xyz, "G_xyz",1,4);
 	matMul(&tmp2, &tmp, &imp.G_xyz);
 	//	MatPrintDebugAll(tmp2, "tmp2",1,1);
-	imp.G.el[0][0] += (ARM_LINK2_MASS / 2.0) * tmp2.el[0][0];
+	imp.G.el[0][0] += (ARM_LINK2_MASS / 2.0) * tmp2.el[0][0];	//ù‰ñ•”•ª‚ÌƒŠƒ“ƒN¿—Ê‚Í(ARM_LINK2_MASS / 2.0) 
 	//	printf("G[0][0] = %lf\n", imp.G.el[0][0]);
 
 	matMul(&tmp,  &imp.s1, &imp.dqs_oT1);
