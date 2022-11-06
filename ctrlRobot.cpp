@@ -1147,6 +1147,9 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matMul(&Fe, &Jt_inv, &tmp3);
 	std::cout << "-----------Fe------------" << std::endl;
 	matPrint(&Fe);
+	/*std::cout << "-----------Fe[0][0]------------" << std::endl;
+	std::cout << Fe.el[0][0] << std::endl;
+	std::cout << Fe.el[1][0] << std::endl;*/
 	save_force_endEffector[entity->step][0] = Fe.el[0][0];
 	save_force_endEffector[entity->step][1] = Fe.el[1][0];
 	return	0;

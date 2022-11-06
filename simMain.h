@@ -130,8 +130,8 @@ constexpr double    OFFSET_VAL = -0.3;
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
 
-std::string jntAngleOutfilename1 = "./data/fiqnger1_info.csv";
-std::string jntAngleOutfilename2 = "./data/finger2_info.csv";
+std::string jntAngleOutfilename1 = "./data/valiadtion/finger1.csv";
+std::string jntAngleOutfilename2 = "./data/valiadtion/finger2.csv";
 #define addOffset		1			//把持力を生み出すオフセットを与えるとき
 
 #endif
@@ -431,6 +431,7 @@ public:
 	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_jnt_dq[DATA_CNT_NUM][ARM_JNT] = {};
+	double	save_jnt_ddq[DATA_CNT_NUM][ARM_JNT] = {};
 
 	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3] = {};
@@ -770,27 +771,38 @@ void cFinger::outputJntAngle(int end) {
 	else {
 		outfile.open(jntAngleOutfilename2);
 	}
-	/*
+	
 	outfile <<"step" << ",";
 	outfile << "第1関節[rad]" << ",";
+	outfile << "第1関節[度]" << ",";
 	outfile << "第1関節[rad/s]" << ",";
+	outfile << "第1関節[度/s]" << ",";
+	outfile << "第1関節[rad/s^2]" << ",";
+	outfile << "第1関節[度/s^2]" << ",";
+
+	outfile << "力覚センサFx" << ",";
+	outfile << "トルク　関節1" << ",";
+	outfile << "手先位置 x" << ",";
+	outfile << "手先速度 x" << ",";
+
+	outfile << "平衡位置 x" << ",";
+	outfile << "センサ出力の理論値　Fx" << ",";
 
 	outfile << "第2関節[rad]" << ",";
-	outfile << "第2関節[rad/s]" << ",";
-
-	outfile << "第1関節[度]" << ",";
-	outfile << "第1関節[度/s]" << ",";
-
 	outfile << "第2関節[度]" << ",";
+	outfile << "第2関節[rad/s]" << ",";
 	outfile << "第2関節[度/s]" << ",";
+	outfile << "第2関節[rad/s^2]" << ",";
+	outfile << "第2関節[度/s^2]" << ",";
 
-	outfile << "Fx[N]" << ",";
-	outfile << "Fy[N]" << ",";
+	outfile << "力覚センサFy" << ",";
+	outfile << "トルク　関節2" << ",";
+	outfile << "手先位置 y" << ",";
+	outfile << "手先速度 y" << ",";
 
-	outfile << "手先位置x" << ",";
-	outfile << "手先位置y" << ",";
-
-	*/
+	outfile << "平衡位置 y" << ",";
+	outfile << "センサ出力の理論値　Fy" << ",";
+	
 
 
 	for (int k = 0; k < end; k++) {
@@ -802,6 +814,9 @@ void cFinger::outputJntAngle(int end) {
 
 			outfile << save_jnt_dq[k][i] << ",";			//関節速度[rad/s]
 			outfile << radToAng(save_jnt_dq[k][i]) << ",";	//関節速度[度/s]
+
+			outfile << save_jnt_ddq[k][i] << ",";			//関節加速度[rad/s^2]
+			outfile << radToAng(save_jnt_ddq[k][i]) << ",";	//関節加速度[度/s^2]
 
 			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
 			outfile << save_jnt_force[k][i] << ",";		//対象の関節に抱える力
@@ -834,7 +849,8 @@ void cFinger::setNums(int step) {
 		//	関節速度
 		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
 		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
-
+		save_jnt_ddq[step - 1][i] = var.ddq.el[i][0];
+		save_jnt_ddq[step - 1][i] = var.ddq.el[i][0];
 #if useContactPoint
 		//  手先位置を取得する
 		const dReal* finger1TopPos = dBodyGetPosition(_this->forceContactPoint.getBody());
