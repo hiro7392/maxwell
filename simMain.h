@@ -130,7 +130,7 @@ constexpr double    OFFSET_VAL = -0.3;
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
 
-std::string jntAngleOutfilename1 = "./data/finger1_info.csv";
+std::string jntAngleOutfilename1 = "./data/fiqnger1_info.csv";
 std::string jntAngleOutfilename2 = "./data/finger2_info.csv";
 #define addOffset		1			//把持力を生み出すオフセットを与えるとき
 
@@ -441,7 +441,7 @@ public:
 	double	save_obj_pos[DATA_CNT_NUM][DIM3] = {};
 	double	save_obj_vel[DATA_CNT_NUM][DIM3] = {};
 	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
-
+	double  save_force_endEffector[DATA_CNT_NUM][ARM_JNT] = {};
 	// 保存用ファイル名変数
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_info[DATA_FILE_NAME_MAXLEN] = {};
@@ -810,8 +810,10 @@ void cFinger::outputJntAngle(int end) {
 
 			outfile << save_eff_vel[k][i] << ",";
 
-			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標位置(平衡位置)
-			//outfile << ",";
+			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標位置(平衡位置
+			
+			outfile << save_force_endEffector[k][i] << ",";	//センサ出力の理論値
+
 		}
 		outfile << std::endl;
 	}
