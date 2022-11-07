@@ -1053,6 +1053,23 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	std::cout << "fingerID : " << fingerID << " tau = " << std::endl;
 	matPrint(tau);		// Inertia Shaping無しの場合は0になればOK
 #endif
+	Matrix Jt_inv, tmp3, Fe;
+	matInit(&Jt_inv, 2, 2);
+	matInit(&tmp3, 2, 1);
+	matInit(&Fe, 2, 1);
+	// 検証用
+	matInv(&Jt_inv, NULL, &this->kine.Jt);
+	matMul(&tmp3, &dyn.Mq, &var.ddq);//Mq*ddq
+	matAdd(&tmp3, &tmp3, &dyn.h);
+	matSub(&tmp3, &tmp3, tau);
+	matMul(&Fe, &Jt_inv, &tmp3);
+	std::cout << "-----------Fe------------" << std::endl;
+	matPrint(&Fe);
+	/*std::cout << "-----------Fe[0][0]------------" << std::endl;
+	std::cout << Fe.el[0][0] << std::endl;
+	std::cout << Fe.el[1][0] << std::endl;*/
+	save_force_endEffector[entity->step][0] = Fe.el[0][0];
+	save_force_endEffector[entity->step][1] = Fe.el[1][0];
 	return	0;
 }
 
