@@ -41,7 +41,7 @@
 
 #include "c:/eigen-3.4.0/Eigen/Dense"
 ////////////////////////////////////////////////////////
-// バイナリフラグ
+// バイナリフラグ	
 // ON(1)とOFF(0)のみ設定可能
 ////////////////////////////////////////////////////////
 #define	GLAPHIC_OPENGL		0		// OpenGLで描画
@@ -49,6 +49,8 @@
 
 #define	FLAG_SAVE_IMAGE		0		// 画像保存
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
+#define VIEW_FROM_X 1		//カメラの開始時点での向き
+#define VIEW_FROM_Y 0		//カメラの開始時点での向き
 
 #define ADD_EXT_FORCE 0
 ////////////////////////////////////////////////////////
