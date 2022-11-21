@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
 	// パラメータ設定 指1
 	auto Finger1 = EntityManager::get()->getFinger();
-	for (int jnt = 0; jnt < ARM_JNT; jnt++)Finger1->init_jnt_pos[jnt] = init_jnt_pos[jnt];
+	for (int jnt = 0; jnt < ARM_JNT; jnt++)Finger1->init_jnt_pos[jnt] = sim->init_jnt_pos[jnt];
 
 	for (int crd = 0; crd < DIM3; crd++) {
 		Finger1->init_obj_pos[crd] = Finger1->init_obj_pos[crd];
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
 	//パラメータ設定 指2
 	auto Finger2 = EntityManager::get()->getFinger2();
-	for (int jnt = 0; jnt < ARM_JNT; jnt++)	Finger2->init_jnt_pos[jnt] = init_jnt_posF2[jnt];
+	for (int jnt = 0; jnt < ARM_JNT; jnt++)	Finger2->init_jnt_pos[jnt] = sim->init_jnt_posF2[jnt];
 	for (int crd = 0; crd < DIM3; crd++) {
 		Finger2->init_obj_pos[crd] = Finger2->init_obj_pos[crd];
 		for (int axis = 0; axis < DIM3; axis++)	Finger2->init_obj_att[axis][crd] = init_obj_att[axis][crd];

@@ -71,8 +71,8 @@ void cFinger::setJoint() {
 	//dJointSetHingeAxis(r_joint[ARM_M1], 0, 0, 1);
 	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(-senkai_base_jnt), cos(-senkai_base_jnt));	//xy平面上で回転するとき
 
-	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
-	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, 0);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, 2*M_PI);
 
 	double link1_top_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]);
 	double link1_top_y = base_y + abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
@@ -141,7 +141,7 @@ dReal capX = -1.0, capY = -0.60, capZ = 1.5;// 1.35 + ARM_LINK2_RAD;//(3次元)
 
 //把持物体の大きさ
 //const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2 // xy平面上
-double intermit = abs(1.1 * sin(init_jnt_pos[0]-PI + init_jnt_pos[1]) - 1.3 * sin(init_jnt_pos[0]-PI))-ARM_LINK2_RAD*2.0;
+//double intermit = abs(1.1 * sin(init_jnt_pos[0]-PI + init_jnt_pos[1]) - 1.3 * sin(init_jnt_pos[0]-PI))-ARM_LINK2_RAD*2.0;
 
 const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.15;// intermit;//	3次元シミュ用 plateZ=0.1
 
@@ -182,8 +182,8 @@ void cFinger::setJoint2() {
 	dJointSetHingeAnchor(r_joint[ARM_M1], base_x, base_y, base_z);
 	//	旋回関節の分、x軸中心に回転
 	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(senkai_base_jnt), cos(senkai_base_jnt));
-	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
-	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, 0);
+	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, 2*M_PI);
 
 	double link1_top_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]);
 	double link1_top_y = base_y + abs(cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));

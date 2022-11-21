@@ -167,7 +167,6 @@ public:
 		this->var_prev2 = Variable();
 		this->var_init = Variable();
 		this->forceOutFilename = forceFilename;
-
 	}
 	~cFinger() {		// ƒWƒ‡ƒCƒ“ƒg”j‰ó
 		dJointDestroy(f_joint);				// “y‘äŒÅ’è
