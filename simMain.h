@@ -492,8 +492,8 @@ class EntityODE : public ODE {
 
 public:
 	int FingerNum=0;
-	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 4.0, PI / 3.0 };	// ロボット初期姿勢
-	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0+  PI / 4.0, -PI / 3.0 };	// ロボット初期姿勢
+	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 6.0, PI / 3.0 };	// ロボット初期姿勢
+	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0+  PI / 6.0, -PI / 3.0 };	// ロボット初期姿勢
 	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 7,-PI/7 };	// ロボット初期姿勢
 	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, +PI/7};	// ロボット初期姿勢
 
