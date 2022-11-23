@@ -181,12 +181,18 @@ void cFinger::setJoint2() {
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M1], base_x, base_y, base_z);
 	//	旋回関節の分、x軸中心に回転
-	dJointSetHingeAxis(r_joint[ARM_M1], 0, sin(-senkai_base_jnt), cos(senkai_base_jnt));
+	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(senkai_base_jnt), cos(senkai_base_jnt));
 	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, 0);
 	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, 2*M_PI);
+	/*
+	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
+	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
+	dJointSetHingeAnchor(r_joint[ARM_M1], base_x,base_y,base_z);
+	//dJointSetHingeAxis(r_joint[ARM_M1], 0, 0, 1);
+	dJointSetHingeAxis(r_joint[ARM_M1], 0, -sin(-senkai_base_jnt), cos(-senkai_base_jnt));	//xy平面上で回転するとき*/
 
 	double link1_top_x = base_x + ARM_LINK1_LEN * cos(jnt_pos[ARM_M1]);
-	double link1_top_y = base_y + (cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
+	double link1_top_y = base_y - (cos(senkai_base_jnt)) * (ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 	double link1_top_z = base_z - sin(senkai_base_jnt) *(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]));
 
 	// ヒンジジョイント2

@@ -18,8 +18,6 @@ int main(int argc, char *argv[])
 
 	// 環境設定
 	sim->setEnv();
-	
-
 	// 物体生成
 	sim->ground = dCreatePlane(sim->getSpace(), 0, 0, 1, 0);		// 地面の設定
 	sim->setup();
@@ -36,7 +34,7 @@ int main(int argc, char *argv[])
 		Finger1->senkai_base_jnt_init = (Finger1->fingerID == 1) ? Finger1->senkai_init_jnt : Finger1->senkai_init_jnt2;
 	}
 
-	//パラメータ設定 指2
+	//	パラメータ設定 指2
 	auto Finger2 = EntityManager::get()->getFinger2();
 	for (int jnt = 0; jnt < ARM_JNT; jnt++)	Finger2->init_jnt_pos[jnt] = sim->init_jnt_posF2[jnt];
 	for (int crd = 0; crd < DIM3; crd++) {
@@ -107,13 +105,13 @@ void DrawStuff::simLoop(int pause)
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(_this->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
 #if finger2_use
-			//追加 kawahara
+			//	追加 kawahara
 			_this2->jnt_pos[jnt] = dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
 			_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
 #endif
 		}
-		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this->fingerID, radToAng(_this->jnt_pos[0]), radToAng(_this->jnt_pos[1]));
-		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this2->fingerID, radToAng(_this2->jnt_pos[0]), radToAng(_this2->jnt_pos[1]));
+		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this->fingerID, radToAng(_this->jnt_pos[ARM_M1]), radToAng(_this->jnt_pos[ARM_M2]));
+		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this2->fingerID, radToAng(_this2->jnt_pos[ARM_M1]), radToAng(_this2->jnt_pos[ARM_M2]));
 
 		//　旋回関節角の角度と角速度を取得
 		_this->senkai_base_jnt = dJointGetHingeAngle(_this->senkai_link_joint)+_this->senkai_base_jnt_init;
