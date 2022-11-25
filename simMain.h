@@ -49,8 +49,8 @@
 
 #define	FLAG_SAVE_IMAGE		0		// 画像保存
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
-#define VIEW_FROM_X 1		//カメラの開始時点での向き
-#define VIEW_FROM_Y 0		//カメラの開始時点での向き
+#define VIEW_FROM_X 0		//カメラの開始時点での向き
+#define VIEW_FROM_Y 1		//カメラの開始時点での向き
 
 #define ADD_EXT_FORCE 0
 ////////////////////////////////////////////////////////
@@ -494,13 +494,13 @@ class EntityODE : public ODE {
 public:
 	int FingerNum=0;
 	double angle_rate = 8.0;//大きいほど初期角度が小さくなる
-	double finger_state = -1.0;	//ひじ上げとひじ下げを切り替える
+	double finger_state =1.0;	//ひじ上げとひじ下げを切り替える
 #if 0 //paralell
 	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / angle_rate*finger_state ,-PI / angle_rate* finger_state };	// ロボット初期姿勢
 	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0-  PI / angle_rate* finger_state, PI / angle_rate* finger_state };	// ロボット初期姿勢
 #else	
-	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 6.0 * finger_state ,-PI /3.0 * finger_state };	// ロボット初期姿勢
-	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 6.0 * finger_state, PI / 3.0 * finger_state };	// ロボット初期姿勢
+	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 9.0 * finger_state ,-PI /9.0 * finger_state };	// ロボット初期姿勢
+	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 9.0 * finger_state, PI /9.0 * finger_state };	// ロボット初期姿勢
 #endif
 	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 7,-PI/7 };	// ロボット初期姿勢
 	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, +PI/7};	// ロボット初期姿勢
