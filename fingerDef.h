@@ -21,7 +21,7 @@ public:
 	dReal senkai_base_x0 = 0.5, senkai_base_y0 = -0.3, senkai_base_z0 = z_base_pos;		//	旋回関節の土台
 	dReal senkai_base_x1 = 0.5, senkai_base_y1 = -0.9, senkai_base_z1 = z_base_pos;		//	旋回関節の土台
 	double senkai_init_jnt = PI / 2.0;	///水平になる位置は0.0
-	double senkai_init_jnt2 =-PI / 2.0;	//指2は反対の姿勢をとる
+	double senkai_init_jnt2 = -PI / 2.0;	//指2は反対の姿勢をとる
 
 	//指先のカプセル
 	double fingerTopCapsuleLen = ARM_LINK2_LEN / 4.0;
@@ -42,6 +42,8 @@ public:
 
 	dJointFeedback force, * p_force, senkai_force, * senkai_p_force;		//力センサ用
 	dJointFeedback fingerTop2ForcePoint_joint;
+	dJointFeedback  r_joint_feedback[ARM_JNT];
+	dJointFeedback *r_joint_feedback_p[ARM_JNT];
 
 	dJointID senkai_link_joint, senkai_base_joint, senkai_link2finger_joint;						//  旋回関節->指土台->指根本の結合点
 	dJointID f_joint, r_joint[ARM_JNT], f2_joint;	//	固定関節と回転関節
@@ -185,7 +187,6 @@ public:
 	void setEffPos() {
 		//	指先先端のカプセルの座標を採用する
 		const dReal* nowPos = dBodyGetPosition(fingerTopCapsule.getBody());
-
 		//	x座標
 		eff_pos[0] = nowPos[0];
 		eff_pos[1] = nowPos[1];

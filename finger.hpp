@@ -200,14 +200,31 @@ void cFinger::control() {
 
 	// 指の姿勢によって向きを変化
 	// 旋回関節を試す間コメントアウト
-	for (int jnt = 0; jnt < ARM_JNT; jnt++)	dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+	double fric_static_max = 5.0;
+	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
+		dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+		r_joint_feedback_p[jnt] = dJointGetFeedback(r_joint[jnt]);
+		printf("FingerID = %d  now torque joint %d = (%.3lf,%.3lf,%.3lf)\n", fingerID, jnt + 1, r_joint_feedback_p[jnt]->t1[0], r_joint_feedback_p[jnt]->t1[1], r_joint_feedback_p[jnt]->t1[2]);
+		//	静止摩擦力
+		if (r_joint_feedback_p[jnt]->t1[0] < 5.0) {
+			double tmp = r_joint_feedback_p[jnt]->t1[0];
+			//dJointAddHingeTorque(r_joint[jnt], -tmp);
+		}
+
+		/*for (int i = 0; i < 1; i++) {
+			if (r_joint_feedback_p[jnt]->t1[i] < 5.0)dJointAddHingeTorque(r_joint[jnt], -r_joint_feedback_p[jnt]->t1[i]);
+		}*/
+
+	}
 	
-	printf("FingerID = %d torque before saturation =%lf\n", fingerID, rotTau);
+
+
+	printf("FingerID = %d senkai torque before saturation =%lf\n", fingerID, rotTau);
 	double MAX = 10000.0, MIN = -10000.0;
 	if (rotTau > MAX )rotTau = MAX;
 	if (rotTau < MIN)rotTau = MIN;
-	printf("FingerID = %d torque =%lf\n", fingerID, rotTau);
-	if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? -10.0:3.0);
+	printf("FingerID = %d senkai torque =%lf\n", fingerID, rotTau);
+	//if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:-rotTau);
 }
 
 #endif

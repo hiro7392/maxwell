@@ -145,8 +145,8 @@ constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
 
-constexpr double	ARM_JNT1_VISCOUS = 40.0;		// 粘性係数	//XY平面上で実験字は　1.0
-constexpr double	ARM_JNT2_VISCOUS = 40.0;		// 粘性係数
+constexpr double	ARM_JNT1_VISCOUS = 60.0;		// 粘性係数	//XY平面上で実験字は　1.0
+constexpr double	ARM_JNT2_VISCOUS = 60.0;		// 粘性係数
 constexpr double    OFFSET_VAL = -0.5;			//　実験では-0.3
 //constexpr double    OFFSET_VAL = -0.0001;			//　実験では-0.3
 constexpr double	OFFSET_VAL_SENKAI = PI / 8.0;	//旋回関節用のオフセット
