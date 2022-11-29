@@ -224,7 +224,7 @@ void cFinger::control() {
 	if (rotTau > MAX )rotTau = MAX;
 	if (rotTau < MIN)rotTau = MIN;
 	printf("FingerID = %d senkai torque =%lf\n", fingerID, rotTau);
-	if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:-rotTau);
+	//if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:-rotTau);
 }
 
 #endif
