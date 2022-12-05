@@ -197,6 +197,11 @@ int cFinger::armWithoutInertiaShaping()
 	return	0;
 }
 
+#if SIM_3D
+
+#include"armDynPara3Joint3D.h"
+
+#else
 ////////////////////////////////////////////////////////
 // ダイナミクス設定
 // 入力：関節変数
@@ -232,9 +237,11 @@ int cFinger::armDynPara()
 	//for(jnt=0;jnt<ARM_JNT;jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];	//オリジナル
 	for (jnt = 0; jnt < ARM_JNT; jnt++)	this->dyn.h.el[jnt][0] -= this->dyn.V[jnt] * this->jnt_vel[jnt];
 
-	// ヤコビアン
+	// ヤコビアン 2次元バージョン
 	this->kine.J.el[0][0] = -(l1*S1+l2*S12);	this->kine.J.el[0][1] = -l2*S12;
 	this->kine.J.el[1][0] = l1*C1+l2*C12;	this->kine.J.el[1][1] = l2*C12;
+
+
 	// 慣性行列微分
 	this->dyn.dMq.el[0][0] = -2*m2*l1*lg2*S2*this->var.dq.el[1][0];
 	this->dyn.dMq.el[0][1] = this->dyn.dMq.el[1][0] = -m2*l1*lg2*S2*this->var.dq.el[1][0];
@@ -307,7 +314,7 @@ int cFinger::armDynPara()
 	rotImp.h += imp.G.el[0][2];
 	return	0;
 }
-
+#endif
 
 
 //

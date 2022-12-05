@@ -128,6 +128,7 @@ public:
 	int armWithoutInertiaShaping();
 	int ctrlPreProcessing();
 	int armDynPara();
+	int armDynPara3D3Joint();
 
 	int armInvKine(Kinematics* kine, Variable* var);
 	int armJacob(Kinematics* kine, Variable* var);

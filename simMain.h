@@ -11,7 +11,7 @@
 #include "setRobot.h"
 #include "matBase.h"
 #include "texturepath.h"
-
+#define SIM_3D 0
 
 //matplotlibでグラフ描画用
 //#include <iostream>
@@ -97,6 +97,7 @@
 
 #define FILENAME_VIDEO	FILE_SAVE_DIR "cap.mp4"		// ビデオ名
 
+
 // アーム定義
 // 2自由度アーム　各リンクは円柱で構成
 
@@ -122,8 +123,10 @@ constexpr int	ARM_N1 = 0;	// アーム番号
 constexpr int	ARM_N2 = 1;	// アーム番号
 
 constexpr int	ARM_JNT = 2;	// アーム関節数
-constexpr int	ARM_M1 = 0;	// アーム関節番号
-constexpr int	ARM_M2 = 1;	// アーム関節番号
+//constexpr int	ARM_JNT = 3;	// アーム関節数
+
+constexpr int	ARM_M1 = 0;		// アーム関節番号
+constexpr int	ARM_M2 = 1;		// アーム関節番号
 constexpr double	ARM_LINK1_LEN = 0.65;		// リンク長 0.75
 constexpr double	ARM_LINK2_LEN = 0.55;		// リンク長
 
@@ -180,6 +183,37 @@ T getDistPlain(T x1, T y1, T x2, T y2) {
 // 構造体定義
 ////////////////////////////////////////////////////////
 
+
+
+
+#if SIM_3D
+const int ARM_JNT_3D = 3;
+
+// 変数構造体
+struct Variable {
+	Matrix	q, dq, ddq;	// 関節角度，関節速度，関節加速度
+	Matrix	r, dr, ddr;	// 手先位置，手先速度，手先加速度
+	Matrix	F;	// 手先外力
+//	Matrix	dq;	// 関節速度
+//	Matrix	dr;	// 手先速度
+//	Matrix	ddq;	// 関節加速度
+//	Matrix	ddr;	// 手先加速度
+	/*
+	// 補足変数（初期値）
+	Matrix	q0;	// 関節角
+	Matrix	r0;	// 手先位置
+	Matrix	F0;	// 手先外力
+	Matrix	dq0;	// 関節速度
+	Matrix	dr0;	// 手先速度
+	*/
+	Variable() {
+		matInit(&q, ARM_JNT_3D, 1); matInit(&dq, ARM_JNT_3D, 1); matInit(&ddq, ARM_JNT_3D, 1);
+		matInit(&r, DIM3, 1); matInit(&dr, DIM3, 1); matInit(&ddr, DIM3, 1);
+		matInit(&F, DIM3, 1);
+	}
+};
+
+#else
 // 変数構造体
 struct Variable {
 	Matrix	q, dq, ddq;	// 関節角度，関節速度，関節加速度
@@ -204,11 +238,35 @@ struct Variable {
 	}
 };
 
+#endif
 
-// 運動学構造体
-struct Kinematics {       //
+
+
+
+#if SIM_3D
+//	3次元用
+
+struct Kinematics {
+	double	l[ARM_JNT_3D];		// リンク長
+	double	lg[ARM_JNT_3D];	// リンク重心位置までの長さ
+	double	r[ARM_JNT_3D];		// リンク半径（太さ方向）
+	Matrix	J;	// ヤコビアン
+	Matrix	dJ;	// ヤコビアン微分
+	Matrix	Jt, Jinv;	// 転置行列，逆行列
+
+	Kinematics() {
+		this->l[ARM_M1] = ARM_LINK1_LEN;	this->l[ARM_M2] = ARM_LINK2_LEN;
+		this->lg[ARM_M1] = ARM_LINK1_COG_LEN;	this->lg[ARM_M2] = ARM_LINK2_COG_LEN;
+		this->r[ARM_M1] = ARM_LINK1_RAD;	this->r[ARM_M2] = ARM_LINK2_RAD;
+		matInit(&J, ARM_JNT_3D, ARM_JNT_3D);	matInit(&dJ, ARM_JNT_3D, ARM_JNT_3D);
+		matInit(&Jt, ARM_JNT_3D, ARM_JNT_3D);	matInit(&Jinv, ARM_JNT_3D, ARM_JNT_3D);
+	}
+};
+#else
+// 運動学構造体	//2次元用
+struct Kinematics {
 	double	l[ARM_JNT];		// リンク長
-	double	lg[ARM_JNT];		// リンク重心位置までの長さ
+	double	lg[ARM_JNT];	// リンク重心位置までの長さ
 	double	r[ARM_JNT];		// リンク半径（太さ方向）
 	Matrix	J;	// ヤコビアン
 	Matrix	dJ;	// ヤコビアン微分
@@ -218,12 +276,35 @@ struct Kinematics {       //
 		this->l[ARM_M1] = ARM_LINK1_LEN;	this->l[ARM_M2] = ARM_LINK2_LEN;
 		this->lg[ARM_M1] = ARM_LINK1_COG_LEN;	this->lg[ARM_M2] = ARM_LINK2_COG_LEN;
 		this->r[ARM_M1] = ARM_LINK1_RAD;	this->r[ARM_M2] = ARM_LINK2_RAD;
-		matInit(&J, ARM_JNT, ARM_JNT); matInit(&dJ, ARM_JNT, ARM_JNT);
+		matInit(&J, ARM_JNT, ARM_JNT);	matInit(&dJ, ARM_JNT, ARM_JNT);
 		matInit(&Jt, ARM_JNT, ARM_JNT); matInit(&Jinv, ARM_JNT, ARM_JNT);
 	}
 };
+// 
+
+#endif
 
 
+#if SIM_3D
+// 動力学構造体
+// Mq*ddq + h + V*dq = tau + Jt*F
+struct Dynamics {       //
+	double	m[ARM_JNT_3D];		// リンク質量
+	Matrix	Mq;		// 慣性項
+	Matrix	h;	// コリオリ・遠心力項
+	double	V[ARM_JNT_3D];	// 粘性摩擦係数
+	// 補足変数
+	Matrix	dMq;		// 慣性項微分
+
+	Dynamics() {
+		this->m[ARM_M1] = ARM_LINK1_MASS;	this->m[ARM_M2] = ARM_LINK2_MASS;
+		this->V[ARM_M1] = ARM_JNT1_VISCOUS;	this->V[ARM_M2] = ARM_JNT2_VISCOUS;
+		matInit(&Mq, ARM_JNT_3D, ARM_JNT_3D); matInit(&h, ARM_JNT_3D, 1);
+		matInit(&dMq, ARM_JNT_3D, ARM_JNT_3D);
+	}
+};
+
+#else
 // 動力学構造体
 // Mq*ddq + h + V*dq = tau + Jt*F
 struct Dynamics {       //
@@ -241,6 +322,7 @@ struct Dynamics {       //
 		matInit(&dMq, ARM_JNT, ARM_JNT);
 	}
 };
+#endif
 
 
 // インピーダンス構造体
@@ -264,11 +346,19 @@ struct  Impedance {
 
 
 	Impedance() {
+#if SIM_3D
+		matInit(&M, DIM3, DIM3); matInit(&C, DIM3, DIM3); matInit(&K, DIM3, DIM3);
+		matInit(&Minv, DIM3, DIM3); matInit(&Cinv, DIM3, DIM3); matInit(&Kinv, DIM3, DIM3);
+		matInit(&Gp, DIM3, DIM3); matInit(&Gv, DIM3, DIM3);
+		matInit(&dM, DIM3, DIM3); matInit(&dC, DIM3, DIM3); matInit(&dK, DIM3, DIM3);
+		matInit(&K0, DIM3, DIM3);
+#else
 		matInit(&M, DIM2, DIM2); matInit(&C, DIM2, DIM2); matInit(&K, DIM2, DIM2);
 		matInit(&Minv, DIM2, DIM2); matInit(&Cinv, DIM2, DIM2); matInit(&Kinv, DIM2, DIM2);
 		matInit(&Gp, DIM2, DIM2); matInit(&Gv, DIM2, DIM2);
 		matInit(&dM, DIM2, DIM2); matInit(&dC, DIM2, DIM2); matInit(&dK, DIM2, DIM2);
 		matInit(&K0, DIM2, DIM2);
+#endif
 		//	重力項の計算用
 		// matInit(row,col)//el[_row][_col] 
 		matInit(&oTs, 4, 4); matInit(&sT1, 4, 4); matInit(&T12, 4, 4);
@@ -281,6 +371,8 @@ struct  Impedance {
 		matInit(&dq2_oTs, 4, 4); matInit(&dq2_oT1, 4, 4); matInit(&dq2_oT2, 4, 4);
 	}
 };
+
+
 
 struct RotImpedance {
 	//double K = 2.0, C = 4.0, lg = 0.03;
@@ -498,9 +590,13 @@ public:
 #if 0 //paralell
 	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / angle_rate*finger_state ,-PI / angle_rate* finger_state };	// ロボット初期姿勢
 	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0-  PI / angle_rate* finger_state, PI / angle_rate* finger_state };	// ロボット初期姿勢
-#else	
+#elif 0
 	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 9.0 * finger_state ,-PI /9.0 * finger_state };	// ロボット初期姿勢
 	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 9.0 * finger_state, PI /9.0 * finger_state };	// ロボット初期姿勢
+#else
+	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 4.0 * finger_state ,+PI / 3.0 * finger_state };	// ロボット初期姿勢
+	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 4.0 * finger_state, -PI / 3.0 * finger_state };	// ロボット初期姿勢
+
 #endif
 	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 7,-PI/7 };	// ロボット初期姿勢
 	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, +PI/7};	// ロボット初期姿勢

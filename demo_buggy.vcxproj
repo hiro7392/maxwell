@@ -759,6 +759,7 @@
     <ClCompile Include="video.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="armDynPara3Joint3D.h" />
     <ClInclude Include="BMP.h" />
     <ClInclude Include="calculateParameter.h" />
     <ClInclude Include="command.h" />
