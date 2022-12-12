@@ -10,6 +10,7 @@ void MatPrintDebug4x4(Matrix& mat, std::string name) {
 	}
 	return;
 }
+// mat.el[列][行]
 void MatPrintDebug4x1(Matrix& mat, std::string name) {
 	std::cout << name << "= " << std::endl;
 	for (int col = 0; col < 4; col++) {
@@ -325,14 +326,64 @@ int cFinger::setTransMatrixDq() {
 	imp.dqkoTi[2][1] = imp.dq1_oT2;
 	imp.dqkoTi[2][2] = imp.dq2_oT2;
 
-
-
 	return 0;
 }
 
+Matrix getHi(double sx, double sy, double sz, double Ixx, double Iyy, double Izz,double m) {
+	Matrix H;
+	matInit(&H, 4, 4);
+	// mat.el[列][行]
+	H.el[0][0] = (-Ixx + Iyy + Izz) / 2.0;	H.el[1][0] = 0.0;						H.el[2][0] = 0.0;						H.el[3][0] = m*sx;
+	H.el[0][1] = 0;							H.el[1][1] = (Ixx - Iyy + Izz) / 2.0;	H.el[2][1] = 0.0;						H.el[3][1] = m * sy;
+	H.el[0][2] = 0;							H.el[1][2] = 0;							H.el[2][2] = (Ixx - Iyy + Izz) / 2.0;	H.el[3][2]= m * sz;
+	H.el[0][3] = m * sx;					H.el[1][3] = m * sy;					H.el[2][3] = m * sz;					H.el[3][3] = m;
+	return H;
+
+
+}
 //	疑似慣性行列Hi_hatの計算
 int cFinger::setHi() {
+	//	旋回関節の動的パラメータ
+	const dReal* senkai_base_pos = dBodyGetPosition(this->senkai_base.getBody());
+	//	旋回リンクの重心位置
+	const dReal* senkai_link_pos = dBodyGetPosition(this->senkai_link.getBody());
+	//	リンク1の重心位置
+	const dReal* link1_pos = dBodyGetPosition(this->link1.getBody());
+	//	リンク2の重心位置
+	const dReal* link2_pos = dBodyGetPosition(this->link2.getBody());
+	//	カプセルの重心位置
+	const dReal* capsule_pos = dBodyGetPosition(this->fingerTopCapsule.getBody());
+	//	センサの重心位置
+	const dReal* sensor_pos = dBodyGetPosition(this->sensor.getBody());
 
+	static double	m0, m1, m2, l0, l1, l2, lg0, lg1, lg2;
+	static double	I0xx, I0yy, I0zz, I1xx, I1yy, I1zz, I2xx, I2yy, I2zz;
+	m0 = this->senkai_link.getMass(); m1 = this->dyn.m[ARM_M1]; m2 = this->dyn.m[ARM_M2];
+	l0 = SENKAI_LINK_LEN; l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2];
+	lg0 = SENKAI_LINK_LEN / 2.0; lg1 = this->kine.lg[ARM_M1]; lg2 = this->kine.lg[ARM_M2];
+
+	//	各軸に関する慣性モーメント(リンクを円柱として計算)
+	I0xx = I0yy=(SENKAI_LINK_RAD * SENKAI_LINK_RAD / 4 + l1 * l1 / 12) * m0;//I0xx=I0yy
+	I0zz = (1 / 2.0) * m0 * SENKAI_LINK_RAD * SENKAI_LINK_RAD;
+
+	I1yy = I1zz=(this->kine.r[ARM_M1] * this->kine.r[ARM_M1] / 4 + l1 * l1 / 12) * m1;	//I1yy=I1zz
+	I1xx = (1 / 2.0) * m1 * this->kine.r[ARM_M1] * this->kine.r[ARM_M1];
+
+
+	I2yy = I2zz = (this->kine.r[ARM_M2] * this->kine.r[ARM_M2] / 4 + l2 * l2 / 12) * m2;	//I2yy=I2zz
+	I2xx = (1 / 2.0) * m2 * this->kine.r[ARM_M2] * this->kine.r[ARM_M2];
+	
+
+	//	4x4の疑似慣性行列を計算する
+	double sx0, sy0, sz0, sx1, sy1, sz1, sx2, sy2, sz2;
+	sx0 = senkai_link_pos[0]; sy0 = senkai_link_pos[1]; sz0 = senkai_link_pos[2];
+	sx1 = link1_pos[0]; sy1 = link1_pos[1]; sz1 = link1_pos[2];
+	sx2 = link2_pos[0]; sy2 = link2_pos[1]; sz2 = link2_pos[2];
+	imp.H_hat[0] = getHi(sx0, sy0, sz0, I0xx + m0 * (sy0 * sy0 + sz0 * sz0), I0yy + m0 * (sx0 * sx0 + sz0 * sz0), I0zz + m0 * (sx0 * sx0 + sy0 * sy0),m0);
+	imp.H_hat[1] = getHi(sx1, sy1, sz1, I1xx + m1 * (sy1 * sy1 + sz1 * sz1), I1yy + m1 * (sx1 * sx1 + sz1 * sz1), I1zz + m1 * (sx1 * sx1 + sy1 * sy1), m1);
+	imp.H_hat[2] = getHi(sx2, sy2, sz2, I2xx + m2 * (sy2 * sy2 + sz2 * sz2), I2yy + m2 * (sx2 * sx2 + sz2 * sz2), I2zz + m2 * (sx2 * sx2 + sy2 * sy2), m2);
+
+	
 	return 0;
 }
 

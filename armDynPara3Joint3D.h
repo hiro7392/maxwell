@@ -50,12 +50,10 @@ int cFinger::armDynPara() {
 	//　重力項の計算
 	//  計算した重力項をhに足し合わせる
 	// 
-	// 旋回関節の動的パラメータ
+	//	旋回関節の動的パラメータ
 	const dReal* senkai_base_pos = dBodyGetPosition(this->senkai_base.getBody());
-
 	//	旋回リンクの重心位置
 	const dReal* senkai_link_pos = dBodyGetPosition(this->senkai_link.getBody());
-
 	//	リンク1の重心位置
 	const dReal* link1_pos = dBodyGetPosition(this->link1.getBody());
 	//	リンク2の重心位置
