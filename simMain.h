@@ -144,6 +144,7 @@ constexpr double	SENSOR_LEN = 0.01;	//センサの長さ等について設定
 
 constexpr double	ARM_LINK1_RAD = 0.125;		// リンク半径
 constexpr double	ARM_LINK2_RAD = 0.10;		// リンク半径
+constexpr double	SENKAI_LINK_RAD = ARM_LINK2_RAD / 2.0;
 constexpr double	ARM_LINK1_MASS = 1.0;		// 質量
 constexpr double	ARM_LINK2_MASS = 0.8;		// 質量
 constexpr double	ARM_BASE_MASS = 1.0;		// オリジナル　14.0
@@ -343,7 +344,8 @@ struct  Impedance {
 	Matrix	dqs_oTs, dqs_oT1, dqs_oT2;	//	同次行列の旋回角による微分
 	Matrix	dq1_oTs, dq1_oT1, dq1_oT2;	//	同次行列のリンク1による微分
 	Matrix	dq2_oTs, dq2_oT1, dq2_oT2;	//	同次行列のリンク2による微分
-
+	Matrix	H_hat[3];					//	疑似慣性行列
+	Matrix	dqkoTi[3][3];				//	同次行列の各関節微分	dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
 
 	Impedance() {
 #if SIM_3D

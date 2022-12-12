@@ -166,7 +166,6 @@ int cFinger::calculateGravity() {
 	//	MatPrintDebugAll(tmp2, "tmp2", 1, 1);
 	imp.G.el[0][0] += ARM_LINK2_MASS * tmp2.el[0][0];
 	//	printf("G[0][0] = %lf\n", imp.G.el[0][0]);
-	
 
 	//	関節1について
 	matMul(&tmp, &imp.s1, &imp.dq1_oT1);
@@ -312,7 +311,40 @@ int cFinger::setTransMatrixDq() {
 	//MatPrintDebug4x4(imp.dq2_oT2, "dq2_oT2");
 	//MatPrintDebug4x4(imp.dqs_oTs, "dqs_oTs");
 	
+	//	同次行列の各関節微分を格納
+	//	dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
+	imp.dqkoTi[0][0] = imp.dqs_oTs;	//dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
+	imp.dqkoTi[0][1] = imp.dq1_oTs;	
+	imp.dqkoTi[0][2] = imp.dq2_oTs;	
 
+	imp.dqkoTi[1][0] = imp.dqs_oT1;	//dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
+	imp.dqkoTi[1][1] = imp.dq1_oT1;
+	imp.dqkoTi[1][2] = imp.dq2_oT1;
+
+	imp.dqkoTi[2][0] = imp.dqs_oT2;	//dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
+	imp.dqkoTi[2][1] = imp.dq1_oT2;
+	imp.dqkoTi[2][2] = imp.dq2_oT2;
+
+
+
+	return 0;
+}
+
+//	疑似慣性行列Hi_hatの計算
+int cFinger::setHi() {
+
+	return 0;
+}
+
+//	慣性行列の計算	3x3
+int cFinger::setMq() {
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			int k = std::max(i, j);
+			Matrix tmp1, tmp2;
+			matInit(&tmp1, 4, 4); matInit(&tmp2, 4, 4);
+		}
+	}
 
 	return 0;
 }

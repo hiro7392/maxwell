@@ -140,6 +140,8 @@ public:
 	int senkaiDynPara();			//	旋回関節のパラメータ
 	int calculateGravity();			//	重力項を計算
 	int setTransMatrixDq();			//	同次行列の関節角による微分を計算
+	int setMq();	//	慣性行列の計算3x3
+	int setHi();	//	疑似慣性行列Hi_hatの計算
 	//kawaharaの変更以前からコメントアウト
 	////	int armInitMatVar(Variable *var);
 	////	int armInitMatKine(Kinematics *kine);
