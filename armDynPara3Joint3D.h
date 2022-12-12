@@ -21,9 +21,7 @@ int cFinger::armDynPara() {
 	S0 = sin(this->senkai_base_jnt);S1 = sin(this->var.q.el[0][0]); S2 = sin(this->var.q.el[1][0]);
 	C12 = cos(this->var.q.el[0][0] + this->var.q.el[1][0]); S12 = sin(this->var.q.el[0][0] + this->var.q.el[1][0]);
 	// 慣性行列
-	this->dyn.Mq.el[0][0] = m1 * lg1 * lg1 + I1 + m2 * (l1 * l1 + lg2 * lg2 + 2 * l1 * lg2 * C2) + I2;
-	this->dyn.Mq.el[0][1] = this->dyn.Mq.el[1][0] = m2 * (lg2 * lg2 + l1 * lg2 * C2) + I2;
-	this->dyn.Mq.el[1][1] = m2 * lg2 * lg2 + I2;
+	this->setMq();
 	// 遠心・コリオリ力
 	this->dyn.h.el[0][0] = -m2 * l1 * lg2 * S2 * (this->var.dq.el[1][0] * this->var.dq.el[1][0] + 2 * this->var.dq.el[0][0] * this->var.dq.el[1][0]);
 	this->dyn.h.el[1][0] = m2 * l1 * lg2 * S2 * this->var.dq.el[0][0] * this->var.dq.el[0][0];
@@ -31,10 +29,14 @@ int cFinger::armDynPara() {
 	//for(jnt=0;jnt<ARM_JNT;jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];	//オリジナル
 	for (jnt = 0; jnt < ARM_JNT; jnt++)	this->dyn.h.el[jnt][0] -= this->dyn.V[jnt] * this->jnt_vel[jnt];
 
-	// ヤコビアン 2次元バージョン
-	this->kine.J.el[0][0] = -(l1 * S1 + l2 * S12);	this->kine.J.el[0][1] = -l2 * S12;
-	this->kine.J.el[1][0] = l1 * C1 + l2 * C12;	this->kine.J.el[1][1] = l2 * C12;
+	// ヤコビアン 2次元	1関節バージョン
+	/*this->kine.J.el[0][0] = -(l1 * S1 + l2 * S12);	this->kine.J.el[0][1] = -l2 * S12;
+	this->kine.J.el[1][0] = l1 * C1 + l2 * C12;	this->kine.J.el[1][1] = l2 * C12;*/
 
+	// ヤコビアン 3次元	3関節バージョン
+	this->kine.J.el[0][0] = 0;						this->kine.J.el[0][1] = -l1 * S1 - l2 * S12; this->kine.J.el[0][2] = -l2 * S12;
+	this->kine.J.el[1][0] = -S0 * (l0 * (fingerID == 1 ? 1:-1) + l1 * S1 + l2 * S12);	this->kine.J.el[1][1] = l1 * C0 * C1 + l2 * C0 * C12; this->kine.J.el[1][2] = l2 * C0 * C12;
+	this->kine.J.el[2][0] = -C0 * (l0 * (fingerID == 1 ? 1 : -1) + l1 * S1 + l2 * S12);	this->kine.J.el[2][1] = l1 * S0 * C1 + l2 * S0 * C12; this->kine.J.el[2][2] = -l2 * S0 * C12;
 
 	// 慣性行列微分
 	this->dyn.dMq.el[0][0] = -2 * m2 * l1 * lg2 * S2 * this->var.dq.el[1][0];

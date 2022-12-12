@@ -369,7 +369,6 @@ int cFinger::setHi() {
 	I1yy = I1zz=(this->kine.r[ARM_M1] * this->kine.r[ARM_M1] / 4 + l1 * l1 / 12) * m1;	//I1yy=I1zz
 	I1xx = (1 / 2.0) * m1 * this->kine.r[ARM_M1] * this->kine.r[ARM_M1];
 
-
 	I2yy = I2zz = (this->kine.r[ARM_M2] * this->kine.r[ARM_M2] / 4 + l2 * l2 / 12) * m2;	//I2yy=I2zz
 	I2xx = (1 / 2.0) * m2 * this->kine.r[ARM_M2] * this->kine.r[ARM_M2];
 	
@@ -389,11 +388,20 @@ int cFinger::setHi() {
 
 //	慣性行列の計算	3x3
 int cFinger::setMq() {
+	setHi();	//	疑似慣性行列Hi_hatの計算
+	// mat.el[列][行]
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
 			int k = std::max(i, j);
-			Matrix tmp1, tmp2;
+			Matrix tmp1, tmp2,dqkTrans,res;
 			matInit(&tmp1, 4, 4); matInit(&tmp2, 4, 4);
+			matInit(&dqkTrans, 4, 4); matInit(&res, 4, 4);
+
+			//	dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
+			matMul(&tmp1, &imp.dqkoTi[k][j], &imp.H_hat[k]);
+			matTrans(&dqkTrans, &imp.dqkoTi[k][j]);		//行列の転置
+			matMul(&tmp2, &tmp1,&dqkTrans);
+			imp.M.el[j][i] = matTrace(&tmp2);
 		}
 	}
 
