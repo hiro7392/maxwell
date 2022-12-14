@@ -51,6 +51,7 @@
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
 #define VIEW_FROM_X 0		//カメラの開始時点での向き
 #define VIEW_FROM_Y 1		//カメラの開始時点での向き
+#define INVERSE true		//同次行列の微分について行列の転地を取りたいとき	
 
 #define ADD_EXT_FORCE 0
 ////////////////////////////////////////////////////////
@@ -381,7 +382,7 @@ struct  Impedance {
 			}
 		}
 	}
-};d
+};
 
 
 

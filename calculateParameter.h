@@ -326,11 +326,20 @@ int cFinger::setTransMatrixDq() {
 	imp.dqkoTi[2][0] = imp.dqs_oT2;	//dqkoTi[i][k]Ç≈ä÷êﬂiÇÃìØéüçsóÒoTiÇÃqkÇ…ä÷Ç∑ÇÈî˜ï™
 	imp.dqkoTi[2][1] = imp.dq1_oT2;
 	imp.dqkoTi[2][2] = imp.dq2_oT2;
-
+#if INVERSE
+	for (int i = 0; i < 3; i++) {
+		for (int k = 0; k < 3; k++) {
+			for (int l = 0; l < 3; l++) {
+				matTrans(&imp.imp.dqkoTi[i][k], &imp.imp.dqkoTi[i][k]);
+			}
+		}
+	}
+#endif
 	return 0;
 }
 // ìØéüçsóÒÇÃìÒâÒî˜ï™ÇÃåvéZ
 int cFinger::getdqjdqkoTi() {
+	
 	double sig = (fingerID == 1 ? 1.0 : -1.0);
 	double	l0, l1, l2;
 	l0 = SENKAI_LINK_LEN; l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2];
@@ -376,19 +385,28 @@ int cFinger::getdqjdqkoTi() {
 	imp.dqjdqk0Ti[2][2][1].el[0][0] = -C12;			imp.dqjdqk0Ti[2][2][1].el[1][0] = S12;			imp.dqjdqk0Ti[2][2][1].el[3][0] = -2*l2*cos(th22_th1);
 	imp.dqjdqk0Ti[2][2][1].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][2][1].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][2][1].el[3][1] = -2 * l2 *C0* sin(th22_th1);
 	imp.dqjdqk0Ti[2][2][1].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][2][1].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][2][1].el[3][2] = -2 * l2 *S0* sin(th22_th1);
+	
 	imp.dqjdqk0Ti[2][1][2] = imp.dqjdqk0Ti[2][2][1];//(j,kÇ™ì¸ÇÍë÷ÇÌÇ¡ÇƒÇ‡åãâ ÇÕìØÇ∂)
 	// ê˘âÒä÷êﬂÇ≈ìÒâÒî˜ï™
 	imp.dqjdqk0Ti[2][0][0].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][0][0].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][0][0].el[2][1] = S0;	imp.dqjdqk0Ti[2][0][0].el[3][1] = -C0 * (l2 * sin(th22_th1) + sig * l0 + l1 * C1);
 	imp.dqjdqk0Ti[2][0][0].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][0][0].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][0][0].el[2][2] = -C0;	imp.dqjdqk0Ti[2][0][0].el[3][2] = S0 * (-l2 * sin(th22_th1) + l0 + l1 * C1);
 	// ä÷êﬂ1Ç≈ìÒâÒî˜ï™
 	imp.dqjdqk0Ti[2][1][1].el[0][0] = -C12;			imp.dqjdqk0Ti[2][1][1].el[1][0] = S12;			imp.dqjdqk0Ti[2][1][1].el[3][0] = -4 * l2 * cos(th22_th1) - l1 * C1;
-	imp.dqjdqk0Ti[2][1][1].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][1][1].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][1][1].el[3][1] = -C0 * (4 * l2 * sin(th22_1) + l1 * C1);
-	imp.dqjdqk0Ti[2][1][1].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][1][1].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][1][1].el[3][2] = -S0 * (4 * l2 * sin(th22_1) + l1 * C1);
+	imp.dqjdqk0Ti[2][1][1].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][1][1].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][1][1].el[3][1] = -C0 * (4 * l2 * sin(th22_th1) + l1 * C1);
+	imp.dqjdqk0Ti[2][1][1].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][1][1].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][1][1].el[3][2] = -S0 * (4 * l2 * sin(th22_th1) + l1 * C1);
 	// ä÷êﬂ2Ç≈ìÒâÒî˜ï™
 	imp.dqjdqk0Ti[2][2][2].el[0][0] = -C12;			imp.dqjdqk0Ti[2][2][2].el[1][0] = S12;			imp.dqjdqk0Ti[2][2][2].el[3][0] = -l2 * cos(th22_th1);
-	imp.dqjdqk0Ti[2][2][2].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][1] = -C0 *l2 * sin(th22_1);
-	imp.dqjdqk0Ti[2][2][2].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][2] = -S0 * l2 * sin(th22_1);
-
+	imp.dqjdqk0Ti[2][2][2].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][1] = -C0 *l2 * sin(th22_th1);
+	imp.dqjdqk0Ti[2][2][2].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][2] = -S0 * l2 * sin(th22_th1);
+#if INVERSE
+	for (int i = 0; i < 3; i++) {
+		for (int k = 0; k < 3; k++) {
+			for (int l = 0; l < 3; l++) {
+				matTrans(&imp.dqjdqk0Ti[i][k][l], &imp.dqjdqk0Ti[i][k][l]);
+			}
+		}
+	}
+#endif
 	return 0;
 }
 
@@ -489,10 +507,11 @@ int cFinger::seth() {
 				//	ìÒäKïîï™Å~Hk
 				matMul(&tmp1, &imp.dqjdqk0Ti[k][j][m], &imp.H_hat[k]);
 				matMul(&tmp2, &tmp1, &imp.dqkoTi[k][i]);
-				now_iteration=_sum=matTrace(&tmp2);	//traceÇÇ∆ÇÈ
+				now_iteration_sum=matTrace(&tmp2);	//traceÇÇ∆ÇÈ
 				result += now_iteration_sum * this->var.dq.el[j][0] * this->var.dq.el[m][0];
 			}
 		}
 		dyn.h.el[0][i] = result;
 	}
+	return 0;
 }
