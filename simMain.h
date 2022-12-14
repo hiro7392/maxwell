@@ -345,7 +345,8 @@ struct  Impedance {
 	Matrix	dq1_oTs, dq1_oT1, dq1_oT2;	//	同次行列のリンク1による微分
 	Matrix	dq2_oTs, dq2_oT1, dq2_oT2;	//	同次行列のリンク2による微分
 	Matrix	H_hat[3];					//	疑似慣性行列
-	Matrix	dqkoTi[3][3];				//	同次行列の各関節微分	dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
+	Matrix	[3][3];				//	同次行列の各関節微分	dqkoTi[i][k]で関節iの同次行列oTiのqkに関する微分
+	Matrix dqjdqk0Ti[3][3][3];			//	dqjdqkoTi[i][j][k]で関節iの同次行列oTiのqkに関する微分とqjに関する微分
 
 	Impedance() {
 #if SIM_3D
@@ -371,6 +372,14 @@ struct  Impedance {
 		matInit(&dqs_oTs, 4, 4); matInit(&dqs_oT1, 4, 4); matInit(&dqs_oT2, 4, 4);
 		matInit(&dq1_oTs, 4, 4); matInit(&dq1_oT1, 4, 4); matInit(&dq1_oT2, 4, 4);
 		matInit(&dq2_oTs, 4, 4); matInit(&dq2_oT1, 4, 4); matInit(&dq2_oT2, 4, 4);
+		for (int i = 0; i < 3; i++) {
+			for (int k = 0; k < 3; k++) {
+				matInit(&dqkoTi[i][k], 4, 4);
+				for (int l = 0; l < 3; l++) {
+					matInit(&dqjdqk0Ti[i][k][l], 4, 4);
+				}
+			}
+		}
 	}
 };
 

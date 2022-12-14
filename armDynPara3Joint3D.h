@@ -20,6 +20,9 @@ int cFinger::armDynPara() {
 	C0 = cos(this->senkai_base_jnt);C1 = cos(this->var.q.el[0][0]); C2 = cos(this->var.q.el[1][0]); 
 	S0 = sin(this->senkai_base_jnt);S1 = sin(this->var.q.el[0][0]); S2 = sin(this->var.q.el[1][0]);
 	C12 = cos(this->var.q.el[0][0] + this->var.q.el[1][0]); S12 = sin(this->var.q.el[0][0] + this->var.q.el[1][0]);
+	
+	//疑似慣性行列Hi_hatの計算 Mqとdyn.hの計算に使用する
+	this->setHi();	
 	// 慣性行列
 	this->setMq();
 	// 遠心・コリオリ力
@@ -39,12 +42,18 @@ int cFinger::armDynPara() {
 	this->kine.J.el[2][0] = -C0 * (l0 * (fingerID == 1 ? 1 : -1) + l1 * S1 + l2 * S12);	this->kine.J.el[2][1] = l1 * S0 * C1 + l2 * S0 * C12; this->kine.J.el[2][2] = -l2 * S0 * C12;
 
 	// 慣性行列微分
-	this->dyn.dMq.el[0][0] = -2 * m2 * l1 * lg2 * S2 * this->var.dq.el[1][0];
+	/*this->dyn.dMq.el[0][0] = -2 * m2 * l1 * lg2 * S2 * this->var.dq.el[1][0];
 	this->dyn.dMq.el[0][1] = this->dyn.dMq.el[1][0] = -m2 * l1 * lg2 * S2 * this->var.dq.el[1][0];
-	this->dyn.dMq.el[1][1] = 0.0;
+	this->dyn.dMq.el[1][1] = 0.0;*/
 	// ヤコビアン微分
-	this->kine.dJ.el[0][0] = -this->eff_vel[CRD_Y]; this->kine.dJ.el[0][1] = -l2 * C12 * (this->var.dq.el[0][0] + this->var.dq.el[1][0]);
-	this->kine.dJ.el[1][0] = this->eff_vel[CRD_X]; this->kine.dJ.el[1][1] = -l2 * S12 * (this->var.dq.el[0][0] + this->var.dq.el[1][0]);
+	/*this->kine.dJ.el[0][0] = -this->eff_vel[CRD_Y]; this->kine.dJ.el[0][1] = -l2 * C12 * (this->var.dq.el[0][0] + this->var.dq.el[1][0]);
+	this->kine.dJ.el[1][0] = this->eff_vel[CRD_X]; this->kine.dJ.el[1][1] = -l2 * S12 * (this->var.dq.el[0][0] + this->var.dq.el[1][0]);*/
+
+	// ヤコビアン 3次元	3関節バージョン
+	this->kine.dJ.el[0][0] = 0;		this->kine.dJ.el[0][1] = -l1 * C1 * this->var.dq.el[0][0] - l2 * C12 * (this->var.dq.el[0][0] + this->var.dq.el[1][0]);	this->kine.dJ.el[0][2] = -l2 * C12* (this->var.dq.el[0][0] + this->var.dq.el[1][0]);
+	this->kine.J.el[1][0] = -S0 * (l0 * (fingerID == 1 ? 1 : -1) + l1 * S1 + l2 * S12);	this->kine.J.el[1][1] = l1 * C0 * C1 + l2 * C0 * C12; this->kine.J.el[1][2] = l2 * C0 * C12;
+	this->kine.J.el[2][0] = -C0 * (l0 * (fingerID == 1 ? 1 : -1) + l1 * S1 + l2 * S12);	this->kine.J.el[2][1] = l1 * S0 * C1 + l2 * S0 * C12; this->kine.J.el[2][2] = -l2 * S0 * C12;
+
 	// ヤコビアン転置，ヤコビアン逆行列
 	matTrans(&this->kine.Jt, &this->kine.J);		// J^{T}
 	matInv(&this->kine.Jinv, NULL, &this->kine.J);		// J^{-1}（正則の場合のみ対応）

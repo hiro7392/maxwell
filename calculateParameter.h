@@ -54,12 +54,13 @@ void MatPrintDebugAll(Matrix& mat, std::string name,int Col,int Row) {
 }
 //	同次行列の計算
 int cFinger::setTransMatrix() {
+	double sig = (fingerID == 1 ? 1.0 : -1.0);
 	//	同次行列の計算
 	//	リンク1 1行目
 	this->imp.sT1.el[0][0] = cos(jnt_pos[0]);
 	imp.sT1.el[1][0] = -sin(jnt_pos[0]);
 	imp.sT1.el[2][0] = 0;
-	imp.sT1.el[3][0] = ARM_LINK1_LEN * cos(jnt_pos[0]);
+	imp.sT1.el[3][0] = ARM_LINK1_LEN * cos(jnt_pos[0])*sig;
 
 	// 2行目
 	imp.sT1.el[0][1] = sin(jnt_pos[0]);
@@ -328,6 +329,68 @@ int cFinger::setTransMatrixDq() {
 
 	return 0;
 }
+// 同次行列の二回微分の計算
+int cFinger::getdqjdqkoTi() {
+	double sig = (fingerID == 1 ? 1.0 : -1.0);
+	double	l0, l1, l2;
+	l0 = SENKAI_LINK_LEN; l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2];
+	double	C0, S0, C1, C2, S1, S2, C12, S12;
+	double th22_th1 = this->var.q.el[0][0] * 2.0 + this->var.q.el[1][0];
+	// 三角関数
+	C0 = cos(this->senkai_base_jnt); C1 = cos(this->var.q.el[0][0]); C2 = cos(this->var.q.el[1][0]);
+	S0 = sin(this->senkai_base_jnt); S1 = sin(this->var.q.el[0][0]); S2 = sin(this->var.q.el[1][0]);
+	C12 = cos(this->var.q.el[0][0] + this->var.q.el[1][0]); S12 = sin(this->var.q.el[0][0] + this->var.q.el[1][0]);
+
+	//	dqjdqkoTi[i][j][k]で関節iの同次行列oTiのqkに関する微分とqjに関する微分
+	//	Matrix dqjdqk0Ti[3][3][3];
+	Matrix zeroMat; matInit(&zeroMat, 4, 4);
+	// mat.el[列][行]
+	//	oTsについて
+	imp.dqjdqk0Ti[0][0][0].el[1][1] = -C0; imp.dqjdqk0Ti[0][0][0].el[2][1] = S0;	imp.dqjdqk0Ti[0][0][0].el[3][1] = l0 * C0;
+	imp.dqjdqk0Ti[0][0][0].el[1][2] = -S0; imp.dqjdqk0Ti[0][0][0].el[2][2] = -C0;	imp.dqjdqk0Ti[0][0][0].el[3][2] = l0 * S0;
+	//	oTsは旋回関節以外は関与しないので他はすべてゼロ
+
+	//	oT1について
+	imp.dqjdqk0Ti[1][1][0].el[0][1] = -S0 * C1;	imp.dqjdqk0Ti[1][1][0].el[1][1] = -S0 * S1; imp.dqjdqk0Ti[1][1][0].el[3][1] = l1*S0 * S1;
+	imp.dqjdqk0Ti[1][1][0].el[0][2] = C0 * C1;	imp.dqjdqk0Ti[1][1][0].el[1][2] = -C0 * S1; imp.dqjdqk0Ti[1][1][0].el[3][2] = -l1 * C0 * S1;
+	imp.dqjdqk0Ti[1][0][1] = imp.dqjdqk0Ti[1][1][0];//(j,kが入れ替わっても結果は同じ)
+	// 旋回関節で二回微分
+	imp.dqjdqk0Ti[1][0][0].el[0][1] = -C0 * S1;	imp.dqjdqk0Ti[1][0][0].el[1][1] = -C0 * C1; imp.dqjdqk0Ti[1][0][0].el[2][1] =S0;		imp.dqjdqk0Ti[1][0][0].el[3][1] =-C0*(l0*sig+l1*C1);
+	imp.dqjdqk0Ti[1][0][0].el[0][2] = -S0 * S1;	imp.dqjdqk0Ti[1][0][0].el[1][2] = -S0 * C1; imp.dqjdqk0Ti[1][0][0].el[2][2] = -C0;		imp.dqjdqk0Ti[1][0][0].el[3][1] = S0 * (l0 - l1 * C1);
+	//	関節1で二回微分
+	imp.dqjdqk0Ti[1][1][1].el[0][0] = -C1;		imp.dqjdqk0Ti[1][1][1].el[1][0] = S1;		imp.dqjdqk0Ti[1][1][1].el[3][0] = -l1 * C1;
+	imp.dqjdqk0Ti[1][1][1].el[0][1] = -C0 * S1; imp.dqjdqk0Ti[1][1][1].el[1][1] = -C0 * C1; imp.dqjdqk0Ti[1][1][1].el[3][1] = -l1 * C1 *C0;
+	imp.dqjdqk0Ti[1][1][1].el[0][2] = -S0 * C1; imp.dqjdqk0Ti[1][1][1].el[1][2] = -S0 * C1; imp.dqjdqk0Ti[1][1][1].el[3][2] = -l1 * C1 * S0;
+
+	//	0T2について
+	//	旋回関節と関節1に関して微分
+	imp.dqjdqk0Ti[2][1][0].el[0][1] = -S0 * C12;	imp.dqjdqk0Ti[2][1][0].el[1][1] = S0 * S12;		imp.dqjdqk0Ti[2][1][0].el[3][1] = l1*(S0*S1-2*l2*cos(th22_th1));
+	imp.dqjdqk0Ti[2][1][0].el[0][2] = C0 * C12;		imp.dqjdqk0Ti[2][1][0].el[1][2] = -C0 * S12;	imp.dqjdqk0Ti[2][1][0].el[3][2] = -l1 * C0 * S1 + 2 * l2 * C0 * cos(th22_th1);
+	imp.dqjdqk0Ti[2][0][1] = imp.dqjdqk0Ti[2][1][0];//(j,kが入れ替わっても結果は同じ)
+
+	//	旋回関節と関節2に関して微分
+	imp.dqjdqk0Ti[2][2][0].el[0][1] = -S0 * C12;	imp.dqjdqk0Ti[2][2][0].el[1][1] = S0 * S12;		imp.dqjdqk0Ti[2][2][0].el[3][1] = l1 * (S0 * S1 - 2 * l2 * cos(th22_th1));
+	imp.dqjdqk0Ti[2][2][0].el[0][2] = C0 * C12;		imp.dqjdqk0Ti[2][2][0].el[1][2] = -C0 * S12;	imp.dqjdqk0Ti[2][2][0].el[3][2] = -l1 * C0 * S1 + 2 * l2 * C0 * cos(th22_th1);
+	imp.dqjdqk0Ti[2][0][2] = imp.dqjdqk0Ti[2][2][0];//(j,kが入れ替わっても結果は同じ)
+	//	関節1と関節2に関して微分
+	imp.dqjdqk0Ti[2][2][1].el[0][0] = -C12;			imp.dqjdqk0Ti[2][2][1].el[1][0] = S12;			imp.dqjdqk0Ti[2][2][1].el[3][0] = -2*l2*cos(th22_th1);
+	imp.dqjdqk0Ti[2][2][1].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][2][1].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][2][1].el[3][1] = -2 * l2 *C0* sin(th22_th1);
+	imp.dqjdqk0Ti[2][2][1].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][2][1].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][2][1].el[3][2] = -2 * l2 *S0* sin(th22_th1);
+	imp.dqjdqk0Ti[2][1][2] = imp.dqjdqk0Ti[2][2][1];//(j,kが入れ替わっても結果は同じ)
+	// 旋回関節で二回微分
+	imp.dqjdqk0Ti[2][0][0].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][0][0].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][0][0].el[2][1] = S0;	imp.dqjdqk0Ti[2][0][0].el[3][1] = -C0 * (l2 * sin(th22_th1) + sig * l0 + l1 * C1);
+	imp.dqjdqk0Ti[2][0][0].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][0][0].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][0][0].el[2][2] = -C0;	imp.dqjdqk0Ti[2][0][0].el[3][2] = S0 * (-l2 * sin(th22_th1) + l0 + l1 * C1);
+	// 関節1で二回微分
+	imp.dqjdqk0Ti[2][1][1].el[0][0] = -C12;			imp.dqjdqk0Ti[2][1][1].el[1][0] = S12;			imp.dqjdqk0Ti[2][1][1].el[3][0] = -4 * l2 * cos(th22_th1) - l1 * C1;
+	imp.dqjdqk0Ti[2][1][1].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][1][1].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][1][1].el[3][1] = -C0 * (4 * l2 * sin(th22_1) + l1 * C1);
+	imp.dqjdqk0Ti[2][1][1].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][1][1].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][1][1].el[3][2] = -S0 * (4 * l2 * sin(th22_1) + l1 * C1);
+	// 関節2で二回微分
+	imp.dqjdqk0Ti[2][2][2].el[0][0] = -C12;			imp.dqjdqk0Ti[2][2][2].el[1][0] = S12;			imp.dqjdqk0Ti[2][2][2].el[3][0] = -l2 * cos(th22_th1);
+	imp.dqjdqk0Ti[2][2][2].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][1] = -C0 *l2 * sin(th22_1);
+	imp.dqjdqk0Ti[2][2][2].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][2] = -S0 * l2 * sin(th22_1);
+
+	return 0;
+}
 
 Matrix getHi(double sx, double sy, double sz, double Ixx, double Iyy, double Izz,double m) {
 	Matrix H;
@@ -339,8 +402,8 @@ Matrix getHi(double sx, double sy, double sz, double Ixx, double Iyy, double Izz
 	H.el[0][3] = m * sx;					H.el[1][3] = m * sy;					H.el[2][3] = m * sz;					H.el[3][3] = m;
 	return H;
 
-
 }
+
 //	疑似慣性行列Hi_hatの計算
 int cFinger::setHi() {
 	//	旋回関節の動的パラメータ
@@ -388,7 +451,7 @@ int cFinger::setHi() {
 
 //	慣性行列の計算	3x3
 int cFinger::setMq() {
-	setHi();	//	疑似慣性行列Hi_hatの計算
+	
 	// mat.el[列][行]
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -406,4 +469,12 @@ int cFinger::setMq() {
 	}
 
 	return 0;
+}
+
+
+// 遠心・コリオリ力の計算
+int cFinger::seth() {
+	for (int i = 0; i < 3; i++) {
+			
+	}
 }
