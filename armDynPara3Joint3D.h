@@ -47,7 +47,7 @@ int cFinger::armDynPara() {
 	this->kine.J.el[2][0] = -C0 * (l0 * (fingerID == 1 ? 1 : -1) + l1 * S1 + l2 * S12);	this->kine.J.el[2][1] = l1 * S0 * C1 + l2 * S0 * C12; this->kine.J.el[2][2] = -l2 * S0 * C12;
 	// ƒ„ƒRƒrƒAƒ“”÷•ª
 	double  dth0, dth1, dth2;
-	dth0 = senkai_base_jnt_vel;
+	dth0 = this->senkai_base_vel;
 	dth1 = this->var.dq.el[0][0];	dth2 = this->var.dq.el[1][0];
 
 	this->kine.dJ.el[0][0] = 0	; this->kine.dJ.el[0][1] = -l1 * C1 * dth1 - l2 * C12 * (dth1 + dth2); this->kine.dJ.el[0][2] = - l2 * C12 * (dth1 + dth2);

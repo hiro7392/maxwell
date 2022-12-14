@@ -11,7 +11,7 @@
 #include "setRobot.h"
 #include "matBase.h"
 #include "texturepath.h"
-#define SIM_3D 0
+#define SIM_3D 1
 
 //matplotlibでグラフ描画用
 //#include <iostream>
@@ -123,9 +123,12 @@ constexpr int	ARM_NUM = 2;	// アーム本数
 constexpr int	ARM_N1 = 0;	// アーム番号
 constexpr int	ARM_N2 = 1;	// アーム番号
 
+#if SIM_3D
+constexpr int	ARM_JNT = 3;	// アーム関節数
+#else 
 constexpr int	ARM_JNT = 2;	// アーム関節数
-//constexpr int	ARM_JNT = 3;	// アーム関節数
 
+#endif
 constexpr int	ARM_M1 = 0;		// アーム関節番号
 constexpr int	ARM_M2 = 1;		// アーム関節番号
 constexpr double	ARM_LINK1_LEN = 0.65;		// リンク長 0.75
