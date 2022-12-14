@@ -474,7 +474,25 @@ int cFinger::setMq() {
 
 // 遠心・コリオリ力の計算
 int cFinger::seth() {
+	int ARM_JNT_NUM = 3;
 	for (int i = 0; i < 3; i++) {
-			
+		//hi=3次元ベクトルh(q)の第i要素
+		double result = 0.0;
+
+		for (int j = 0; j < ARM_JNT_NUM; j++) {
+			for (int m = 0; m < ARM_JNT_NUM; m++) {
+				int k = std::max(i, std::max(j, m));
+				double now_iteration_sum = 0.0;
+				Matrix tmp1, tmp2, dqkTrans, res;
+				matInit(&tmp1, 4, 4); matInit(&tmp2, 4, 4);
+				matInit(&dqkTrans, 4, 4); matInit(&res, 4, 4);
+				//	二階部分×Hk
+				matMul(&tmp1, &imp.dqjdqk0Ti[k][j][m], &imp.H_hat[k]);
+				matMul(&tmp2, &tmp1, &imp.dqkoTi[k][i]);
+				now_iteration=_sum=matTrace(&tmp2);	//traceをとる
+				result += now_iteration_sum * this->var.dq.el[j][0] * this->var.dq.el[m][0];
+			}
+		}
+		dyn.h.el[0][i] = result;
 	}
 }
