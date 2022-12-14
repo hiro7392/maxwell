@@ -451,7 +451,7 @@ int cFinger::setHi() {
 
 //	Šµ«s—ñ‚ÌŒvZ	3x3
 int cFinger::setMq() {
-	
+	getdqjdqkoTi();
 	// mat.el[—ñ][s]
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {

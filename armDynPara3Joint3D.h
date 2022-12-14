@@ -21,13 +21,16 @@ int cFinger::armDynPara() {
 	S0 = sin(this->senkai_base_jnt);S1 = sin(this->var.q.el[0][0]); S2 = sin(this->var.q.el[1][0]);
 	C12 = cos(this->var.q.el[0][0] + this->var.q.el[1][0]); S12 = sin(this->var.q.el[0][0] + this->var.q.el[1][0]);
 	
+	//　同次行列の計算
+	this->setTransMatrixDq();
 	//疑似慣性行列Hi_hatの計算 Mqとdyn.hの計算に使用する
 	this->setHi();	
 	// 慣性行列
 	this->setMq();
 	// 遠心・コリオリ力
-	this->dyn.h.el[0][0] = -m2 * l1 * lg2 * S2 * (this->var.dq.el[1][0] * this->var.dq.el[1][0] + 2 * this->var.dq.el[0][0] * this->var.dq.el[1][0]);
-	this->dyn.h.el[1][0] = m2 * l1 * lg2 * S2 * this->var.dq.el[0][0] * this->var.dq.el[0][0];
+	this->seth();
+	//this->dyn.h.el[0][0] = -m2 * l1 * lg2 * S2 * (this->var.dq.el[1][0] * this->var.dq.el[1][0] + 2 * this->var.dq.el[0][0] * this->var.dq.el[1][0]);
+	//this->dyn.h.el[1][0] = m2 * l1 * lg2 * S2 * this->var.dq.el[0][0] * this->var.dq.el[0][0];
 	// 関節粘性摩擦力をhに追加
 	//for(jnt=0;jnt<ARM_JNT;jnt++)	this->dyn.h.el[jnt][0] += this->dyn.V[jnt] * this->jnt_vel[jnt];	//オリジナル
 	for (jnt = 0; jnt < ARM_JNT; jnt++)	this->dyn.h.el[jnt][0] -= this->dyn.V[jnt] * this->jnt_vel[jnt];
