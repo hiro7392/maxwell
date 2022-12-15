@@ -49,8 +49,8 @@
 
 #define	FLAG_SAVE_IMAGE		0		// 画像保存
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
-#define VIEW_FROM_X 0		//カメラの開始時点での向き
-#define VIEW_FROM_Y 1		//カメラの開始時点での向き
+#define VIEW_FROM_X 1		//カメラの開始時点での向き
+#define VIEW_FROM_Y 0		//カメラの開始時点での向き
 #define INVERSE true		//同次行列の微分について行列の転地を取りたいとき	
 
 #define ADD_EXT_FORCE 0
@@ -124,7 +124,7 @@ constexpr int	ARM_N1 = 0;	// アーム番号
 constexpr int	ARM_N2 = 1;	// アーム番号
 
 #if SIM_3D
-constexpr int	ARM_JNT = 3;	// アーム関節数
+constexpr int	ARM_JNT = 2;	// アーム関節数
 #else 
 constexpr int	ARM_JNT = 2;	// アーム関節数
 
