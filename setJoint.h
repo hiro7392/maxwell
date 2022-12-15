@@ -138,17 +138,7 @@ void cFinger::setJoint() {
 
 
 }
-//把持物体の初期位置
-//dReal capX = -1.2, capY = -0.60, capZ = 0.3;//0.3(二次元) z=1.5(3次元)
-dReal capX = -1.0/*-1.0*/, capY = -0.60, capZ = 1.45;// 1.35 + ARM_LINK2_RAD;//(3次元)
 
-//把持物体の大きさ
-//const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2 // xy平面上
-//double intermit = abs(1.1 * sin(init_jnt_pos[0]-PI + init_jnt_pos[1]) - 1.3 * sin(init_jnt_pos[0]-PI))-ARM_LINK2_RAD*2.0;
-
-const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.15;// intermit;//	3次元シミュ用 plateZ=0.1
-
-// const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
 
 
 //二本目の指の初期位置設定

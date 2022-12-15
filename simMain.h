@@ -158,7 +158,23 @@ constexpr double	ARM_JNT2_VISCOUS = 60.0;		// 粘性係数
 constexpr double    OFFSET_VAL = -0.5;			//　実験では-0.3
 //constexpr double    OFFSET_VAL = -0.0001;			//　実験では-0.3
 constexpr double	OFFSET_VAL_SENKAI = PI / 8.0;	//旋回関節用のオフセット
+constexpr double	finger_state = 1.0;	//ひじ上げとひじ下げを切り替える
+//	ロボットの初期姿勢
+double	init_pos[2] = { 4 * PI / 4.0 - PI / 4.0 * finger_state ,+PI / 3.0 * finger_state };	// ロボット初期姿勢
+double	init_posF2[2] = { 4 * PI / 4.0 + PI / 4.0 * finger_state, -PI / 3.0 * finger_state };	// ロボット初期姿勢
+constexpr double	senkai_init_pos = 0;
+constexpr double	senkai_init_posF2 = 0;
 
+//把持物体の初期位置
+//dReal capX = -1.2, capY = -0.60, capZ = 0.3;//0.3(二次元) z=1.5(3次元)
+dReal capX = 15.0/*-1.0*/, capY = -0.60, capZ = 1.45;// 1.35 + ARM_LINK2_RAD;//(3次元)
+
+//	把持物体の大きさ
+//	const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;//z=1.2 // xy平面上
+
+const dReal plateX = 1.5, plateY = 1.2, plateZ = 0.15;// intermit;//	3次元シミュ用 plateZ=0.1
+// const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
+//出力用
 std::string forceOutfilename1 = "./data/force_finger1.csv";
 std::string forceOutfilename2 = "./data/force_finger2.csv";
 
@@ -599,18 +615,18 @@ class EntityODE : public ODE {
 	std::shared_ptr<cPartsCylinder> pObj2;
 
 public:
-	int FingerNum=0;
+	int FingerNum = 0;
 	double angle_rate = 8.0;//大きいほど初期角度が小さくなる
-	double finger_state =1.0;	//ひじ上げとひじ下げを切り替える
+
 #if 0 //paralell
 	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / angle_rate*finger_state ,-PI / angle_rate* finger_state };	// ロボット初期姿勢
 	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0-  PI / angle_rate* finger_state, PI / angle_rate* finger_state };	// ロボット初期姿勢
 #elif 0
-	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 9.0 * finger_state ,-PI /9.0 * finger_state };	// ロボット初期姿勢
-	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 9.0 * finger_state, PI /9.0 * finger_state };	// ロボット初期姿勢
+	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 9.0 * finger_state ,-PI / 9.0 * finger_state };	// ロボット初期姿勢
+	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 - PI / 9.0 * finger_state, PI / 9.0 * finger_state };	// ロボット初期姿勢
 #else
-	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 4.0 * finger_state ,+PI / 3.0 * finger_state };	// ロボット初期姿勢
-	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 4.0 * finger_state, -PI / 3.0 * finger_state };	// ロボット初期姿勢
+	double	init_jnt_pos[ARM_JNT] = { init_pos[0],init_pos[1] };	// ロボット初期姿勢
+	double	init_jnt_posF2[ARM_JNT] = { init_posF2[0],init_posF2[1] };	// ロボット初期姿勢
 
 #endif
 	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 + PI / 7,-PI/7 };	// ロボット初期姿勢
