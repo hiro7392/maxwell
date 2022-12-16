@@ -36,7 +36,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	half.el[0][0] = 0.5;
 	half.el[1][1] = 0.5;
 
-#if 1//debug
+#if 0 //debug
 	printf("F1=\n");
 	matPrint(&F1);
 
@@ -74,7 +74,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	matPrint(tau);*/
 	// デバッグ
 //	matPrint(&sim->imp.M);	matPrint(&sim->imp.C);	matPrint(&sim->imp.K);
-#if 1// print_debug
+#if PRINT_TORQUE
 	std::cout << "fingerID : " << fingerID << " tau = " << std::endl;
 	matPrint(tau);		// Inertia Shaping無しの場合は0になればOK
 #endif
@@ -145,11 +145,13 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
 	tau->el[0][0] += imp.G.el[0][1];
 	tau->el[0][1] += imp.G.el[0][2];
-
+#if PRINT_MAXWELL_PARAM
+	printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
 	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, imp.M.el[0][0]);
+#endif
 	// デバッグ
-#if 1//print_debug
+#if PRINT_TORQUE
 	std::cout << "fingerID : " << fingerID << " tau = " << std::endl;
 	matPrint(tau);		// Inertia Shaping無しの場合は0になればOK
 #endif
@@ -173,23 +175,28 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	double scale = 100.0;
 	mu1 = Finger1->senkai_p_force->t1[0]/scale; mu2 = Finger2->senkai_p_force->t1[0]/scale;
 	mu_ave = (fingerID == 1 ? ((mu1 - mu2)/2.0) : ((mu2 - mu1)/2.0));
-	printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	static double Integ=0.0;
 	Integ +=(mu_ave*SIM_CYCLE_TIME);
+#if PRINT_MAXWELL_PARAM
+	printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	printf("Integ = %lf\n", Integ);
-
+#endif
 	//	関節の粘性摩擦力を追加
 	rotImp.h = senkai_base_vel * rotImp.V*(fingerID ==1?1:-1);
 	double dphi =  senkai_base_jnt-senkai_base_jnt_init+ (fingerID == 1 ? 1 : -1) * OFFSET_VAL_SENKAI;
 
 	static double tauNC, tauPL, tauIN, tauVE, Er;
 	Er = (rotImp.Iq / rotImp.Ja) * rotImp.Id;
+#if PRINT_MAXWELL_PARAM
 	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf,dphi = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id,dphi);
+#endif
 	tauNC = rotImp.h - rotImp.Iq * rotImp.Ja * 0.0 * senkai_base_vel;
 	tauPL = ((Er * rotImp.lg * rotImp.K) / (rotImp.C * rotImp.lg))*Integ;
 	tauIN = Er * mu_ave - rotImp.Ja * (fingerID == 1 ? mu1 : mu2);
 	tauVE = -Er * rotImp.lg * rotImp.K*(rotImp.Id * senkai_base_vel / (rotImp.C * rotImp.lg) + (dphi));
+#if PRINT_MAXWELL_PARAM
 	printf("tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC, tauPL, tauIN, tauVE);
+#endif
 	*tau = tauNC + tauPL + tauIN + tauVE+imp.G.el[0][0];//重力項を足す
 	//*tau = 2.0;
 	

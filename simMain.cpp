@@ -110,8 +110,7 @@ void DrawStuff::simLoop(int pause)
 			_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
 #endif
 		}
-		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this->fingerID, radToAng(_this->jnt_pos[ARM_M1]), radToAng(_this->jnt_pos[ARM_M2]));
-		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this2->fingerID, radToAng(_this2->jnt_pos[ARM_M1]), radToAng(_this2->jnt_pos[ARM_M2]));
+		
 
 		//　旋回関節角の角度と角速度を取得
 		_this->senkai_base_jnt = dJointGetHingeAngle(_this->senkai_link_joint)+_this->senkai_base_jnt_init;
@@ -119,8 +118,7 @@ void DrawStuff::simLoop(int pause)
 
 		_this2->senkai_base_jnt = dJointGetHingeAngle(_this2->senkai_link_joint) + _this2->senkai_base_jnt_init;
 		_this2->senkai_base_vel = dJointGetHingeAngleRate(_this2->senkai_link_joint);
-		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt),radToAng(_this->senkai_base_vel));
-		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));
+		
 
 		//_this->eff_pos[0]=
 		dBodyGetRelPointPos(sensor->getBody(), 0.0, 0.0, sensor->getl() / 2.0, _this->eff_pos);			// 手先位置
@@ -129,15 +127,11 @@ void DrawStuff::simLoop(int pause)
 		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
 		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
 //#endif
-		printf("fingerID =%d endEffector world x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
-		printf("fingerID =%d endEffector world x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
 
 		//関
 		_this->setEffPos(); 
 		_this2->setEffPos();
-		printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
-		printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
-
+		
 		//関節にかかるトルクを取得する
 		//_this->p_force = dJointGetFeedback(_this->f2_joint);	//参考: もともとのmaxwell制御
 		_this->p_force = dJointGetFeedback(_this->sensor2FingerTop);
@@ -147,9 +141,30 @@ void DrawStuff::simLoop(int pause)
 		//	旋回関節にかかっているトルクを取得する
 		_this->senkai_p_force = dJointGetFeedback(_this->senkai_base_joint);
 		_this2->senkai_p_force = dJointGetFeedback(_this2->senkai_base_joint);
+#if  PRINT_ANGLE
+		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this->fingerID, radToAng(_this->jnt_pos[ARM_M1]), radToAng(_this->jnt_pos[ARM_M2]));
+		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this2->fingerID, radToAng(_this2->jnt_pos[ARM_M1]), radToAng(_this2->jnt_pos[ARM_M2]));
+		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt), radToAng(_this->senkai_base_vel));
+		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this2->fingerID, radToAng(_this2->senkai_base_jnt), radToAng(_this2->senkai_base_vel));
+		
+		//printf("fingerID =%d endEffector world x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
+		//printf("fingerID =%d endEffector world x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
+		//printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
+		//printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
 		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this->fingerID,_this->senkai_p_force->t1[0], _this->senkai_p_force->t1[1],_this->senkai_p_force->t1[2]);
 		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this2->fingerID, _this2->senkai_p_force->t1[0], _this2->senkai_p_force->t1[1], _this2->senkai_p_force->t1[2]);
+#endif
 
+#if PRINT_BASE_POS
+		printf("fingerID =%d base=(%lf,%lf,%lf) \n", _this->fingerID, _this->senkai_base_x0,_this->senkai_base_y0, _this->senkai_base_z0);
+		printf("fingerID =%d base=(%lf,%lf,%lf) \n", _this2->fingerID, _this->senkai_base_x0, _this2->senkai_base_y1, _this2->senkai_base_z1);
+
+#endif
+#if PRINT_TORQUE
+		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this->fingerID, _this->senkai_p_force->t1[0], _this->senkai_p_force->t1[1], _this->senkai_p_force->t1[2]);
+		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this2->fingerID, _this2->senkai_p_force->t1[0], _this2->senkai_p_force->t1[1], _this2->senkai_p_force->t1[2]);
+
+#endif
 		for (int crd = 0; crd < DIM3; crd++) {
 			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 #if finger2_use
@@ -219,7 +234,9 @@ void DrawStuff::simLoop(int pause)
 		beforeXpos = nowPos[0];
 		beforeYpos = nowPos[1];
 		beforeZpos = nowPos[2];
+#if PRINT_OBJ_POSE
 		printf("plate posture (%.2lf,%.2lf,%.2lf,%.2lf)\n", quat[0], quat[1], quat[2], quat[3]);
+#endif
 		//	x座標を記録
 		//	plateの端に外力を加える
 		if(sim->step >prepareTime /*ADD_EXT_FORCE && sim->step > 1000 && sim->step <= 1500*/) {

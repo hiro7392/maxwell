@@ -130,13 +130,13 @@ void cFinger::control() {
 
 #if 1
 	if (fingerID == 1) {
-		//ctrlMaxwell(&tau);
-		RestrictedCtrlMaxwell(&tau);
+		//ctrlMaxwell(&tau);	//	指1本単体でのmaxwell制御
+		//RestrictedCtrlMaxwell(&tau);
 		RotRestrictedCtrlMaxwell(&rotTau);
 	}
 	else {
 		//ctrlMaxwell2(&tau);
-		RestrictedCtrlMaxwell2(&tau);
+		//RestrictedCtrlMaxwell2(&tau);
 		RotRestrictedCtrlMaxwell(&rotTau);
 	}
 #elif 0
@@ -195,16 +195,22 @@ void cFinger::control() {
 	// 返り値に代入
 	jnt_force[ARM_M1] = tau.el[ARM_M1][0];
 	jnt_force[ARM_M2] = tau.el[ARM_M2][0];
+	//if (fingerID == 2) {
+		jnt_force[ARM_M1] = 20.0;//sin(entity -> step / 1000.0 * 2 * PI);
+	//}
+#if PRINT_EFF_FORCE
 	std::cout << "eff_force " << std::endl;
 	std::cout << eff_force[0] << " " << eff_force[1] << std::endl;
-
+#endif
 	// 指の姿勢によって向きを変化
 	// 旋回関節を試す間コメントアウト
 	double fric_static_max = 5.0;
 	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 		dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 		r_joint_feedback_p[jnt] = dJointGetFeedback(r_joint[jnt]);
+#if PRINT_TORQUE
 		printf("FingerID = %d  now torque joint %d = (%.3lf,%.3lf,%.3lf)\n", fingerID, jnt + 1, r_joint_feedback_p[jnt]->t1[0], r_joint_feedback_p[jnt]->t1[1], r_joint_feedback_p[jnt]->t1[2]);
+#endif
 		//	静止摩擦力
 		if (r_joint_feedback_p[jnt]->t1[0] < 5.0) {
 			double tmp = r_joint_feedback_p[jnt]->t1[0];
@@ -218,12 +224,15 @@ void cFinger::control() {
 	}
 	
 
-
+#if  PRINT_TORQUE
 	printf("FingerID = %d senkai torque before saturation =%lf\n", fingerID, rotTau);
+#endif
 	double MAX = 10000.0, MIN = -10000.0;
 	if (rotTau > MAX )rotTau = MAX;
 	if (rotTau < MIN)rotTau = MIN;
+#if  PRINT_TORQUE
 	printf("FingerID = %d senkai torque =%lf\n", fingerID, rotTau);
+#endif
 	//if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:-rotTau);
 }
 

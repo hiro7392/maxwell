@@ -173,7 +173,7 @@ void cFinger::setJoint2() {
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M1], base_x, base_y, base_z);
 	//	旋回関節の分、x軸中心に回転
-	dJointSetHingeAxis(r_joint[ARM_M1], 0, sin(-senkai_base_jnt), cos(senkai_base_jnt));
+	dJointSetHingeAxis(r_joint[ARM_M1], 0, sin(senkai_base_jnt), cos(senkai_base_jnt));
 	dJointSetHingeParam(r_joint[ARM_M1], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M1], dParamHiStop, M_PI);
 	dJointSetFeedback(r_joint[ARM_M1], &r_joint_feedback[ARM_M1]);
@@ -193,7 +193,7 @@ void cFinger::setJoint2() {
 	dJointAttach(r_joint[ARM_M2], finger[2]->getBody(), finger[1]->getBody());
 	dJointSetHingeAnchor(r_joint[ARM_M2], link1_top_x, link1_top_y, link1_top_z);
 	//	旋回関節の分、x軸中心に回転
-	dJointSetHingeAxis(r_joint[ARM_M2], 0, sin(-senkai_base_jnt), cos(senkai_base_jnt));
+	dJointSetHingeAxis(r_joint[ARM_M2], 0, sin(senkai_base_jnt), cos(senkai_base_jnt));
 	dJointSetHingeParam(r_joint[ARM_M2], dParamLoStop, -M_PI);
 	dJointSetHingeParam(r_joint[ARM_M2], dParamHiStop, M_PI);
 	dJointSetFeedback(r_joint[ARM_M2], &r_joint_feedback[ARM_M2]);
@@ -225,8 +225,8 @@ void cFinger::setJoint2() {
 	dJointAttach(senkai_link_joint, senkai_link.getBody(), senkai_base.getBody());
 	dJointSetHingeAnchor(senkai_link_joint, senkai_base_x1, senkai_base_y1, senkai_base_z1);
 	dJointSetHingeAxis(senkai_link_joint, 1, 0, 0);
-	dJointSetHingeParam(senkai_link_joint, dParamLoStop, 0);
-	dJointSetHingeParam(senkai_link_joint, dParamHiStop, PI/2.0);
+	dJointSetHingeParam(senkai_link_joint, dParamLoStop, -PI/4.0);
+	dJointSetHingeParam(senkai_link_joint, dParamHiStop, 0.0);
 
 	// 固定ジョイント 指旋回関節のリンク->指根本関節
 	senkai_link2finger_joint = dJointCreateFixed(sim->getWorld(), 0);  // 固定ジョイント

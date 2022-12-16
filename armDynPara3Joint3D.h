@@ -107,8 +107,9 @@ int cFinger::armDynPara() {
 	sensor_Ix = sensor_dist * sensor.getMass();
 	//	各関節について　(zy平面における距離r^2)*質量m を足し合わせる
 	this->rotImp.Iq = senkai_link_Ix + base_Ix + link1_Ix + link2_Ix + capsule_Ix + sensor_Ix;
+#if  PRINT_MAXWELL_ROT_PARAM
 	printf("rotImp.Iq =%lf\n ", this->rotImp.Iq);
-
+#endif
 	//	同次行列の計算
 	setTransMatrix();
 
@@ -123,8 +124,10 @@ int cFinger::armDynPara() {
 
 	//	各関節について重力項を計算
 	calculateGravity();
+#if  PRINT_MAXWELL_ROT_PARAM
 	printf("fingerID = %d\n", fingerID);
 	MatPrintDebug3x1(imp.G, "G");
+#endif
 	//	重力項をhに足す
 	dyn.h.el[0][0] += imp.G.el[0][0];
 	dyn.h.el[1][0] += imp.G.el[0][1];

@@ -183,7 +183,7 @@ int cFinger::calculateGravity() {
 	matMul(&tmp2, &tmp ,&imp.G_xyz);
 	imp.G.el[0][2] += ARM_LINK2_MASS * tmp2.el[0][0];
 	//printf("G[0][2] = %lf\n", imp.G.el[0][2]);
-	MatPrintDebug3x1(imp.G, "G");
+	//MatPrintDebug3x1(imp.G, "G");
 
 	matFree(&tmp);
 
