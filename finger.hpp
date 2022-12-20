@@ -131,12 +131,12 @@ void cFinger::control() {
 #if 1
 	if (fingerID == 1) {
 		//ctrlMaxwell(&tau);	//	Žw1–{’P‘Ì‚Å‚Ìmaxwell§Œä
-		//RestrictedCtrlMaxwell(&tau);
+		RestrictedCtrlMaxwell(&tau);
 		RotRestrictedCtrlMaxwell(&rotTau);
 	}
 	else {
 		//ctrlMaxwell2(&tau);
-		//RestrictedCtrlMaxwell2(&tau);
+		RestrictedCtrlMaxwell2(&tau);
 		RotRestrictedCtrlMaxwell(&rotTau);
 	}
 #elif 0
@@ -196,7 +196,7 @@ void cFinger::control() {
 	jnt_force[ARM_M1] = tau.el[ARM_M1][0];
 	jnt_force[ARM_M2] = tau.el[ARM_M2][0];
 	//if (fingerID == 2) {
-		jnt_force[ARM_M1] = 20.0;//sin(entity -> step / 1000.0 * 2 * PI);
+		//jnt_force[ARM_M1] = 20.0;//sin(entity -> step / 1000.0 * 2 * PI);
 	//}
 #if PRINT_EFF_FORCE
 	std::cout << "eff_force " << std::endl;

@@ -344,9 +344,11 @@ void DrawStuff::start() {
 	hpr[0] = -180.0;	hpr[1] = 0.0;	hpr[2] = 0.0;	// +xからの視点(右が+y,上が+z)
 #elif 1
 #if VIEW_FROM_X
-		xyz[0] = -3.0;	xyz[1] =-0.5;	xyz[2] = 1.5;	//正面から見るとき
+		xyz[0] = -3.0;	xyz[1] =-0.5;	xyz[2] = 1.5;	//	正面から見るとき
 #elif VIEW_FROM_Y
-		xyz[0] = -0.5;	xyz[1] = 2.0;	xyz[2] = 1.5;	//ハンドを側面から見るとき
+		xyz[0] = -0.5;	xyz[1] = 2.0;	xyz[2] = 1.5;	//	ハンドを側面から見るとき
+#elif VIEW_FROM_Z
+		xyz[0] = -1.0;	xyz[1] = -0.5;	xyz[2] = 5.5;	//	上から見るとき
 #endif
 	//	xyz[0] = -2.0;	xyz[1] = -0.5;	xyz[2] = 1.5;
 	//	xyz[0] = -2.0;	xyz[1] = 1.5;	xyz[2] = 3.0;
@@ -355,7 +357,10 @@ void DrawStuff::start() {
 		hpr[0] = 180.0;	hpr[1] = -150.0;	hpr[2] = 180;	//	正面から見るとき			+zからの視点(右が+x,上が+y)
 #elif VIEW_FROM_Y
 		hpr[0] = 90.0;	hpr[1] = -180.0;	hpr[2] = 180;	//	側面から見るとき
+#elif VIEW_FROM_Z
+		hpr[0] = 180.0;	hpr[1] = -110.0;	hpr[2] = 180;	//	上から見るとき
 #endif
+
 #endif
 	dsSetViewpoint(xyz, hpr);               // 視点，視線の設定
 	dsSetSphereQuality(3);					// 球の品質設定

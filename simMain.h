@@ -49,12 +49,13 @@
 
 #define	FLAG_SAVE_IMAGE		0		// 画像保存
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
-#define VIEW_FROM_X 1		//	カメラの開始時点での向き
+#define VIEW_FROM_X 0		//	カメラの開始時点での向き
 #define VIEW_FROM_Y 0		//	カメラの開始時点での向き
+#define VIEW_FROM_Z 1
 #define INVERSE 1		//	同次行列の微分について行列の転地を取りたいとき
 //	パラメータのコンソール表示
-#define PRINT_ANGLE	1			//	関節角度などをコンソール表示
-#define PRINT_TORQUE	0		//	旋回およびリンク関節
+#define PRINT_ANGLE	0			//	関節角度などをコンソール表示
+#define PRINT_TORQUE	1		//	旋回およびリンク関節
 #define PRINT_MAXWELL_PARAM 0	//	maxwell制御のパラメータ
 #define PRINT_MAXWELL_ROT_PARAM 0	//	maxwell制御　回転に関するパラメータ
 #define PRINT_OBJ_POSE	0			//	把持物体の姿勢
@@ -167,8 +168,8 @@ constexpr double    OFFSET_VAL = -0.5;			//　実験では-0.3
 constexpr double	OFFSET_VAL_SENKAI = PI / 8.0;	//旋回関節用のオフセット
 constexpr double	finger_state = 1.0;	//ひじ上げとひじ下げを切り替える
 //	ロボットの初期姿勢
-double	init_pos[2] = { 4 * PI / 4.0 - PI / 4.0 * finger_state ,+PI / 3.0 * finger_state };	// ロボット初期姿勢
-double	init_posF2[2] = { 4 * PI / 4.0 + PI / 4.0 * finger_state, -PI / 3.0 * finger_state };	// ロボット初期姿勢
+double	init_pos[2] = { 4 * PI / 4.0 - PI / 6.0 * finger_state ,+PI / 3.0 * finger_state };	// ロボット初期姿勢
+double	init_posF2[2] = { 4 * PI / 4.0 + PI / 6.0 * finger_state, -PI / 3.0 * finger_state };	// ロボット初期姿勢
 constexpr double	senkai_init_pos = 0.0;
 constexpr double	senkai_init_posF2 = 0.0;
 
