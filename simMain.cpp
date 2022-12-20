@@ -142,6 +142,8 @@ void DrawStuff::simLoop(int pause)
 		_this->senkai_p_force = dJointGetFeedback(_this->senkai_base_joint);
 		_this2->senkai_p_force = dJointGetFeedback(_this2->senkai_base_joint);
 #if  PRINT_ANGLE
+		
+		//	各関節の角度と角速度を表示
 		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this->fingerID, radToAng(_this->jnt_pos[ARM_M1]), radToAng(_this->jnt_pos[ARM_M2]));
 		printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this2->fingerID, radToAng(_this2->jnt_pos[ARM_M1]), radToAng(_this2->jnt_pos[ARM_M2]));
 		printf("fingerID =%d senkai_angle=%lf senkai speed =%lf\n", _this->fingerID, radToAng(_this->senkai_base_jnt), radToAng(_this->senkai_base_vel));
@@ -151,8 +153,10 @@ void DrawStuff::simLoop(int pause)
 		//printf("fingerID =%d endEffector world x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
 		//printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this->fingerID, _this->eff_pos[0], _this->eff_pos[1], _this->eff_pos[2]);
 		//printf("fingerID =%d endEffector x=%.2lf y=%.2lf z=%.2lf\n", _this2->fingerID, _this2->eff_pos[0], _this2->eff_pos[1], _this2->eff_pos[2]);
-		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this->fingerID,_this->senkai_p_force->t1[0], _this->senkai_p_force->t1[1],_this->senkai_p_force->t1[2]);
-		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this2->fingerID, _this2->senkai_p_force->t1[0], _this2->senkai_p_force->t1[1], _this2->senkai_p_force->t1[2]);
+		//printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this->fingerID,_this->senkai_p_force->t1[0], _this->senkai_p_force->t1[1],_this->senkai_p_force->t1[2]);
+		//printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this2->fingerID, _this2->senkai_p_force->t1[0], _this2->senkai_p_force->t1[1], _this2->senkai_p_force->t1[2]);
+		_this->showPos();
+		_this2->showPos();
 #endif
 
 #if PRINT_BASE_POS

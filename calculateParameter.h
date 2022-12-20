@@ -421,7 +421,27 @@ Matrix getHi(double sx, double sy, double sz, double Ixx, double Iyy, double Izz
 	return H;
 
 }
+void cFinger::showPos() {
+	//	旋回関節の動的パラメータ
+	const dReal* senkai_base_pos = dBodyGetPosition(this->senkai_base.getBody());
+	//	旋回リンクの重心位置
+	const dReal* senkai_link_pos = dBodyGetPosition(this->senkai_link.getBody());
+	//	リンク1の重心位置
+	const dReal* link1_pos = dBodyGetPosition(this->link1.getBody());
+	//	リンク2の重心位置
+	const dReal* link2_pos = dBodyGetPosition(this->link2.getBody());
+	//	カプセルの重心位置
+	const dReal* capsule_pos = dBodyGetPosition(this->fingerTopCapsule.getBody());
+	//	センサの重心位置
+	const dReal* sensor_pos = dBodyGetPosition(this->sensor.getBody());
+	printf("finger ID : %d\n", this->fingerID);
+	printf("senkai_base(%lf,%lf,%lf)\n", senkai_base_pos[0], senkai_base_pos[1], senkai_base_pos[2]);
+	printf("link1(%lf,%lf,%lf)\n", link1_pos[0], link1_pos[1], link1_pos[2]);
+	printf("link1_x = base_x + ARM_LINK1_LEN *  (ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1])=%lf + %lf/2.0*%lf=%lf\n",
+		0.5, ARM_LINK1_LEN, cos(jnt_pos[ARM_M1]), 0.5+ (ARM_LINK1_LEN/2.0)* cos(jnt_pos[ARM_M1]));
+	//printf("link_base(%lf,%lf,%lf)\n", link1_pos[0], link1_pos[1], link1_pos[2]);
 
+}
 //	疑似慣性行列Hi_hatの計算
 int cFinger::setHi() {
 	//	旋回関節の動的パラメータ
@@ -437,8 +457,8 @@ int cFinger::setHi() {
 	//	センサの重心位置
 	const dReal* sensor_pos = dBodyGetPosition(this->sensor.getBody());
 
-	static double	m0, m1, m2, l0, l1, l2, lg0, lg1, lg2;
-	static double	I0xx, I0yy, I0zz, I1xx, I1yy, I1zz, I2xx, I2yy, I2zz;
+	double	m0, m1, m2, l0, l1, l2, lg0, lg1, lg2;
+	double	I0xx, I0yy, I0zz, I1xx, I1yy, I1zz, I2xx, I2yy, I2zz;
 	m0 = this->senkai_link.getMass(); m1 = this->dyn.m[ARM_M1]; m2 = this->dyn.m[ARM_M2];
 	l0 = SENKAI_LINK_LEN; l1 = this->kine.l[ARM_M1]; l2 = this->kine.l[ARM_M2];
 	lg0 = SENKAI_LINK_LEN / 2.0; lg1 = this->kine.lg[ARM_M1]; lg2 = this->kine.lg[ARM_M2];
@@ -493,25 +513,31 @@ int cFinger::setMq() {
 // 遠心・コリオリ力の計算
 int cFinger::seth() {
 	int ARM_JNT_NUM = 3;
+	Matrix tmp1, tmp2;
+	matInit(&tmp1, 4, 4); matInit(&tmp2, 4, 4);
 	for (int i = 0; i < 3; i++) {
 		//hi=3次元ベクトルh(q)の第i要素
 		double result = 0.0;
-
+		
+		
 		for (int j = 0; j < ARM_JNT_NUM; j++) {
 			for (int m = 0; m < ARM_JNT_NUM; m++) {
 				int k = std::max(i, std::max(j, m));
 				double now_iteration_sum = 0.0;
-				Matrix tmp1, tmp2, dqkTrans, res;
-				matInit(&tmp1, 4, 4); matInit(&tmp2, 4, 4);
-				matInit(&dqkTrans, 4, 4); matInit(&res, 4, 4);
+				matZero(&tmp1); matZero(&tmp2);
 				//	二階部分×Hk
 				matMul(&tmp1, &imp.dqjdqk0Ti[k][j][m], &imp.H_hat[k]);
 				matMul(&tmp2, &tmp1, &imp.dqkoTi[k][i]);
 				now_iteration_sum=matTrace(&tmp2);	//traceをとる
 				result += now_iteration_sum * this->var.dq.el[j][0] * this->var.dq.el[m][0];
+				
 			}
 		}
+
 		dyn.h.el[0][i] = result;
 	}
+	matFree(&tmp1);	matFree(&tmp2);
+
+
 	return 0;
 }

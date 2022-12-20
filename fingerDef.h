@@ -144,6 +144,7 @@ public:
 	int setHi();	//	疑似慣性行列Hi_hatの計算
 	int seth();		//	遠心・コリオリ力の計算
 	int getdqjdqkoTi();	// 同次行列の二回微分の計算
+	void showPos();		// リンクの中心位置を表示する
 
 	//kawaharaの変更以前からコメントアウト
 	////	int armInitMatVar(Variable *var);
@@ -222,7 +223,6 @@ public:
 		double link2_x = link1_top_x + (ARM_LINK2_LEN / 2.0) * cos(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]);
 		double link2_y = link1_top_y + cos(senkai_base_jnt) * (ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
 		double link2_z = base_z - sin(senkai_base_jnt) *(ARM_LINK1_LEN * sin(jnt_pos[ARM_M1]) + ARM_LINK2_LEN / 2.0 * sin(jnt_pos[ARM_M1] + jnt_pos[ARM_M2]));
-
 		finger[2]->setPosition(link2_x, link2_y, link2_z);
 
 		//	センサ
@@ -282,15 +282,15 @@ public:
 
 	//kawaharaが追加　二本目の指用
 	//指１の初期位置と初期姿勢	指1と指2で共通
-	void setPosition2(double senkai_base_x0, double senkai_base_y0, double senkai_base_z0) {
+	void setPosition2(double senkaxi_base_x0, double senkai_base_y0, double senkai_base_z0) {
 		//	リンク1の土台
-		double base_x = senkai_base_x0;
+		double base_x = 0.5;
 		double base_y = senkai_base_y0 + (fingerID == 1 ? 1 : -1) * SENKAI_LINK_LEN * cos(senkai_base_jnt);
 		double base_z = senkai_base_z0 + SENKAI_LINK_LEN * sin(-senkai_base_jnt);
 		finger[0]->setPosition(base_x, base_y, base_z);
 
 		//	リンク１
-		double link1_x = base_x+(ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1]));
+		double link1_x = 0.5 + (ARM_LINK1_LEN / 2.0) * cos(jnt_pos[ARM_M1]);// base_x + ((ARM_LINK1_LEN / 2.0) * cos(jnt_pos[ARM_M1]));
 		double link1_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		double link1_z = base_z + sin(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		finger[1]->setPosition(link1_x, link1_y, link1_z);

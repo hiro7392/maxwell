@@ -51,7 +51,7 @@
 #define	FLAG_SAVE_VIDEO		0		// 動画保存(OpenCVが必要)
 #define VIEW_FROM_X 1		//	カメラの開始時点での向き
 #define VIEW_FROM_Y 0		//	カメラの開始時点での向き
-#define INVERSE true		//	同次行列の微分について行列の転地を取りたいとき
+#define INVERSE 1		//	同次行列の微分について行列の転地を取りたいとき
 //	パラメータのコンソール表示
 #define PRINT_ANGLE	1			//	関節角度などをコンソール表示
 #define PRINT_TORQUE	0		//	旋回およびリンク関節
