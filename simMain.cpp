@@ -308,6 +308,7 @@ void DrawStuff::simLoop(int pause)
 	}
 	
 	std::cout << "step:" << sim->step << std::endl;
+	printf("fingerID =%d link1_angle=%.2lf link2 angle=%.2lf\n", _this2->fingerID, radToAng(_this2->jnt_pos[ARM_M1]), radToAng(_this2->jnt_pos[ARM_M2]));
 
 #if SIM_OBJ_IMPACT
 	//	drawObject(); // 衝突対象の描画

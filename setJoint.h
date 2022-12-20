@@ -165,9 +165,9 @@ void cFinger::setJoint2() {
 	dGeomSetBody(geomBodyPlate, plateToGrasp.body);
 #endif	
 	auto sim = EntityManager::get();
-	double base_x = senkai_base_x0;
-	double base_y = senkai_base_y0 + (fingerID == 1 ? 1 : -1) * SENKAI_LINK_LEN * cos(senkai_base_jnt);
-	double base_z = senkai_base_z0 + SENKAI_LINK_LEN * sin(-senkai_base_jnt);
+	double base_x = senkai_base_x1;
+	double base_y = senkai_base_y1 + (fingerID == 1 ? 1 : -1) * SENKAI_LINK_LEN * cos(senkai_base_jnt);
+	double base_z = senkai_base_z1 + SENKAI_LINK_LEN * sin(-senkai_base_jnt);
 	// ヒンジジョイント1
 	r_joint[ARM_M1] = dJointCreateHinge(sim->getWorld(), 0);
 	dJointAttach(r_joint[ARM_M1], finger[1]->getBody(), finger[0]->getBody());

@@ -439,6 +439,8 @@ void cFinger::showPos() {
 	printf("link1(%lf,%lf,%lf)\n", link1_pos[0], link1_pos[1], link1_pos[2]);
 	printf("link1_x = base_x + ARM_LINK1_LEN *  (ARM_LINK1_LEN / 2.0 * cos(jnt_pos[ARM_M1])=%lf + %lf/2.0*%lf=%lf\n",
 		0.5, ARM_LINK1_LEN, cos(jnt_pos[ARM_M1]), 0.5+ (ARM_LINK1_LEN/2.0)* cos(jnt_pos[ARM_M1]));
+	double estimated_theta = acos(2.0*(link1_pos[0]-0.5)/ARM_LINK1_LEN);
+	printf("estimated theta1 = %lf or %lf real theta1 = %lf\n", radToAng(estimated_theta), radToAng(2*PI-estimated_theta),radToAng(jnt_pos[ARM_M1]));
 	//printf("link_base(%lf,%lf,%lf)\n", link1_pos[0], link1_pos[1], link1_pos[2]);
 
 }
@@ -518,7 +520,6 @@ int cFinger::seth() {
 	for (int i = 0; i < 3; i++) {
 		//hi=3次元ベクトルh(q)の第i要素
 		double result = 0.0;
-		
 		
 		for (int j = 0; j < ARM_JNT_NUM; j++) {
 			for (int m = 0; m < ARM_JNT_NUM; m++) {

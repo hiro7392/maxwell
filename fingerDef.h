@@ -290,7 +290,7 @@ public:
 		finger[0]->setPosition(base_x, base_y, base_z);
 
 		//	ƒŠƒ“ƒN‚P
-		double link1_x = 0.5 + (ARM_LINK1_LEN / 2.0) * cos(jnt_pos[ARM_M1]);// base_x + ((ARM_LINK1_LEN / 2.0) * cos(jnt_pos[ARM_M1]));
+		double link1_x = base_x + ((ARM_LINK1_LEN / 2.0) * cos(jnt_pos[ARM_M1]));
 		double link1_y = base_y + cos(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		double link1_z = base_z + sin(senkai_base_jnt) * (ARM_LINK1_LEN / 2.0 * sin(jnt_pos[ARM_M1]));
 		finger[1]->setPosition(link1_x, link1_y, link1_z);
