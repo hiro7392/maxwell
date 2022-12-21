@@ -688,17 +688,23 @@ public:
 };
 
 
+
 void cFinger::setNums(int step) {
 	for (int i = 0; i < 2; i++) {
-		
+		//	力覚センサの値
+		//_this->saveForce[sim->step - 1][i] = _this->var.F.el[i][0];
+		//_this2->saveForce[sim->step - 1][i] = _this2->var.F.el[i][0];
 		//	力覚センサの値
 		saveForce[step - 1][i] = eff_force[i];
+
 		//	関節角度
 		save_jnt_vel[step - 1][i] = var.q.el[i][0];
+
 		//	関節速度
 		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
 		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
-
+		save_jnt_ddq[step - 1][i] = var.ddq.el[i][0];
+		save_jnt_ddq[step - 1][i] = var.ddq.el[i][0];
 #if useContactPoint
 		//  手先位置を取得する
 		const dReal* finger1TopPos = dBodyGetPosition(_this->forceContactPoint.getBody());
@@ -710,8 +716,11 @@ void cFinger::setNums(int step) {
 		save_eff_vel[step - 1][i] = var.dr.el[i][0];
 		save_ref_eff_pos[step - 1][i] = var_init.r.el[i][0];
 #endif
+
+
 		save_jnt_force[step - 1][i] = jnt_force[i];
 		save_jnt_force[step - 1][i] = jnt_force[i];
+
 	}
 }
 //センサの値を記録

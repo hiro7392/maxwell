@@ -102,6 +102,7 @@ public:
 	double	save_jnt_pos[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_jnt_vel[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_jnt_dq[DATA_CNT_NUM][ARM_JNT] = {};
+	double	save_jnt_ddq[DATA_CNT_NUM][ARM_JNT] = {};
 
 	double	save_jnt_force[DATA_CNT_NUM][ARM_JNT] = {};
 	double	save_ref_eff_pos[DATA_CNT_NUM][DIM3] = {};
@@ -112,6 +113,7 @@ public:
 	double	save_obj_pos[DATA_CNT_NUM][DIM3] = {};
 	double	save_obj_vel[DATA_CNT_NUM][DIM3] = {};
 	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
+	double  save_force_endEffector[DATA_CNT_NUM][DIM3] = {};
 
 	// ê˘âÒä÷êﬂäp
 	double senkai_base_jnt = 0;
