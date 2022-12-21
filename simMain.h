@@ -688,59 +688,6 @@ public:
 };
 
 
-
-
-//センサの値を記録
-void cFinger::outputForce() {
-	forceOutOfs.open(forceOutFilename);
-	for (int k = 0; k < DATA_CNT_NUM; k++) {
-		forceOutOfs << k + 1 << ",";
-		for (int i = 0; i < 2; i++) {
-			forceOutOfs << saveForce[k][i] << ",";
-		}
-		forceOutOfs << std::endl;
-	}
-	forceOutOfs.close();
-
-}
-
-//センサの値を記録
-void cFinger::outputJntAngle(int end) {
-	//auto entity = EntityManager::get();
-	
-	std::ofstream outfile;
-	if (fingerID == 1) {
-		outfile.open(jntAngleOutfilename1);
-	}
-	else {
-		outfile.open(jntAngleOutfilename2);
-	}
-
-	for (int k = 0; k < end; k++) {
-		outfile << k << ",";
-		//各関節について
-		for (int i = 0; i < 2; i++) {
-			outfile << save_jnt_vel[k][i] << ",";			//関節角度[rad]
-			outfile << radToAng(save_jnt_vel[k][i]) << ",";	//関節角度[度]
-
-			outfile << save_jnt_dq[k][i] << ",";			//関節速度[rad/s]
-			outfile << radToAng(save_jnt_dq[k][i]) << ",";	//関節速度[度/s]
-
-			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
-			outfile << save_jnt_force[k][i] << ",";		//対象の関節に抱える力
-
-			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
-
-			outfile << save_eff_vel[k][i] << ",";		//対象の手先速度
-
-			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標位置(平衡位置)
-			//outfile << ",";
-		}
-		outfile << std::endl;
-	}
-	outfile.close();
-}
-
 void cFinger::setNums(int step) {
 	for (int i = 0; i < 2; i++) {
 		
@@ -767,6 +714,95 @@ void cFinger::setNums(int step) {
 		save_jnt_force[step - 1][i] = jnt_force[i];
 	}
 }
+//センサの値を記録
+void cFinger::outputForce() {
+	forceOutOfs.open(forceOutFilename);
+	for (int k = 0; k < DATA_CNT_NUM; k++) {
+		forceOutOfs << k + 1 << ",";
+		for (int i = 0; i < 2; i++) {
+			forceOutOfs << saveForce[k][i] << ",";
+		}
+		forceOutOfs << std::endl;
+	}
+	forceOutOfs.close();
+
+}
+
+//センサの値を記録
+void cFinger::outputJntAngle(int end) {
+	//auto entity = EntityManager::get();
+
+	std::ofstream outfile;
+	if (fingerID == 1) {
+		outfile.open(jntAngleOutfilename1);
+	}
+	else {
+		outfile.open(jntAngleOutfilename2);
+	}
+
+	outfile << "step" << ",";
+	outfile << "第1関節[rad]" << ",";
+	outfile << "第1関節[度]" << ",";
+	outfile << "第1関節[rad/s]" << ",";
+	outfile << "第1関節[度/s]" << ",";
+	outfile << "第1関節[rad/s^2]" << ",";
+	outfile << "第1関節[度/s^2]" << ",";
+
+	outfile << "力覚センサFx" << ",";
+	outfile << "トルク　関節1" << ",";
+	outfile << "手先位置 x" << ",";
+	outfile << "手先速度 x" << ",";
+
+	outfile << "平衡位置 x" << ",";
+	outfile << "センサ出力の理論値　Fx" << ",";
+
+	outfile << "第2関節[rad]" << ",";
+	outfile << "第2関節[度]" << ",";
+	outfile << "第2関節[rad/s]" << ",";
+	outfile << "第2関節[度/s]" << ",";
+	outfile << "第2関節[rad/s^2]" << ",";
+	outfile << "第2関節[度/s^2]" << ",";
+
+	outfile << "力覚センサFy" << ",";
+	outfile << "トルク　関節2" << ",";
+	outfile << "手先位置 y" << ",";
+	outfile << "手先速度 y" << ",";
+
+	outfile << "平衡位置 y" << ",";
+	outfile << "センサ出力の理論値　Fy" << ",";
+
+
+
+	for (int k = 0; k < end; k++) {
+		outfile << k << ",";
+		//各関節について
+		for (int i = 0; i < 2; i++) {
+			outfile << save_jnt_vel[k][i] << ",";			//関節角度[rad]
+			outfile << radToAng(save_jnt_vel[k][i]) << ",";	//関節角度[度]
+
+			outfile << save_jnt_dq[k][i] << ",";			//関節速度[rad/s]
+			outfile << radToAng(save_jnt_dq[k][i]) << ",";	//関節速度[度/s]
+
+			outfile << save_jnt_ddq[k][i] << ",";			//関節加速度[rad/s^2]
+			outfile << radToAng(save_jnt_ddq[k][i]) << ",";	//関節加速度[度/s^2]
+
+			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
+			outfile << save_jnt_force[k][i] << ",";		//対象の関節に抱える力
+
+			outfile << save_eff_pos[k][i] << ",";		//対象の手先位置
+
+			outfile << save_eff_vel[k][i] << ",";
+
+			outfile << save_ref_eff_pos[k][i] << ",";	//対象の目標位置(平衡位置
+
+			outfile << save_force_endEffector[k][i] << ",";	//センサ出力の理論値
+
+		}
+		outfile << std::endl;
+	}
+	outfile.close();
+}
+
 
 ////////////////////////////////////////////////////////
 
