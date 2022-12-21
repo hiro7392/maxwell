@@ -160,9 +160,14 @@ void DrawStuff::simLoop(int pause)
 #endif
 
 #if PRINT_BASE_POS
+		if (sim->step <= 1) {
+			_this->senkai_p_force->t1[0] = _this->senkai_p_force->t1[1]= _this->senkai_p_force->t1[2]=0.0;
+			_this2->senkai_p_force->t1[0] = _this2->senkai_p_force->t1[1] = _this2->senkai_p_force->t1[2] = 0.0;
+
+		}
 		printf("fingerID =%d base=(%lf,%lf,%lf) \n", _this->fingerID, _this->senkai_base_x0,_this->senkai_base_y0, _this->senkai_base_z0);
 		printf("fingerID =%d base=(%lf,%lf,%lf) \n", _this2->fingerID, _this->senkai_base_x0, _this2->senkai_base_y1, _this2->senkai_base_z1);
-
+		
 #endif
 #if PRINT_TORQUE
 		printf("fingerID =%d senkai_torque=(%lf,%lf,%lf) \n", _this->fingerID, _this->senkai_p_force->t1[0], _this->senkai_p_force->t1[1], _this->senkai_p_force->t1[2]);

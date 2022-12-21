@@ -504,7 +504,7 @@ int cFinger::setMq() {
 			matMul(&tmp1, &imp.dqkoTi[k][j], &imp.H_hat[k]);
 			matTrans(&dqkTrans, &imp.dqkoTi[k][j]);		//çsóÒÇÃì]íu
 			matMul(&tmp2, &tmp1,&dqkTrans);
-			imp.M.el[j][i] = matTrace(&tmp2);
+			dyn.Mq.el[j][i] = matTrace(&tmp2);
 		}
 	}
 

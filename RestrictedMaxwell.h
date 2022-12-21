@@ -7,11 +7,11 @@
 int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 {
 	int	jnt, crd;
-
-	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2);
-	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
-	static Matrix	Integ(2, 1);
-	static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
+	int DIM2_ = 3;
+	static Matrix	Tmp21(DIM2_, 1), Tmp22(DIM2_, DIM2_), Tmp22_2(DIM2_, DIM2_);
+	static Matrix	tauNC(DIM2_, 1), tauVE(DIM2_, 1), tauIN(DIM2_, 1), tauPL(DIM2_, 1), E(DIM2_, DIM2_);
+	static Matrix	Integ(DIM2_, 1);
+	static Matrix	re(DIM2_, 1), dre(DIM2_, 1);	// 手先位置変位，手先速度変位
 
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
@@ -32,23 +32,12 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	//Fの部分を(F1-F2)/2に変更
 	Matrix F12;
 	matAdd(&F12, &F1, &F2);	//加わる力は反転しているので足してもF1-F2になる
-	Matrix half(2, 2);
+	Matrix half(DIM2_, DIM2_);
 	half.el[0][0] = 0.5;
 	half.el[1][1] = 0.5;
+	half.el[2][2] = 0.5;
 
-#if 0 //debug
-	printf("F1=\n");
-	matPrint(&F1);
 
-	printf("F2=\n");
-	matPrint(&F2);
-
-	printf("F12=(F1-F2)\n");
-	matPrint(&F12);
-	matMul(&F12, &half, &F12);
-	printf("F12=(F1-F2)/2\n");
-	matPrint(&F12);
-#endif
 	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// 制約条件付きの時
 
@@ -75,6 +64,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	// デバッグ
 //	matPrint(&sim->imp.M);	matPrint(&sim->imp.C);	matPrint(&sim->imp.K);
 #if PRINT_TORQUE
+
 	std::cout << "fingerID : " << fingerID << " tau = " << std::endl;
 	matPrint(tau);		// Inertia Shaping無しの場合は0になればOK
 #endif
@@ -85,10 +75,15 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 {
 
 	int	jnt, crd;
-	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2);
-	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
-	static Matrix	Integ(2, 1);
-	static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
+	//static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2);
+	//static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
+	//static Matrix	Integ(2, 1);
+	//static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
+	int DIM2_ = 3;
+	static Matrix	Tmp21(DIM2_, 1), Tmp22(DIM2_, DIM2_), Tmp22_2(DIM2_, DIM2_);
+	static Matrix	tauNC(DIM2_, 1), tauVE(DIM2_, 1), tauIN(DIM2_, 1), tauPL(DIM2_, 1), E(DIM2_, DIM2_);
+	static Matrix	Integ(DIM2_, 1);
+	static Matrix	re(DIM2_, 1), dre(DIM2_, 1);	// 手先位置変位，手先速度変位
 	auto Finger1 = EntityManager::get()->getFinger();
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
@@ -110,9 +105,10 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 
 	Matrix F12;				//(F2-F1)/2
 	matAdd(&F12, &F2, &F1);
-	Matrix half(2, 2);
+	Matrix half(DIM2_, DIM2_);
 	half.el[0][0] = 0.5;
 	half.el[1][1] = 0.5;
+	half.el[2][2] = 0.5;
 	matMul(&F12, &half, &F12);
 #if 0//debug
 	printf("F1=\n");

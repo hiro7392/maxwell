@@ -82,34 +82,47 @@ double	init_obj_att[DIM3][DIM3] = { {sqrt(2.0) / 2, sqrt(2.0) / 2, 0.0}, {0.0, 0
 // 戻り値：関節一般化力（直動関節では力，回転関節ではトルク）
 ////////////////////////////////////////////////////////
 
+void MatPrintDebugAll2(Matrix& mat, std::string name, int Col, int Row) {
+	std::cout << name << " = " << std::endl;
+	for (int col = 0; col < Col; col++) {
+		for (int row = 0; row < Row; row++) {
+			printf("%lf ", mat.el[row][col]);
+		}
+		printf("\n");
+	}
+	return;
+}
 void cFinger::control() {
 	auto entity = EntityManager::get();
 
 	Matrix	tau;
 	double rotTau=0.0;
-	matInit(&tau, 2, 1);
+	matInit(&tau, DIM3, 1);
 	// 初期化
 	if (entity->step == 0) {
 
 		// 初期化
 		ctrlInitErr();		// パラメータ誤差を追加	今は何もやっていないので無視
 		// 初期値保存
-		for (int crd = 0; crd < DIM2; crd++) {
-			var_init.q.el[crd][0] = jnt_pos[crd]; var_init.dq.el[crd][0] = jnt_vel[crd] = 0.0;
+		for (int crd = 0; crd < DIM3; crd++) {
 			var_init.r.el[crd][0] = eff_pos[crd]; var_init.dr.el[crd][0] = eff_vel[crd] = 0.0;
 			var_init.F.el[crd][0] = eff_force[crd] = 0.0;
+		}
+		for (int crd = 0; crd < 2; crd++) {
+			var_init.q.el[crd+1][0] = jnt_pos[crd]; var_init.dq.el[crd+1][0] = jnt_vel[crd] = 0.0;
 		}
 	}
 
 	// 手先変数代入
-	for (int crd = 0; crd < DIM2; crd++) {
+	for (int crd = 0; crd < DIM3; crd++) {
 		var.r.el[crd][0] = eff_pos[crd]; var.dr.el[crd][0] = eff_vel[crd];
 		var.F.el[crd][0] = eff_force[crd];
 	}
 	// 関節変数代入
 	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
-		var.q.el[jnt][0] = jnt_pos[jnt]; var.dq.el[jnt][0] = jnt_vel[jnt];
+		var.q.el[jnt+1][0] = jnt_pos[jnt]; var.dq.el[jnt+1][0] = jnt_vel[jnt];
 	}
+	var.q.el[2][0] = senkai_base_jnt; var.dq.el[2][0] = senkai_base_vel;
 
 	// パラメータセット
 	armDynPara();
@@ -132,12 +145,15 @@ void cFinger::control() {
 	if (fingerID == 1) {
 		//ctrlMaxwell(&tau);	//	指1本単体でのmaxwell制御
 		RestrictedCtrlMaxwell(&tau);
-		RotRestrictedCtrlMaxwell(&rotTau);
+		//RotRestrictedCtrlMaxwell(&rotTau);
+		MatPrintDebugAll2(dyn.Mq, "Mq ", 3, 3);
 	}
 	else {
 		//ctrlMaxwell2(&tau);
 		RestrictedCtrlMaxwell2(&tau);
-		RotRestrictedCtrlMaxwell(&rotTau);
+		//RotRestrictedCtrlMaxwell(&rotTau);
+		MatPrintDebugAll2(dyn.Mq, "Mq ", 3, 3);
+
 	}
 #elif 0
 	//	ctrlMaxwellConv(_this, &tau);
@@ -193,8 +209,8 @@ void cFinger::control() {
 	matPrint(&tau);
 #endif
 	// 返り値に代入
-	jnt_force[ARM_M1] = tau.el[ARM_M1][0];
-	jnt_force[ARM_M2] = tau.el[ARM_M2][0];
+	jnt_force[ARM_M1] = tau.el[1][0];
+	jnt_force[ARM_M2] = tau.el[2][0];
 	//if (fingerID == 2) {
 		//jnt_force[ARM_M1] = 20.0;//sin(entity -> step / 1000.0 * 2 * PI);
 	//}
@@ -206,10 +222,10 @@ void cFinger::control() {
 	// 旋回関節を試す間コメントアウト
 	double fric_static_max = 5.0;
 	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
-		dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+		//dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 		r_joint_feedback_p[jnt] = dJointGetFeedback(r_joint[jnt]);
 #if PRINT_TORQUE
-		printf("FingerID = %d  now torque joint %d = (%.3lf,%.3lf,%.3lf)\n", fingerID, jnt + 1, r_joint_feedback_p[jnt]->t1[0], r_joint_feedback_p[jnt]->t1[1], r_joint_feedback_p[jnt]->t1[2]);
+		// printf("FingerID = %d  now torque joint %d = (%.3lf,%.3lf,%.3lf)\n", fingerID, jnt + 1, r_joint_feedback_p[jnt]->t1[0], r_joint_feedback_p[jnt]->t1[1], r_joint_feedback_p[jnt]->t1[2]);
 #endif
 		//	静止摩擦力
 		if (r_joint_feedback_p[jnt]->t1[0] < 5.0) {
@@ -225,13 +241,13 @@ void cFinger::control() {
 	
 
 #if  PRINT_TORQUE
-	printf("FingerID = %d senkai torque before saturation =%lf\n", fingerID, rotTau);
+	//printf("FingerID = %d senkai torque before saturation =%lf\n", fingerID, rotTau);
 #endif
 	double MAX = 10000.0, MIN = -10000.0;
 	if (rotTau > MAX )rotTau = MAX;
 	if (rotTau < MIN)rotTau = MIN;
 #if  PRINT_TORQUE
-	printf("FingerID = %d senkai torque =%lf\n", fingerID, rotTau);
+	//printf("FingerID = %d senkai torque =%lf\n", fingerID, rotTau);
 #endif
 	//if(entity->step>prepareTime)dJointAddHingeTorque(senkai_link_joint, fingerID==1? rotTau:-rotTau);
 }
