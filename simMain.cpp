@@ -100,16 +100,19 @@ void DrawStuff::simLoop(int pause)
 		auto sensor = _this->getParts()[3];
 		auto sensor2 = _this2->getParts()[3];
 
-		// 状態取得
 		for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(_this->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
+			_this->var.ddq.el[0][jnt] = _this->jnt_vel[jnt] - dJointGetHingeAngleRate(_this->r_joint[jnt]);	//	関節加速度
 			_this->jnt_vel[jnt] = dJointGetHingeAngleRate(_this->r_joint[jnt]);	// 関節速度
 #if finger2_use
-			//	追加 kawahara
+			//追加 kawahara
 			_this2->jnt_pos[jnt] = dJointGetHingeAngle(_this2->r_joint[jnt]) + _this2->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
+			_this2->var.ddq.el[0][jnt] = _this2->jnt_vel[jnt] - dJointGetHingeAngleRate(_this2->r_joint[jnt]);	//	関節加速度
+
 			_this2->jnt_vel[jnt] = dJointGetHingeAngleRate(_this2->r_joint[jnt]);	// 関節速度
 #endif
 		}
+		
 		
 
 		//　旋回関節角の角度と角速度を取得
