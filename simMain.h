@@ -698,13 +698,13 @@ void cFinger::setNums(int step) {
 		saveForce[step - 1][i] = eff_force[i];
 
 		//	関節角度
-		save_jnt_vel[step - 1][i] = var.q.el[i][0];
+		save_jnt_vel[step - 1][i] = var.q.el[i+1][0];
 
 		//	関節速度
-		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
-		save_jnt_dq[step - 1][i] = var.dq.el[i][0];
-		save_jnt_ddq[step - 1][i] = var.ddq.el[i][0];
-		save_jnt_ddq[step - 1][i] = var.ddq.el[i][0];
+		save_jnt_dq[step - 1][i] = var.dq.el[i+1][0];
+		save_jnt_dq[step - 1][i] = var.dq.el[i+1][0];
+		save_jnt_ddq[step - 1][i] = var.ddq.el[i+1][0];
+		save_jnt_ddq[step - 1][i] = var.ddq.el[i+1][0];
 #if useContactPoint
 		//  手先位置を取得する
 		const dReal* finger1TopPos = dBodyGetPosition(_this->forceContactPoint.getBody());
