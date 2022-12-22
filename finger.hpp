@@ -122,7 +122,7 @@ void cFinger::control() {
 	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 		var.q.el[jnt+1][0] = jnt_pos[jnt]; var.dq.el[jnt+1][0] = jnt_vel[jnt];
 	}
-	var.q.el[2][0] = senkai_base_jnt; var.dq.el[2][0] = senkai_base_vel;
+	var.q.el[0][0] = senkai_base_jnt; var.dq.el[0][0] = senkai_base_vel;	//旋回関節は0番目
 
 	// パラメータセット
 	armDynPara();
@@ -131,7 +131,7 @@ void cFinger::control() {
 	// 制御指令計算
 #if SIM_CTRL_MODE_MAXWELL & SIM_ADD_EXT_FORCE
 	//double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };		//xy平面上でシミュレーションする際
-	double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };		//3次元でシミュレーションする際
+	double	impM[] = { 5.0, 5.0,5.0 }, impC[] = { 4.0, 4.0,4.0 }, impK[] = { 40.0, 40.0,40.0 }, impK0[] = { 10.0, 10.0,10.0 };		//3次元でシミュレーションする際
 
 	//	重力方向の力を受ける際はkを大きくする
 	//for (int i = 0; i < 2; i++)impK[i] *= (1.0 + (senkai_base_jnt / (PI)));

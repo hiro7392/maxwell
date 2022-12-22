@@ -47,7 +47,7 @@ int cFinger::armDynPara() {
 	// ヤコビアン微分
 	double  dth0, dth1, dth2;
 	dth0 = this->senkai_base_vel;
-	dth1 = this->var.dq.el[0][0];	dth2 = this->var.dq.el[1][0];
+	dth1 = this->var.dq.el[1][0];	dth2 = this->var.dq.el[2][0];
 
 	this->kine.dJ.el[0][0] = 0	; this->kine.dJ.el[0][1] = -l1 * C1 * dth1 - l2 * C12 * (dth1 + dth2); this->kine.dJ.el[0][2] = - l2 * C12 * (dth1 + dth2);
 	
@@ -58,7 +58,13 @@ int cFinger::armDynPara() {
 	this->kine.dJ.el[2][0] = -S0 * sig * l0 * dth0 - l1 * (dth0 * S0 * S1 + C0 * C1 * dth1) - l2 * (-dth0 * S0 * S12 + (dth1 + dth2) * C0 * C12);
 	this->kine.dJ.el[2][1] = -l1 * (dth0 * C0 * C1 - dth1 * S0 * S1) - l2 * (C0 * C12 * dth0 + S0 * S12 * (dth1 + dth2));
 	this->kine.dJ.el[2][2] = -l2 * (dth0 * C0 * C12 - (dth1 + dth2) * S0 * S12);
+#if 1
+	printf("J =\n");
+	matPrint(&this->kine.J);
 
+	printf("dJ =\n");
+	matPrint(&this->kine.dJ);
+#endif
 	// 慣性行列微分
 	/*this->dyn.dMq.el[0][0] = -2 * m2 * l1 * lg2 * S2 * this->var.dq.el[1][0];
 	this->dyn.dMq.el[0][1] = this->dyn.dMq.el[1][0] = -m2 * l1 * lg2 * S2 * this->var.dq.el[1][0];

@@ -398,7 +398,7 @@ int cFinger::getdqjdqkoTi() {
 	imp.dqjdqk0Ti[2][2][2].el[0][0] = -C12;			imp.dqjdqk0Ti[2][2][2].el[1][0] = S12;			imp.dqjdqk0Ti[2][2][2].el[3][0] = -l2 * cos(th22_th1);
 	imp.dqjdqk0Ti[2][2][2].el[0][1] = -C0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][1] = -C0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][1] = -C0 *l2 * sin(th22_th1);
 	imp.dqjdqk0Ti[2][2][2].el[0][2] = -S0 * S12;	imp.dqjdqk0Ti[2][2][2].el[1][2] = -S0 * C12;	imp.dqjdqk0Ti[2][2][2].el[3][2] = -S0 * l2 * sin(th22_th1);
-#if INVERSE
+#if 0 //INVERSE
 	for (int i = 0; i < 3; i++) {
 		for (int k = 0; k < 3; k++) {
 			for (int l = 0; l < 3; l++) {

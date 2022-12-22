@@ -65,7 +65,28 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}∫Fdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
+#if PRINT_MAXWELL_PARAM
+	//printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
+	printf("finger ID:%d\n",fingerID);
+	//printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0] / 10);
+	printf("heishin tauNC =\n");
+	matPrint(&tauNC);
+	printf("heishin tauPL =\n");
+	matPrint(&tauPL);
+	printf("heishin tauIN =\n");
+	matPrint(&tauIN);
+	printf("heishin tauVE =\n");
+	matPrint(&tauVE);
 
+	printf("heishin E =\n");
+	matPrint(&E);
+	printf("heishin h =\n");
+	matPrint(&dyn.h);
+	printf("heishin imp.Mq =\n");
+	matPrint(&dyn.Mq);
+	printf("heishin imp.M =\n");
+	matPrint(&imp.M);
+#endif
 	/*printf("tau =\n");
 	matPrint(tau);
 	Matrix minus(2, 2);
@@ -159,8 +180,26 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	tau->el[0][1] += imp.G.el[0][2];
 #if PRINT_MAXWELL_PARAM
 	//printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
-	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
-	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, imp.M.el[0][0]);
+	printf("finger ID:%d\n",fingerID);
+	//	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
+	printf("heishin tauNC =\n");
+	matPrint(&tauNC);
+	printf("heishin tauPL =\n");
+	matPrint(&tauPL);
+	printf("heishin tauIN =\n");
+	matPrint(&tauIN);
+	printf("heishin tauVE =\n");
+	matPrint(&tauVE);
+	printf("heishin E =\n");
+	matPrint(&E);
+	printf("heishin E*(F1-F2)/2.0 =\n");
+	matPrint(&Tmp22);
+	printf("heishin h =\n");
+	matPrint(&dyn.h);
+	printf("heishin imp.Mq =\n");
+	matPrint(&dyn.Mq);
+	printf("heishin imp.M =\n");
+	matPrint(&imp.M);
 #endif
 	// デバッグ
 #if PRINT_TORQUE
