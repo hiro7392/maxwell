@@ -526,7 +526,7 @@ int cFinger::seth() {
 				int k = std::max(i, std::max(j, m));
 				double now_iteration_sum = 0.0;
 				matZero(&tmp1); matZero(&tmp2);
-				//	“ñŠK•”•ª~Hk
+				//	“ñŠK”÷•²~Hk
 				matMul(&tmp1, &imp.dqjdqk0Ti[k][j][m], &imp.H_hat[k]);
 				matMul(&tmp2, &tmp1, &imp.dqkoTi[k][i]);
 				now_iteration_sum=matTrace(&tmp2);	//trace‚ğ‚Æ‚é
