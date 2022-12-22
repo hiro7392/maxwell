@@ -37,7 +37,20 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	half.el[1][1] = 0.5;
 	half.el[2][2] = 0.5;
 
+#if 1//debug
+	printf("F1=\n");
+	matPrint(&F1);
 
+	printf("F2=\n");
+	matPrint(&F2);
+
+	printf("F12=(F2-F1)\n");
+	matPrint(&F12);
+	matMul(&F12, &F12, &half);
+	printf("F12=(F2-F1)/2\n");
+	matPrint(&F12);
+	//matZero(&F12);
+#endif
 	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = çFdt
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// §–ñðŒ•t‚«‚ÌŽž
 
@@ -110,7 +123,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	half.el[1][1] = 0.5;
 	half.el[2][2] = 0.5;
 	matMul(&F12, &half, &F12);
-#if 0//debug
+#if 1//debug
 	printf("F1=\n");
 	matPrint(&F1);
 
@@ -120,8 +133,11 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	printf("F12=(F2-F1)\n");
 	matPrint(&F12);
 
+	matMul(&F12, &F12, &half);
+
 	printf("F12=(F2-F1)/2\n");
 	matPrint(&F12);
+	//matZero(&F12);
 #endif
 
 	//ŠO—ÍF‚É‚Â‚¢‚Ä
@@ -142,7 +158,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	tau->el[0][0] += imp.G.el[0][1];
 	tau->el[0][1] += imp.G.el[0][2];
 #if PRINT_MAXWELL_PARAM
-	printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
+	//printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	printf("heishin tauNC %lf tauPL %lf tauIN %lf tauVE %lf\n", tauNC.el[0][0], tauPL.el[0][0], tauIN.el[0][0], tauVE.el[0][0]/10);
 	printf("heishin E = %lf Mq = %lf Id = %lf\n", E.el[0][0], dyn.Mq.el[0][0], rotImp.Ja, imp.M.el[0][0]);
 #endif

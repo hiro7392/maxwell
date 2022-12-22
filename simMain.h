@@ -55,10 +55,10 @@
 #define VIEW_FROM_Z 1
 #define INVERSE 1		//	同次行列の微分について行列の転地を取りたいとき
 //	パラメータのコンソール表示
-#define PRINT_ANGLE	0			//	関節角度などをコンソール表示
+#define PRINT_ANGLE	1			//	関節角度などをコンソール表示
 #define PRINT_TORQUE	1		//	旋回およびリンク関節
-#define PRINT_MAXWELL_PARAM 0	//	maxwell制御のパラメータ
-#define PRINT_MAXWELL_ROT_PARAM 0	//	maxwell制御　回転に関するパラメータ
+#define PRINT_MAXWELL_PARAM 1	//	maxwell制御のパラメータ
+#define PRINT_MAXWELL_ROT_PARAM 1	//	maxwell制御　回転に関するパラメータ
 #define PRINT_OBJ_POSE	0			//	把持物体の姿勢
 #define PRINT_EFF_FORCE 0			//	手先にかかる力
 #define PRINT_BASE_POS	1			//	リンク1の根本の座標	
@@ -89,7 +89,7 @@
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	5000	// データ保存カウント数
+#define DATA_CNT_NUM	8	// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
 // 文字列定義

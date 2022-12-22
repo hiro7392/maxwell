@@ -222,7 +222,7 @@ void cFinger::control() {
 	// 旋回関節を試す間コメントアウト
 	double fric_static_max = 5.0;
 	for (int jnt = 0; jnt < ARM_JNT; jnt++) {
-		//dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
+		dJointAddHingeTorque(r_joint[jnt], jnt_force[jnt]);		// トルクは上書きではなくインクリメントされることに注意
 		r_joint_feedback_p[jnt] = dJointGetFeedback(r_joint[jnt]);
 #if PRINT_TORQUE
 		// printf("FingerID = %d  now torque joint %d = (%.3lf,%.3lf,%.3lf)\n", fingerID, jnt + 1, r_joint_feedback_p[jnt]->t1[0], r_joint_feedback_p[jnt]->t1[1], r_joint_feedback_p[jnt]->t1[2]);
