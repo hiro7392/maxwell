@@ -89,7 +89,7 @@
 // 定数定義
 #define SYSTEM_CYCLE_TIME	(0.001)	// 実験用サイクルタイム
 #define SIM_CYCLE_TIME	(0.001)	// シミュレーション用サイクルタイム
-#define DATA_CNT_NUM	8	// データ保存カウント数
+#define DATA_CNT_NUM	100		// データ保存カウント数
 #define SAVE_IMG_RATE	200		// 画像保存間隔カウント数
 #define SAVE_VIDEO_RATE	33		// 動画保存間隔カウント数
 // 文字列定義
@@ -696,6 +696,7 @@ void cFinger::setNums(int step) {
 		//_this2->saveForce[sim->step - 1][i] = _this2->var.F.el[i][0];
 		//	力覚センサの値
 		saveForce[step - 1][i] = eff_force[i];
+		saveForce[step - 1][2] = eff_force[2];
 
 		//	関節角度
 		save_jnt_vel[step - 1][i] = var.q.el[i+1][0];
@@ -705,6 +706,7 @@ void cFinger::setNums(int step) {
 		save_jnt_dq[step - 1][i] = var.dq.el[i+1][0];
 		save_jnt_ddq[step - 1][i] = var.ddq.el[i+1][0];
 		save_jnt_ddq[step - 1][i] = var.ddq.el[i+1][0];
+		
 #if useContactPoint
 		//  手先位置を取得する
 		const dReal* finger1TopPos = dBodyGetPosition(_this->forceContactPoint.getBody());
@@ -757,7 +759,8 @@ void cFinger::outputJntAngle(int end) {
 	outfile << "第1関節[rad/s^2]" << ",";
 	outfile << "第1関節[度/s^2]" << ",";
 
-	outfile << "力覚センサFx" << ",";
+	outfile << "手先位置偏差　rx" << ",";
+	outfile << "センサ実測値　Fx" << ",";
 	outfile << "トルク　関節1" << ",";
 	outfile << "手先位置 x" << ",";
 	outfile << "手先速度 x" << ",";
@@ -772,14 +775,17 @@ void cFinger::outputJntAngle(int end) {
 	outfile << "第2関節[rad/s^2]" << ",";
 	outfile << "第2関節[度/s^2]" << ",";
 
-	outfile << "力覚センサFy" << ",";
+	outfile << "手先位置偏差　ry" << ",";
+
+	outfile << "センサ実測値　Fy" << ",";
 	outfile << "トルク　関節2" << ",";
 	outfile << "手先位置 y" << ",";
 	outfile << "手先速度 y" << ",";
 
 	outfile << "平衡位置 y" << ",";
 	outfile << "センサ出力の理論値　Fy" << ",";
-
+	outfile << "センサ実測値　Fz" << ","; 
+	outfile << "手先位置偏差　rz" << std::endl;
 
 
 	for (int k = 0; k < end; k++) {
@@ -795,6 +801,8 @@ void cFinger::outputJntAngle(int end) {
 			outfile << save_jnt_ddq[k][i] << ",";			//関節加速度[rad/s^2]
 			outfile << radToAng(save_jnt_ddq[k][i]) << ",";	//関節加速度[度/s^2]
 
+			outfile << save_endEffector_diff[k][i] << ","; //手先位置偏差
+
 			outfile << saveForce[k][i] << ",";			//力覚センサの値 Fx,Fy[N]
 			outfile << save_jnt_force[k][i] << ",";		//対象の関節に抱える力
 
@@ -807,7 +815,8 @@ void cFinger::outputJntAngle(int end) {
 			outfile << save_force_endEffector[k][i] << ",";	//センサ出力の理論値
 
 		}
-		outfile << std::endl;
+		outfile << saveForce[k][2] << ",";			//力覚センサの値 Fx,Fy[N]
+		outfile << save_endEffector_diff[k][2] << std::endl;	 //手先位置偏差 
 	}
 	outfile.close();
 }

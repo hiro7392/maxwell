@@ -3,15 +3,92 @@
 #include"filter.h"
 #include"setJoint.h"
 #include"simCmd.h"
+#define GNUPLOT_PATH "C:/gnuplot/bin/gnuplot.exe" //gnuplot.exeへのPATH
+#define NX 720
 ////////////////////////////////////////////////////////
 // 描画設定
 // main関数
 ////////////////////////////////////////////////////////
+void calculate_sin(double x[NX + 1], double y[NX + 1])
+{
+	int i;
+	double dx = (4 * M_PI) / NX;
+
+	for (i = 0; i <= NX; i++) {
+		x[i] = -2 * M_PI + i * dx;
+		y[i] = sin(x[i]);
+	}
+}
+void gunplot_test() {
+	FILE* gp, * fp; //gp:gnuplot pointer, fp:file pointer
+	char foil_name[256], file_name[256], foil_data[256], file_format[] = ".txt", * ch;
+	int i, j, file_size = 0;
+	double val[1024][4];
+	double x[NX + 1], y[NX + 1];
+
+	calculate_sin(x,y);
+	//Gnuplotのコマンドを起動する
+	if ((gp = _popen(GNUPLOT_PATH, "w")) == NULL) { //パイプを使ってGnuplotを起動する
+		fprintf(stderr, "Not Found %s.", GNUPLOT_PATH);
+		exit(EXIT_FAILURE);
+	}
+	fprintf(gp, "set xrange [%lf:%lf]\n", -2 * M_PI, 2 * M_PI);
+	fprintf(gp, "set yrange [-1.0:1.0]\n");
+
+	fprintf(gp, "set terminal png\n");
+	fprintf(gp, "set output 'C:/Users/k_hir/source/repos/sakana7392/maxwell/data/gnuplot_sample.png'\n");
+	fprintf(gp, "plot '-' with lines linetype 1 title 'sin(x)'\n");
+
+	for (i = 0; i <= 720; i++) {
+		fprintf(gp, "%f %f\n", x[i], y[i]);
+	}
+	
+	fprintf(gp, "set terminal windows\n");
+	fprintf(gp, "set output\n");
+
+	fprintf(gp, "e\n");
+
+	fprintf(gp, "pause -1\n");
+	fflush(gp);
+
+	if (_pclose(gp) == EOF) {
+		fprintf(stderr, "Error: cannot close \"%s\".\n", GNUPLOT_PATH);
+		exit(2);
+	}
+	//fprintf(gp, "plot sin(x)\n");
+	//fflush(gp); //バッファにため込まれているデータを解放する(必須)
+	//system("pause");
+	//std::cin.get();		//	一時停止
+	//fprintf(gp, "exit\n"); //Gnuplotを終了する
+	//_pclose(gp);
+	/*if (pclose(gp) == EOF) {
+		fprintf(stderr, "Error: cannot close \"%s\".\n", GNUPLOT_PATH);
+		exit(2);
+	}*/
+
+	////Gnuplotにコマンドを送る
+	//fprintf(gp, "set xrange [0:1]\n"); //範囲の設定
+	//fprintf(gp, "set yrange [-0.5:0.5]\n");
+	//fprintf(gp, "set size square\n");
+	//fprintf(gp, "plot '-' with lines\n"); //配列に入っている値を表示
+	//for (i = 1; i <= file_size - 1; i++) {
+	//	fprintf(gp, "%f\t%f\n", val[0][i], val[1][i]); //値の書き込み
+	//}
+	//fprintf(gp, "e\n"); //配列の終了
+
+	//fflush(gp); //バッファにため込まれているデータを解放する(必須)
+	//system("pause");
+	//fprintf(gp, "exit\n"); //Gnuplotを終了する
+	//_pclose(gp);
+}
 bool addForce = false;
 int main(int argc, char *argv[])
 {
-	filterTest();
+	gunplot_test();
+	return 0;
 	auto sim = EntityManager::init();
+	
+	
 #if FLAG_DRAW_SIM
 //	setDrawStuff();		//ドロースタッフ
 #endif
@@ -49,7 +126,7 @@ int main(int argc, char *argv[])
 	//	dRandSetSeed(0);
 	// コマンド開始
 	exeCmd(argc, argv);		// 内部でdsSimulationLoop()を実行
-
+	
 #if	GLAPHIC_OPENGL
 	// グラフィック表示
 	glutInitWindowPosition(200, 100);
@@ -65,6 +142,7 @@ int main(int argc, char *argv[])
 	init();
 	glutMainLoop();
 #endif
+
 	return 0;
 }
 

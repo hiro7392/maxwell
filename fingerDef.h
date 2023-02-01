@@ -114,6 +114,7 @@ public:
 	double	save_obj_vel[DATA_CNT_NUM][DIM3] = {};
 	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
 	double  save_force_endEffector[DATA_CNT_NUM][DIM3] = {};
+	double	save_endEffector_diff[DATA_CNT_NUM][DIM3] = {};
 
 	// ê˘âÒä÷êﬂäp
 	double senkai_base_jnt = 0;

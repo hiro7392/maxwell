@@ -44,6 +44,7 @@ int cFinger::armDynPara() {
 	this->kine.J.el[0][0] = 0;						this->kine.J.el[0][1] = -l1 * S1 - l2 * S12; this->kine.J.el[0][2] = -l2 * S12;
 	this->kine.J.el[1][0] = -S0 * (l0 * (fingerID == 1 ? 1:-1) + l1 * S1 + l2 * S12);	this->kine.J.el[1][1] = l1 * C0 * C1 + l2 * C0 * C12; this->kine.J.el[1][2] = l2 * C0 * C12;
 	this->kine.J.el[2][0] = -C0 * (l0 * (fingerID == 1 ? 1 : -1) + l1 * S1 + l2 * S12);	this->kine.J.el[2][1] = l1 * S0 * C1 + l2 * S0 * C12; this->kine.J.el[2][2] = -l2 * S0 * C12;
+	matTrans(&kine.J, &kine.J);
 	// ƒ„ƒRƒrƒAƒ“”÷•ª
 	double  dth0, dth1, dth2;
 	dth0 = this->senkai_base_vel;
@@ -58,6 +59,7 @@ int cFinger::armDynPara() {
 	this->kine.dJ.el[2][0] = -S0 * sig * l0 * dth0 - l1 * (dth0 * S0 * S1 + C0 * C1 * dth1) - l2 * (-dth0 * S0 * S12 + (dth1 + dth2) * C0 * C12);
 	this->kine.dJ.el[2][1] = -l1 * (dth0 * C0 * C1 - dth1 * S0 * S1) - l2 * (C0 * C12 * dth0 + S0 * S12 * (dth1 + dth2));
 	this->kine.dJ.el[2][2] = -l2 * (dth0 * C0 * C12 - (dth1 + dth2) * S0 * S12);
+	matTrans(&kine.dJ, &kine.dJ);
 #if 1
 	printf("J =\n");
 	matPrint(&this->kine.J);

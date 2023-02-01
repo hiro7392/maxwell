@@ -98,11 +98,11 @@ int exeCmd(int argc, char* argv[])
 		}
 #endif
 		// ファイル保存
-		//sprintf(sim->getFinger()->data_file_name, FILENAME_DATA, incount);		// ファイル名を連番に設定
-		//sprintf(sim->getFinger()->filename_info, FILENAME_INFO, incount);		// ファイル名を連番に設定
-		//sim->getFinger()->saveData();
-		//sim->getFinger()->saveInfo();
-		//sim->getFinger()->saveGraph();
+		sprintf(sim->getFinger()->data_file_name, FILENAME_DATA, incount);		// ファイル名を連番に設定
+		sprintf(sim->getFinger()->filename_info, FILENAME_INFO, incount);		// ファイル名を連番に設定
+		sim->getFinger()->saveData();
+		sim->getFinger()->saveInfo();
+		sim->getFinger()->saveGraph();
 
 		//// ファイル保存
 		//sprintf(sim->getFinger2()->data_file_name, FILENAME_DATA, incount);		// ファイル名を連番に設定

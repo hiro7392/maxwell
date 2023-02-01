@@ -130,8 +130,9 @@ void cFinger::control() {
 	// インピーダンス設定
 	// 制御指令計算
 #if SIM_CTRL_MODE_MAXWELL & SIM_ADD_EXT_FORCE
-	//double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };		//xy平面上でシミュレーションする際
-	double	impM[] = { 5.0, 5.0,5.0 }, impC[] = { 4.0, 4.0,4.0 }, impK[] = { 40.0, 40.0,40.0 }, impK0[] = { 10.0, 10.0,10.0 };		//3次元でシミュレーションする際
+	//double	impM[] = { 2.0, 2.0 }, impC[] = { 4.0, 4.0 }, impK[] = { 40.0, 40.0 }, impK0[] = { 10.0, 10.0 };	//xy平面上でシミュレーションする際
+	static double Md_ = 5.0, C_ = 100, K_ = 4.0, k0_ = 10.0;
+	double	impM[] = { Md_,Md_,Md_ }, impC[] = {C_,C_,C_ }, impK[] = { K_,K_,K_ }, impK0[] = { k0_,k0_,k0_ };		//3次元でシミュレーションする際
 
 	//	重力方向の力を受ける際はkを大きくする
 	//for (int i = 0; i < 2; i++)impK[i] *= (1.0 + (senkai_base_jnt / (PI)));
@@ -246,6 +247,7 @@ void cFinger::control() {
 	double MAX = 10000.0, MIN = -10000.0;
 	if (rotTau > MAX )rotTau = MAX;
 	if (rotTau < MIN)rotTau = MIN;
+	dJointAddHingeTorque(senkai_link_joint, tau.el[0][0]);
 #if  PRINT_TORQUE
 	//printf("FingerID = %d senkai torque =%lf\n", fingerID, rotTau);
 #endif

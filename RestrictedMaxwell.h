@@ -19,7 +19,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 		Matrix Offset(2, 1);
 		Offset.el[0][0] = -0.1;//x軸なので0
 		Offset.el[1][0] = -OFFSET_VAL;
-		matSub(&var_init.r, &var_init.r, &Offset);	//平衡位置からオフセットの分をずらしておく
+		//matSub(&var_init.r, &var_init.r, &Offset);	//平衡位置からオフセットの分をずらしておく
 	}
 	//ゲインを変更してみるとき
 	// 前処理
@@ -28,7 +28,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 
 	Matrix F1 = EntityManager::get()->getFinger()->var.F;
 	Matrix F2 = EntityManager::get()->getFinger2()->var.F;
-
+	//matZero(&F1); matZero(&F2);
 	//Fの部分を(F1-F2)/2に変更
 	Matrix F12;
 	matAdd(&F12, &F1, &F2);	//加わる力は反転しているので足してもF1-F2になる
@@ -46,6 +46,7 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 
 	printf("F12=(F2-F1)\n");
 	matPrint(&F12);
+
 	matMul(&F12, &F12, &half);
 	printf("F12=(F2-F1)/2\n");
 	matPrint(&F12);
@@ -54,17 +55,23 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// 制約条件付きの時
 
-
+	//	遠心コリオリを無視
+	//for (int i = 0; i < 3; i++)dyn.h.el[i][0] = 0.001;
 	// 制御則
 	matMul3(&E, &dyn.Mq, &kine.Jinv, &imp.Minv);	// E = Mq*J^{-1}*Md^{-1}
 	matSub(&tauNC, &dyn.h, matMul4(&Tmp21, &dyn.Mq, &kine.Jinv, &kine.dJ, &var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
 	matAdd(&Tmp21, matMul4(&tauVE, &imp.K, &imp.Cinv, &imp.M, &dre), matMul(&Tmp21, &imp.K, &re));		// Kd*Cd^{-1}*Md*dr+Kd*r
+	
 	matSignInv(matMul(&tauVE, &E, &Tmp21));	// tauVE = -E{Kd*Cd^{-1}*Md*dr+Kd*r}
 	//matMul(&tauIN, matSub(&Tmp22, &E, &kine.Jt), &var.F);		// tauIN = (E-J^T)F
 	matSub(&tauIN, matMul(&Tmp22, &E, &F12), matMul(&Tmp22_2, &kine.Jt, &var.F));		// tauIN = (E*((F1+F2)/2) -J^T*F)	制約条件付き
 
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}∫Fdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
+	//tau->el[0][1] += imp.G.el[0][1];
+	//tau->el[0][2] += imp.G.el[0][2];
+	for (int i = 0; i < 3; i++)save_endEffector_diff[entity->step - 1][i] = re.el[i][0];
+
 #if PRINT_MAXWELL_PARAM
 	//printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	printf("finger ID:%d\n",fingerID);
@@ -78,6 +85,11 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	printf("heishin tauVE =\n");
 	matPrint(&tauVE);
 
+	printf("heishin tau =\n");
+	matPrint(tau);
+	printf("heishin Jt*F =\n");
+	matPrint(&Tmp22_2);
+
 	printf("heishin E =\n");
 	matPrint(&E);
 	printf("heishin h =\n");
@@ -86,6 +98,10 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	matPrint(&dyn.Mq);
 	printf("heishin imp.M =\n");
 	matPrint(&imp.M);
+	printf("re (xe) =\n");
+	matPrint(&re);
+	printf("dret (xdot) =\n");
+	matPrint(&dre);
 #endif
 	/*printf("tau =\n");
 	matPrint(tau);
@@ -126,7 +142,7 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 		Offset.el[0][0] = -0.1;//x軸なので0
 		Offset.el[1][0] = OFFSET_VAL;
 
-		matSub(&var_init.r, &var_init.r, &Offset);
+		//matSub(&var_init.r, &var_init.r, &Offset);
 		printf("initialized ! \n");
 
 	}
@@ -136,6 +152,8 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	//Fの部分を(F1-F2)/2に変更
 	Matrix F1 = EntityManager::get()->getFinger()->var.F;
 	Matrix F2 = EntityManager::get()->getFinger2()->var.F;
+
+	//matZero(&F1);matZero(&F2);
 
 	Matrix F12;				//(F2-F1)/2
 	matAdd(&F12, &F2, &F1);
@@ -158,6 +176,9 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 
 	printf("F12=(F2-F1)/2\n");
 	matPrint(&F12);
+
+	
+
 	//matZero(&F12);
 #endif
 
@@ -165,7 +186,8 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	//matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &var.F));		// Integ = ∫Fdt
 	matAdd(&Integ, &Integ, matMulScl(&Tmp21, SIM_CYCLE_TIME, &F12));		// 制約条件付きの時
 
-
+	//	遠心コリオリを無視
+	//for (int i = 0; i < 3; i++)dyn.h.el[i][0] = 0.001;
 	// 制御則
 	matMul3(&E, &dyn.Mq, &kine.Jinv, &imp.Minv);	// E = Mq*J^{-1}*Md^{-1}
 	matSub(&tauNC, &dyn.h, matMul4(&Tmp21, &dyn.Mq, &kine.Jinv, &kine.dJ, &var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
@@ -176,8 +198,9 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 
 	matMul4(&tauPL, &E, &imp.K, &imp.Cinv, &Integ);		// tauPL = E*Kd*Cd^{-1}∫Fdt
 	matAdd4(tau, &tauNC, &tauVE, &tauIN, &tauPL);
-	tau->el[0][0] += imp.G.el[0][1];
-	tau->el[0][1] += imp.G.el[0][2];
+	
+	//tau->el[0][1] += imp.G.el[0][1];
+	//tau->el[0][2] += imp.G.el[0][2];
 #if PRINT_MAXWELL_PARAM
 	//printf("mu1 = %lf mu2=%lf\n", mu1, mu2);
 	printf("finger ID:%d\n",fingerID);
@@ -190,8 +213,16 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matPrint(&tauIN);
 	printf("heishin tauVE =\n");
 	matPrint(&tauVE);
+
+	printf("heishin tau =\n");
+	matPrint(tau);
+	printf("heishin Jt =\n");
+	matPrint(&kine.Jt);
+	printf("heishin Jt*F =\n");
+	matPrint(&Tmp22_2);
 	printf("heishin E =\n");
 	matPrint(&E);
+
 	printf("heishin E*(F1-F2)/2.0 =\n");
 	matPrint(&Tmp22);
 	printf("heishin h =\n");
@@ -199,6 +230,11 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	printf("heishin imp.Mq =\n");
 	matPrint(&dyn.Mq);
 	printf("heishin imp.M =\n");
+	printf("re (xe) =\n");
+	matPrint(&re);
+	printf("dret (xdot) =\n");
+	matPrint(&dre);
+
 	matPrint(&imp.M);
 #endif
 	// デバッグ
@@ -236,7 +272,7 @@ int cFinger::RotRestrictedCtrlMaxwell(double* tau)
 	rotImp.h = senkai_base_vel * rotImp.V*(fingerID ==1?1:-1);
 	double dphi =  senkai_base_jnt-senkai_base_jnt_init+ (fingerID == 1 ? 1 : -1) * OFFSET_VAL_SENKAI;
 
-	static double tauNC, tauPL, tauIN, tauVE, Er;
+	double tauNC, tauPL, tauIN, tauVE, Er;
 	Er = (rotImp.Iq / rotImp.Ja) * rotImp.Id;
 #if PRINT_MAXWELL_PARAM
 	printf("Er = %lf Iq = %lf Ja = %lf Id = %lf,dphi = %lf\n", Er, rotImp.Iq, rotImp.Ja, rotImp.Id,dphi);

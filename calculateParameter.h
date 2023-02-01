@@ -535,7 +535,7 @@ int cFinger::seth() {
 			}
 		}
 
-		dyn.h.el[0][i] = result;
+		dyn.h.el[i][0] = result;
 	}
 	matFree(&tmp1);	matFree(&tmp2);
 
