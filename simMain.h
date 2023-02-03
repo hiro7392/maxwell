@@ -444,6 +444,7 @@ public:
 	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
 	double  save_force_endEffector[DATA_CNT_NUM][ARM_JNT] = {};
 	double  save_object_pos[DATA_CNT_NUM] = {};
+	double  save_object_force[DATA_CNT_NUM] = {};
 	// 保存用ファイル名変数
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_info[DATA_FILE_NAME_MAXLEN] = {};
@@ -693,10 +694,10 @@ class EntityODE : public ODE {
 
 public:
 	int FingerNum=0;
-	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
-	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
-	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 4.0, PI / 2.0 };	// ロボット初期姿勢
-	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 4.0, -PI / 2.0 };	// ロボット初期姿勢
+	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
+	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
+	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 3.5, PI / 2.0 };	// ロボット初期姿勢
+	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 3.5, -PI / 2.0 };	// ロボット初期姿勢
 
 
 	void setup() {
@@ -805,8 +806,8 @@ void cFinger::outputJntAngle(int end) {
 
 	outfile << "平衡位置 y" << ",";
 	outfile << "センサ出力の理論値　Fy" << ",";
-	outfile << "物体の中心位置　r0" << std::endl;
-
+	outfile << "物体の中心位置　r0" << ",";
+	outfile << "物体に加える外力　F0" << std::endl;
 
 	for (int k = 0; k < end; k++) {
 		outfile << k << ",";
@@ -834,6 +835,7 @@ void cFinger::outputJntAngle(int end) {
 
 		}
 		outfile << save_object_pos[k] << ",";
+		outfile << save_object_force[k] << ",";
 		outfile << std::endl;
 	}
 	outfile.close();

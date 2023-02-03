@@ -52,11 +52,11 @@ float DrawStuff::hpr[3];
 
 // 初期設定変数
 //double	init_jnt_pos[ARM_JNT] = {3*PI/4.0, PI/2.0};	// ロボット初期姿勢
-//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
-//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
+double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 3.5, PI / 2.0 };	// ロボット初期姿勢
+double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 3.5, -PI / 2.0 };	// ロボット初期姿勢
 
-double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0-PI/7.0, PI / 3.0 };	// ロボット初期姿勢
-double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI /7.0 , -PI / 3.0 };	// ロボット初期姿勢
+//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0-PI/7.0, PI / 3.0 };	// ロボット初期姿勢
+//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI /7.0 , -PI / 3.0 };	// ロボット初期姿勢
 #if SIM_OBJ_CASE1
 double	init_obj_pos[DIM3] = { -0.8 - 2 * 0.75 / sqrt(2.0), -0.035, OBJ_RADIUS };	// 対象初期位置
 double	init_obj_att[DIM3][DIM3] = { {1.0, 0.0, 0.0}, {0.0, 0.0, -1.0}, {0.0, 1.0, 0.0} };	// 回転軸がy方向

@@ -239,9 +239,9 @@ void cFinger::setJoint() {
 	
 }
 //把持物体の初期位置
-dReal capX = -1.2, capY = -0.60, capZ = 0.3;
+dReal capX = -1.1, capY = -0.60, capZ = 0.3;
 //把持物体の大きさ
-const dReal plateX = 1.5, plateY = 0.50, plateZ = 0.4;
+const dReal plateX = 1.5, plateY = 0.70, plateZ = 0.4;
 
 
 //二本目の指の初期位置設定
@@ -403,7 +403,7 @@ void DrawStuff::simLoop(int pause)
 	if (!pause) {
 		auto sensor = _this->getParts()[3];
 		auto sensor2 = _this2->getParts()[3];
-	
+
 		// 状態取得
 		for (int jnt = 0; jnt < ARM_JNT; jnt++) {
 			_this->jnt_pos[jnt] = dJointGetHingeAngle(_this->r_joint[jnt]) + _this->init_jnt_pos[jnt];	// 関節位置（x軸が基準角0）
@@ -423,7 +423,7 @@ void DrawStuff::simLoop(int pause)
 		dBodyGetRelPointPos(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_pos);			// 手先位置
 		dBodyGetRelPointVel(sensor2->getBody(), 0.0, 0.0, sensor2->getl() / 2.0, _this2->eff_vel);			// 手先速度
 #endif
-		
+
 		//関節にかかるトルクを取得する
 		//_this->p_force = dJointGetFeedback(_this->f2_joint);	//参考: もともとのmaxwell制御
 		_this->p_force = dJointGetFeedback(_this->sensor2FingerTop);
@@ -473,13 +473,13 @@ void DrawStuff::simLoop(int pause)
 		quat[1] = 0.0;
 		quat[2] = 0.0;
 		quat[3] = 0.0;// quat_ptr[3];	//外力による回転を無視したいので0にする
-		
+
 
 		//現在の位置
 		const dReal* nowPos = dBodyGetPosition(plateToGrasp.body);
-		
-		static double beforeXpos; 
-		if(sim->step==0)beforeXpos=nowPos[0];
+
+		static double beforeXpos;
+		if (sim->step == 0)beforeXpos = nowPos[0];
 		//速度,角度
 		dBodySetQuaternion(plateToGrasp.body, quat);
 		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
@@ -487,20 +487,25 @@ void DrawStuff::simLoop(int pause)
 		beforeXpos = nowPos[0];
 		_this->save_object_pos[entity->step - 1] = nowPos[1];
 
+		double extForceValue = 0.0;
 		//x座標を記録
 		//plateの端に外力を加える
-		if (true &&sim->step > 500 && sim->step<=1200) {
+		if (true && sim->step > 800 && sim->step <= 1500 + 2100+1000) {
 			static int duty = 30000;	//外力の向きの周期
 			static int forceVal = 5;
 			int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
+			if (sim->step >= 3000 )forceDir = 1.5;
+			if (sim->step >= 2000 && sim->step <=3000 )forceDir = 0;//停止
 			int forceDirX = 0;// (sim->step % duty <= duty / 4) ? -1 : 1;
 			double distFromCenter = 0.0;
 			// distFromCenter = 0.2; duty=100,forceVal=30,1点のみについて力を加える
 			//外力ベクトル(x,y,z),加える位置(x,y,z)
+			extForceValue = forceVal * forceDir;
 			dBodyAddForceAtPos(plateToGrasp.body, forceVal/2.0 * forceDirX, forceVal * forceDir, 0.0, nowPos[0] - distFromCenter, nowPos[1], nowPos[2]);
 			dVector3 ext_f{ 0, forceVal *(forceDir), 0.0 };
-			//drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
+			drawArrowOriginal(dVector3{ nowPos[0] - distFromCenter, nowPos[1], nowPos[2]+0.5 }, dVector3{nowPos[0]-distFromCenter-ext_f[0]*0.3, nowPos[1] - ext_f[1] * 0.3, nowPos[2]+0.5 - ext_f[2] * 0.3 }, ext_f);
 		}
+		_this->save_object_force[entity->step - 1] = extForceValue;
 #endif
 		// 過去データとして代入
 		for (int jnt = 0; jnt < ARM_JNT; jnt++)	_this->past_jnt_pos[jnt] = _this->jnt_pos[jnt];
