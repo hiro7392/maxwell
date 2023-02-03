@@ -920,7 +920,7 @@ int cFinger::moveEqPointCtrlMaxwell2(Matrix* tau)
 		Offset.el[0][0] = 0;//x軸なので0
 		Offset.el[1][0] = OFFSET_VAL;
 
-		matSub(&var_init.r, &var_init.r, &Offset);
+		//matSub(&var_init.r, &var_init.r, &Offset);
 		printf("initialized ! \n");
 
 	}
@@ -983,18 +983,19 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 
 	int	jnt, crd;
 
-	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2);
+	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2), Tmp21_2(2, 1);
 	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
 	static Matrix	Integ(2, 1);
 	static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
-
+	static Matrix Offset(2, 1);
+	Offset.el[0][0] = 0;//x軸なので0
+	Offset.el[1][0] = -OFFSET_VAL/2.0;
 	auto entity = EntityManager::get();
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
-		Matrix Offset(2, 1);
-		Offset.el[0][0] = 0;//x軸なので0
-		Offset.el[1][0] = -OFFSET_VAL;
-		matSub(&var_init.r, &var_init.r, &Offset);	//平衡位置からオフセットの分をずらしておく
+		//Offset.el[0][0] = 0;//x軸なので0
+		//Offset.el[1][0] = -OFFSET_VAL;
+		//matSub(&var_init.r, &var_init.r, &Offset);	//平衡位置からオフセットの分をずらしておく
 	}
 	//ゲインを変更してみるとき
 	// 前処理
@@ -1032,6 +1033,16 @@ int cFinger::RestrictedCtrlMaxwell(Matrix* tau)
 	matMul3(&E, &dyn.Mq, &kine.Jinv, &imp.Minv);	// E = Mq*J^{-1}*Md^{-1}
 	matSub(&tauNC, &dyn.h, matMul4(&Tmp21, &dyn.Mq, &kine.Jinv, &kine.dJ, &var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
 	matAdd(&Tmp21, matMul4(&tauVE, &imp.K, &imp.Cinv, &imp.M, &dre), matMul(&Tmp21, &imp.K, &re));		// Kd*Cd^{-1}*Md*dr+Kd*r
+	//	オフセットの分を()内で足す
+	printf("Tmp21 =\n"); matPrint(&Tmp21);
+	printf("Offset =\n"); matPrint(&Offset);
+	printf("imp.K =\n"); matPrint(&imp.K);
+	matMul(&Tmp21_2, &imp.K, &Offset);
+	printf("Tmp21_2 =\n"); matPrint(&Tmp21_2);
+
+	matAdd(&Tmp21, &Tmp21, &Tmp21_2);
+	printf("Tmp21 final=\n"); matPrint(&Tmp21);
+	//	符号反転
 	matSignInv(matMul(&tauVE, &E, &Tmp21));	// tauVE = -E{Kd*Cd^{-1}*Md*dr+Kd*r}
 	//matMul(&tauIN, matSub(&Tmp22, &E, &kine.Jt), &var.F);		// tauIN = (E-J^T)F
 	matSub(&tauIN, matMul(&Tmp22, &E,&F12), matMul(&Tmp22_2, &kine.Jt, &var.F));		// tauIN = (E*((F1+F2)/2) -J^T*F)	制約条件付き
@@ -1079,17 +1090,20 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 {
 
 	int	jnt, crd;
-	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp22_2(2, 2);
+	static Matrix	Tmp21(2, 1), Tmp22(2, 2), Tmp21_2(2, 1), Tmp22_2(2, 2);
 	static Matrix	tauNC(2, 1), tauVE(2, 1), tauIN(2, 1), tauPL(2, 1), E(2, 2);
 	static Matrix	Integ(2, 1);
 	static Matrix	re(2, 1), dre(2, 1);	// 手先位置変位，手先速度変位
 	auto Finger1 = EntityManager::get()->getFinger();
 	auto entity = EntityManager::get();
+	static Matrix Offset(2, 1);
+	Offset.el[0][0] = 0;//x軸なので0
+	Offset.el[1][0] = OFFSET_VAL / 2.0;
 	if (entity->step == 0) {
 		armCalcImpPeriod();		// 周期計算
-		Matrix Offset(2, 1);
-		Offset.el[0][0] = 0;//x軸なので0
-		Offset.el[1][0] = OFFSET_VAL;
+		//Matrix Offset(2, 1);
+		//Offset.el[0][0] = 0;//x軸なので0
+		//Offset.el[1][0] = OFFSET_VAL;
 
 		matSub(&var_init.r, &var_init.r, &Offset);
 		printf("initialized ! \n");
@@ -1138,6 +1152,15 @@ int cFinger::RestrictedCtrlMaxwell2(Matrix* tau)
 	matMul3(&E, &dyn.Mq, &kine.Jinv, &imp.Minv);	// E = Mq*J^{-1}*Md^{-1}
 	matSub(&tauNC, &dyn.h, matMul4(&Tmp21, &dyn.Mq, &kine.Jinv, &kine.dJ, &var.dq));	// tauNC = h-Mq*J^{-1}*dJ*dq
 	matAdd(&Tmp21, matMul4(&tauVE, &imp.K, &imp.Cinv, &imp.M, &dre), matMul(&Tmp21, &imp.K, &re));		// Kd*Cd^{-1}*Md*dr+Kd*r
+	//	オフセットの分を()内で足す
+	printf("Tmp21 =\n"); matPrint(&Tmp21);
+	printf("Offset =\n"); matPrint(&Offset);
+	printf("imp.K =\n"); matPrint(&imp.K);
+	matMul(&Tmp21_2, &imp.K, &Offset);
+	printf("Tmp21_2 =\n"); matPrint(&Tmp21_2);
+
+	matAdd(&Tmp21, &Tmp21, &Tmp21_2);
+	printf("Tmp21 final=\n"); matPrint(&Tmp21);
 	matSignInv(matMul(&tauVE, &E, &Tmp21));	// tauVE = -E{Kd*Cd^{-1}*Md*dr+Kd*r}
 	//matMul(&tauIN, matSub(&Tmp22, &E, &kine.Jt), &var.F);		// tauIN = (E-J^T)F
 	matSub(&tauIN, matMul(&Tmp22, &E, &F12), matMul(&Tmp22_2, &kine.Jt, &var.F));		// tauIN = (E*((F1+F2)/2) -J^T*F)

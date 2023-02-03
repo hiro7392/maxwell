@@ -443,6 +443,7 @@ public:
 	double	save_obj_vel[DATA_CNT_NUM][DIM3] = {};
 	double  saveForce[DATA_CNT_NUM][ARM_JNT] = {};
 	double  save_force_endEffector[DATA_CNT_NUM][ARM_JNT] = {};
+	double  save_object_pos[DATA_CNT_NUM] = {};
 	// 保存用ファイル名変数
 	char	data_file_name[DATA_FILE_NAME_MAXLEN] = {};
 	char	filename_info[DATA_FILE_NAME_MAXLEN] = {};
@@ -694,6 +695,8 @@ public:
 	int FingerNum=0;
 	double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 7, PI / 3.0 };	// ロボット初期姿勢
 	double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 7, -PI / 3.0 };	// ロボット初期姿勢
+	//double	init_jnt_pos[ARM_JNT] = { 4 * PI / 4.0 - PI / 4.0, PI / 2.0 };	// ロボット初期姿勢
+	//double	init_jnt_posF2[ARM_JNT] = { 4 * PI / 4.0 + PI / 4.0, -PI / 2.0 };	// ロボット初期姿勢
 
 
 	void setup() {
@@ -802,7 +805,7 @@ void cFinger::outputJntAngle(int end) {
 
 	outfile << "平衡位置 y" << ",";
 	outfile << "センサ出力の理論値　Fy" << ",";
-	
+	outfile << "物体の中心位置　r0" << std::endl;
 
 
 	for (int k = 0; k < end; k++) {
@@ -830,6 +833,7 @@ void cFinger::outputJntAngle(int end) {
 			outfile << save_force_endEffector[k][i] << ",";	//センサ出力の理論値
 
 		}
+		outfile << save_object_pos[k] << ",";
 		outfile << std::endl;
 	}
 	outfile.close();

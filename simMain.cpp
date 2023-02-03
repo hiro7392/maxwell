@@ -485,10 +485,11 @@ void DrawStuff::simLoop(int pause)
 		dBodySetAngularVel(plateToGrasp.body, 0, 0, rot[2]);
 		dBodySetPosition(plateToGrasp.body, beforeXpos, nowPos[1], capZ);
 		beforeXpos = nowPos[0];
+		_this->save_object_pos[entity->step - 1] = nowPos[1];
 
 		//x座標を記録
 		//plateの端に外力を加える
-		if (true &&sim->step > 300 && sim->step<=800) {
+		if (true &&sim->step > 500 && sim->step<=1200) {
 			static int duty = 30000;	//外力の向きの周期
 			static int forceVal = 5;
 			int forceDir = -1;// ((sim->step % duty) <= duty / 2) ? 1 : -1;
