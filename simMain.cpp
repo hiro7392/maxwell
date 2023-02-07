@@ -430,11 +430,18 @@ void DrawStuff::simLoop(int pause)
 #if finger2_use
 		_this2->p_force = dJointGetFeedback(_this2->sensor2FingerTop);
 #endif
+		int len = 50;
 		for (int crd = 0; crd < DIM3; crd++) {
-			_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
+
+			if (sim->step < len) {
+				_this->eff_force[crd] = -_this->p_force->f1[crd];					// 対象がセンサに及ぼしている力=センサが関節に及ぼしている力
 #if finger2_use
-			_this2->eff_force[crd] = -_this2->p_force->f1[crd];
+				_this2->eff_force[crd] = -_this2->p_force->f1[crd];
 #endif
+			}
+			else {
+
+			}
 		}
 		auto entity = EntityManager::get();
 		// 距離計算	//
