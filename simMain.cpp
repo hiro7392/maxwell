@@ -314,12 +314,37 @@ void cFinger::setJoint2() {
 	//dJointSetFeedback(f2_joint, &force);
 
 }
+#define GNUPLOT_PATH "C:/gnuplot/bin/gnuplot.exe" // gnuplot.exeのある場所
+
+void gnutest() {
+	FILE* gp;	// For gnuplot
+
+	// gnuplotの起動コマンド
+	if ((gp = _popen(GNUPLOT_PATH, "w")) == NULL) {	// gnuplotをパイプで起動
+		fprintf(stderr, "ファイルが見つかりません %s.", GNUPLOT_PATH);
+		exit(EXIT_FAILURE);
+	}
+
+	// --- gnuplotにコマンドを送る --- //
+	fprintf(gp, "set xrange [-10:10]\n"); // 範囲の指定(省略可)
+	fprintf(gp, "set yrange [-1:1]\n");
+
+	fprintf(gp, "plot sin(x)\n"); 	//sin(x)を描く
+
+	fflush(gp); // バッファに格納されているデータを吐き出す（必須）
+	system("pause");
+	fprintf(gp, "exit\n"); // gnuplotの終了
+	_pclose(gp);
+
+}
 ////////////////////////////////////////////////////////
 // 描画設定
 // main関数
 ////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 {
+	gnutest();
+	return 0;
 	auto sim = EntityManager::init();
 #if FLAG_DRAW_SIM
 //	setDrawStuff();		//ドロースタッフ
